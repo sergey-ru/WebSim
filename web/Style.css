@@ -1,0 +1,47 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Dec 2, 2013, 11:29:36 AM
+    Author     : Keren Fruchter
+*/
+#header {
+    width:100%;
+}
+#menu {
+    height:800px;
+    width:20%;
+    float:left;
+}
+#content {
+    height:800px;
+    width:80%;
+    float:left;
+}
+p {
+    margin: 20px 20px 20px 20px;
+}
+
+
+.hasmenu {
+    border: 0px solid #008;
+    margin: 3px;
+    padding: 5px;
+    width: 30px;
+}
+
+.ui-widget{
+    font-size: .8em;
+}
+.ui-menu {
+    width: 150px;
+}
+
+/* Define a custom icon */
+
+.ui-icon.custom-icon-firefox {
+    background-image: url(application_firefox.gif);
+    background-position: 0 0;
+}

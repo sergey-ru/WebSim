@@ -13,8 +13,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -100,6 +98,24 @@ public class SimServlet extends HttpServlet {
                         response.getWriter().write("error");
                     }
                     break;
+                case "ScenarioProperty":
+                    try {
+                        m = XMLTree.getInstance();
+                        int scenarioIndex = Integer.parseInt(request.getParameter("index"));
+                        response.getWriter().write(m.getScenarioProperties(scenarioIndex));
+                    } catch (IOException ex) {
+                        response.getWriter().write("error");
+                    }
+                    break;
+                case "InitProperty":
+                    try {
+                        m = XMLTree.getInstance();
+                        int scenarioIndex = Integer.parseInt(request.getParameter("index"));
+                        response.getWriter().write(m.getInitProperties(scenarioIndex));
+                    } catch (IOException ex) {
+                        response.getWriter().write("error");
+                    }
+                    break;
                 case "IfStaticIsSelected":
                     try {
                         String statisticNodeToCheck = request.getParameter("element");
@@ -119,6 +135,19 @@ public class SimServlet extends HttpServlet {
                     } catch (IOException ex) {
                         response.getWriter().write("error");
                     }
+                    break;
+                case "SaveProperties":
+                    m = XMLTree.getInstance();
+                    String elementTopic = request.getParameter("elementToSave");
+                    int elementIndex = Integer.parseInt(request.getParameter("index"));
+                    String Info = request.getParameter("info");
+                    String[] parsedInfo = Info.split(",");
+                    for (int i = 0; i < parsedInfo.length; i++) {
+                        String[] keyval = parsedInfo[i].split("::");
+                        m.updateElementProperty(elementTopic, elementIndex, keyval[0], keyval[1]);
+                    }
+                    //System.out.println(Info);
+                    response.getWriter().write("Changes have been successfully saved.");
                     break;
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {

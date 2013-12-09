@@ -92,6 +92,9 @@
 
             <!--MENU-->
             <div class="outer-west" style="float: left; width: 200px;">
+                <div id='loadingmessage' style='display:none'>
+                    <img src='Images/ajax-loader.gif' width="50%"/>
+                </div>
                 <ul id="red" class="treeview-red">
                     <%
                         XMLTree m = XMLTree.getInstance();

@@ -47,6 +47,11 @@ public final class XMLTree {
         return root;
     }
 
+    public void updateElementProperty(String Element, int Index, String Property, String Value) {
+        Node ElementNode = root.getElementsByTagName(Element.toLowerCase()).item(Index - 1);
+        ElementNode.getAttributes().getNamedItem(lowerCaseFirstLetter(Property)).setNodeValue(Value);
+    }
+
     public static XMLTree getInstance() {
         return XMLTree.XMLTreeHolder.INSTANCE;
     }
@@ -84,7 +89,7 @@ public final class XMLTree {
         Node simulation = li.item(0);
         NamedNodeMap fres = simulation.getAttributes();
         for (int i = 0; i < fres.getLength(); i++) {
-            res += fres.item(i).getNodeName();
+            res += upperFirstLetter(fres.item(i).getNodeName());
             res += "::";
             res += fres.item(i).getNodeValue();
             res += ",";
@@ -92,7 +97,48 @@ public final class XMLTree {
         return res;
     }
 
+    public String getScenarioProperties(int index) {
+        String res = "";
+        NodeList li = root.getElementsByTagName("scenario");
+        Node simulation = li.item(index - 1); // cuz it is array
+        NamedNodeMap fres = simulation.getAttributes();
+        for (int i = 0; i < fres.getLength(); i++) {
+            res += upperFirstLetter(fres.item(i).getNodeName()); // upper first letter
+            res += "::";
+            res += fres.item(i).getNodeValue();
+            //res += ","; // only one property
+        }
+        return res;
+    }
+
+    public String getInitProperties(int index) {
+        String res = "";
+        NodeList li = root.getElementsByTagName("init");
+        Node simulation = li.item(index - 1); // cuz it is array
+        NamedNodeMap fres = simulation.getAttributes();
+        // name
+        for (int i = 0; i < fres.getLength(); i++) {
+            res += upperFirstLetter(fres.item(i).getNodeName()); // upper first letter
+            res += "::";
+            res += fres.item(i).getNodeValue();
+            //res += ","; // only one property
+        }
+        res += ",";
+        // actions
+        ClassesLister allActions = ClassesLister.getInstance();
+        List<Class> actionsList = allActions.GetActions();
+        for (Class action : actionsList) {
+            res += "Action"; // upper first letter
+            res += "::";
+            res += action.getName();
+            res += ",";
+        }
+
+        return res;
+    }
+
     public void parse() throws Exception {
+        int initIndex = 0;
         result = new StringBuilder("");
         ifSuccsessParswing = true;
         try {
@@ -171,7 +217,7 @@ public final class XMLTree {
                 Element currScenario = (Element) ExperimentNodeChildren.item(i);
                 // check if it is Scenario
                 validateName(currScenario, "scenario");
-                addHtmlHeader("Scenario", "Scenario", false);
+                addHtmlHeader("Scenario", "Scenario" + i, false);
 
                 // check Scenario childrens
                 NodeList ScenarioNodeChildren = currScenario.getChildNodes();
@@ -181,7 +227,8 @@ public final class XMLTree {
                     // check Init (0..*)
                     if (scenarioChild.getNodeName().equalsIgnoreCase("init")) {
                         NodeList initChildren = scenarioChild.getChildNodes();
-                        addHtmlHeader("Init", "Init", false);
+                        initIndex++;
+                        addHtmlHeader("Init", "Init" + initIndex, false);
                         // must be exactly one action
                         validateMinNumOfChildren(initChildren, 1);
                         validateMaxNumOfChildren(initChildren, 1);
@@ -398,8 +445,16 @@ public final class XMLTree {
         return StatIdarr[StatIdarr.length - 1];
     }
 
+    private String lowerCaseFirstLetter(String userIdea) {
+        return Character.toLowerCase(userIdea.charAt(0)) + userIdea.substring(1);
+    }
+
     private static class XMLTreeHolder {
 
         private static final XMLTree INSTANCE = new XMLTree();
+    }
+
+    public String upperFirstLetter(String userIdea) {
+        return Character.toUpperCase(userIdea.charAt(0)) + userIdea.substring(1);
     }
 }

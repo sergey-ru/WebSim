@@ -11,6 +11,8 @@ import bgu.sim.reflection.ClassesLister;
 import bgu.sim.ruleEngine.property.Property;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.List;
 import javax.servlet.ServletException;
@@ -178,8 +180,15 @@ public class SimServlet extends HttpServlet {
                 System.out.println("FileName=" + fileItem.getName());
                 System.out.println("ContentType=" + fileItem.getContentType());
                 System.out.println("Size in bytes=" + fileItem.getSize());
+                
+                //String absolutePath = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+                Path currentRelativePath = Paths.get("");
+                String s = currentRelativePath.toAbsolutePath().toString();
+                //System.out.println(absolutePath);
 
-                File file = new File(("c:/tmp/Sim/") + File.separator + fileItem.getName());
+                //File file = new File(("c:/tmp/Sim/") + File.separator + fileItem.getName());
+                File file = new File(s + File.separator + fileItem.getName());
+                
                 System.out.println("Absolute Path at server=" + file.getAbsolutePath());
                 // set parameter for the simulator, the path of the xml scenarios
                 SIMULATOR_SCENARIO_XML_PATH = file.getAbsolutePath();

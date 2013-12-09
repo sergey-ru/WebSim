@@ -115,6 +115,7 @@ public final class XMLTree {
         String res = "";
         NodeList li = root.getElementsByTagName("init");
         Node simulation = li.item(index - 1); // cuz it is array
+
         NamedNodeMap fres = simulation.getAttributes();
         // name
         for (int i = 0; i < fres.getLength(); i++) {
@@ -134,11 +135,26 @@ public final class XMLTree {
             res += ",";
         }
 
+        // must be one action
+        NodeList children = simulation.getChildNodes();
+        // the one action
+        Node child = children.item(0);
+
+        // get the value attribute
+        NamedNodeMap tmp = child.getAttributes();
+        for (int i = 0; i < tmp.getLength(); i++) {
+            res += upperFirstLetter(tmp.item(i).getNodeName()); // upper first letter
+            res += "::";
+            res += getNameOfClass(tmp.item(i).getNodeValue());
+            //res += ","; // only one property
+        }
+
         return res;
     }
 
     public void parse() throws Exception {
         int initIndex = 0;
+        //int actionIndex = 0;
         result = new StringBuilder("");
         ifSuccsessParswing = true;
         try {
@@ -236,7 +252,7 @@ public final class XMLTree {
                         // check action name
                         Element action = (Element) initChildren.item(0);
                         validateName(action, "action");
-                        addHtmlHeader("Action", "Action", false);
+                        addHtmlHeader("Action", "Action" + initIndex, false);
 
                         // p (0..*)
                         NodeList actionChildren = action.getChildNodes();
@@ -383,6 +399,9 @@ public final class XMLTree {
                         .append(id)
                         .append("')\">")
                         .append(text)
+                        .append("</a>")
+                        .append("<button type=\"button\" class=\"close\" aria-hidden=\"true\">&times;</button>")
+                        .append("<button type=\"button\" class=\"close\" aria-hidden=\"true\">+</button>")
                         .append("</span><ul>");
             }
         } else {

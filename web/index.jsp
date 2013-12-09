@@ -70,6 +70,9 @@
                         <div id="EditNodeDivHide">
                             Select property from the xml tree to edit.
                         </div>
+                        <div id="EditNodeDivLoading" style="display:none">
+                            <img src='Images/ajax-loader.gif' width="5%"/>
+                        </div>
                         <div id="EditNodeDivShow" style="width: 80%; margin: 20px 20px 20px 20px;">
 
                             <div id="AllFormDynamicInputs">
@@ -95,7 +98,7 @@
                 <div id='loadingmessage' style='display:none'>
                     <img src='Images/ajax-loader.gif' width="50%"/>
                 </div>
-                <ul id="red" class="treeview-red">
+                <ul id="red" class="treeview-gray">
                     <%
                         XMLTree m = XMLTree.getInstance();
                         out.println(m.getResult());

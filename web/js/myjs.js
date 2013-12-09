@@ -37,14 +37,13 @@ $(document).ready(function() {
             var matches = elementToSave.match(/\d+/g);
             if (matches != null) {
                 index = matches;
-                // elementToSave = elementToSave.replace(index,"");
-                //alert('number');
-                //alert(matches);
+                elementToSave = elementToSave.replace(index, "");
             }
         });
 
         // radio
         $("#form1 input[type=radio]:checked").each(function() {
+            //alert(this.value);
             radioCheckVal = this.value;
         });
 
@@ -58,6 +57,13 @@ $(document).ready(function() {
             i++;
         });
 
+        // radio
+        if (radioCheckVal != "") {
+            info[i] = "Radio" + "::" + radioCheckVal;
+            i++;
+        }
+
+        // action
         if (actionSelect != "") {
             info[i] = "Action" + "::" + actionSelect;
             i++;
@@ -114,14 +120,17 @@ function upl() {
 }
 
 function EditPropertyJS(node) {
-    //alert("iv been clicked");
     alert(node);
-    //alert((node.indexOf("Scenario") != -1));
-
-    $('#EditNodeDivShow').show();
-    $('#EditNodeDivHide').hide();
 
     $(document).ready(function() {
+
+        $('#EditNodeDivHide').hide(); // always hide
+
+        $('#EditNodeDivShow').hide();
+        $('#EditNodeDivLoading').show();
+
+
+
         if (node == "Simulation") {
             var v0;
             var htmlcode = "";
@@ -156,6 +165,9 @@ function EditPropertyJS(node) {
                 // add the code
                 htmlcode = htmlcode + '<input id="name" type="hidden" value="' + node + '" name="name">';
                 $('#AllFormDynamicInputs').html(htmlcode);
+
+                $('#EditNodeDivLoading').hide();
+                $('#EditNodeDivShow').show();
             });
         }
 
@@ -187,6 +199,9 @@ function EditPropertyJS(node) {
                 // add code on/off
                 htmlcode = htmlcode + '<input id="name" type="hidden" value="' + node + '" name="name">';
                 $('#AllFormDynamicInputs').html(htmlcode);
+
+                $('#EditNodeDivLoading').hide();
+                $('#EditNodeDivShow').show();
             });
         }
 
@@ -218,6 +233,9 @@ function EditPropertyJS(node) {
                 // add code on/off
                 htmlcode = htmlcode + '<input id="name" type="hidden" value="' + node + '" name="name">';
                 $('#AllFormDynamicInputs').html(htmlcode);
+
+                $('#EditNodeDivLoading').hide();
+                $('#EditNodeDivShow').show();
             });
         }
 
@@ -226,7 +244,7 @@ function EditPropertyJS(node) {
             var index = node.replace("Scenario", "");
             //alert(index);
             $.get('SimServlet', {request: "ScenarioProperty", index: index}, function(responseText) {
-                alert("responseText:" + responseText);
+                //alert("responseText:" + responseText);
                 var v0 = responseText.split("::");
                 htmlcode = '<div class="row">' +
                         '<div class="col-md-2">' +
@@ -247,6 +265,9 @@ function EditPropertyJS(node) {
                 // add code on/off
                 htmlcode = htmlcode + '<input id="scenarioname" type="hidden" value="' + node + '" name="scenarioname">';
                 $('#AllFormDynamicInputs').html(htmlcode);
+
+                $('#EditNodeDivLoading').hide();
+                $('#EditNodeDivShow').show();
             });
         }
 
@@ -255,11 +276,14 @@ function EditPropertyJS(node) {
             var index = node.replace("Init", "");
             //alert(index);
             $.get('SimServlet', {request: "InitProperty", index: index}, function(responseText) {
-                alert("responseText:" + responseText);
+                //alert("responseText:" + responseText);
 
                 var res = responseText.split(",");
                 //alert(res);
                 var v0 = res[0].split("::");
+                var selected = res[res.length - 1].split("::");
+                selected = selected[1];
+                //alert(selected);
 
                 htmlcode = '<div class="row">' +
                         '<div class="col-md-2">' +
@@ -289,7 +313,13 @@ function EditPropertyJS(node) {
 
                 for (var i = 1; i < res.length - 1; i++) {
                     var tmp = res[i].split("::");
-                    htmlcode += "<option>" + tmp[1] + "</option>";
+                    //alert(selected + "!=" +  tmp[1])
+                    if (selected != tmp[1]) {
+                        htmlcode += "<option>" + tmp[1] + "</option>";
+                    }
+                    else {
+                        htmlcode += "<option selected>" + tmp[1] + "</option>";
+                    }
                 }
 
                 htmlcode += '</select></div></div><p></p>';
@@ -297,6 +327,9 @@ function EditPropertyJS(node) {
                 // add code on/off
                 htmlcode = htmlcode + '<input id="scenarioname" type="hidden" value="' + node + '" name="scenarioname">';
                 $('#AllFormDynamicInputs').html(htmlcode);
+
+                $('#EditNodeDivLoading').hide();
+                $('#EditNodeDivShow').show();
             });
         }
 
@@ -308,12 +341,15 @@ function EditPropertyJS(node) {
                     '</div>';
             htmlcode = htmlcode + '<input id="name" type="hidden" value="' + node + '" name="name">';
             $('#AllFormDynamicInputs').html(htmlcode);
+
+            $('#EditNodeDivLoading').hide();
+            $('#EditNodeDivShow').show();
         }
 
         // send request for knowing which properties to display
-        $.get('SimServlet', {request: "getElementProperties", element: node}, function(responseText) {
-            //alert(responseText);
-            //$('#statis').append(responseText);
-        });
+        //$.get('SimServlet', {request: "getElementProperties", element: node}, function(responseText) {
+        //alert(responseText);
+        //$('#statis').append(responseText);
+        //});
     });
 }

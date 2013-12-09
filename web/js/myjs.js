@@ -27,6 +27,7 @@ $(document).ready(function() {
         //alert("save changes");
         var elementToSave;
         var radioCheckVal;
+        var actionSelect;
         var info = [];
         var index = 1; // always
 
@@ -47,7 +48,8 @@ $(document).ready(function() {
             radioCheckVal = this.value;
         });
 
-        alert($("#" + elementToSave + " option:selected").text());
+        // If it is a Init save, there is a select to save
+        actionSelect = $("#" + elementToSave + " option:selected").text();
 
         // all text input
         var i = 0;
@@ -56,14 +58,19 @@ $(document).ready(function() {
             i++;
         });
 
+        if (actionSelect != "") {
+            info[i] = "Action" + "::" + actionSelect;
+            i++;
+        }
+
         //alert("1");
 
         var parseInfo = "";
         for (var i = 0; i < info.length; i++) {
             parseInfo = parseInfo + info[i] + ",";
         }
-        alert("parseInfo:" + parseInfo);
 
+        alert("parseInfo:" + parseInfo);
         alert("elementToSave: " + elementToSave);
         alert("index: " + index);
         alert("parseInfo: " + parseInfo);

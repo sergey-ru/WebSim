@@ -130,7 +130,7 @@ public final class XMLTree {
         for (Class action : actionsList) {
             res += "Action"; // upper first letter
             res += "::";
-            res += action.getName();
+            res += getNameOfClass(action.getName());
             res += ",";
         }
 

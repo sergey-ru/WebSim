@@ -312,24 +312,52 @@ function EditPropertyJS(node) {
                         '<select class="form-control" id="' + node + '">';
 
                 for (var i = 1; i < res.length - 1; i++) {
-                    var tmp = res[i].split("::");
-                    //alert(selected + "!=" +  tmp[1])
-                    if (selected != tmp[1]) {
-                        htmlcode += "<option>" + tmp[1] + "</option>";
+                    var listofclass = res[i].split("::");
+                    var listAfterDots = listofclass[1].split(".");
+                    //alert(selected);
+                    //alert(listofclass[1]);
+                    if (selected != listofclass[1]) {
+                        htmlcode += "<option>" + listAfterDots[listAfterDots.length - 1] + "</option>";
                     }
                     else {
-                        htmlcode += "<option selected>" + tmp[1] + "</option>";
+                        htmlcode += "<option selected>" + listAfterDots[listAfterDots.length - 1] + "</option>";
                     }
                 }
+                htmlcode += '</select></div></div>'
+                htmlcode += '<p></p>';
 
-                htmlcode += '</select></div></div><p></p>';
+                // p in the xml (0..1)
+                $.get('SimServlet', {request: "GetPByActionName", selectedName: v0[1], selectedClass: selected}, function(responseText) {
+                    alert(responseText);
+                    var pListRes = responseText.split(",");
+                    var pList = pListRes[0].split("::");
+                    htmlcode += '<div class="row">' +
+                            '<div class="col-md-2">' +
+                            '<label id="Labelp" ' +
+                            'for="' + pList[0] + '" ' +
+                            'class="col-sm-2 control-label">' +
+                            pList[0] +
+                            '</label>' +
+                            '</div>' +
+                            '<div class="col-md-10">' +
+                            '<input type="text" class="form-control input-sm" ' +
+                            'id="' + pList[0] + '" value="' +
+                            pList[1] +
+                            '">' +
+                            '</div>' +
+                            '</div><p></p>';
 
-                // add code on/off
-                htmlcode = htmlcode + '<input id="scenarioname" type="hidden" value="' + node + '" name="scenarioname">';
-                $('#AllFormDynamicInputs').html(htmlcode);
 
-                $('#EditNodeDivLoading').hide();
-                $('#EditNodeDivShow').show();
+                    htmlcode += '<p></p>';
+                    alert(htmlcode);
+
+                    // add code on/off
+                    htmlcode = htmlcode + '<input id="scenarioname" type="hidden" value="' + node + '" name="scenarioname">';
+                    $('#AllFormDynamicInputs').html(htmlcode);
+
+                    $('#EditNodeDivLoading').hide();
+                    $('#EditNodeDivShow').show();
+                });
             });
         }
 

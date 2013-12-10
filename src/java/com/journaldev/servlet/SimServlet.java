@@ -138,6 +138,13 @@ public class SimServlet extends HttpServlet {
                         response.getWriter().write("error");
                     }
                     break;
+                case "GetPByActionName":
+                    m = XMLTree.getInstance();
+                    String selectedName = request.getParameter("selectedName");
+                    String selectedClass = request.getParameter("selectedClass");
+                    String result = m.getPvalByAction(selectedName,selectedClass);
+                    response.getWriter().write(result);
+                    break;
                 case "SaveProperties":
                     m = XMLTree.getInstance();
                     String elementTopic = request.getParameter("elementToSave");

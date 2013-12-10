@@ -138,11 +138,11 @@ public class SimServlet extends HttpServlet {
                         response.getWriter().write("error");
                     }
                     break;
-                case "GetPByActionName":
+                case "GetPByActionValue":
                     m = XMLTree.getInstance();
-                    String selectedName = request.getParameter("selectedName");
-                    String selectedClass = request.getParameter("selectedClass");
-                    String result = m.getPvalByAction(selectedName,selectedClass);
+                    //String selectedName = request.getParameter("selectedName");
+                    String fullClassPath = request.getParameter("fullClassPath");
+                    String result = m.getPValuesByActionValue(fullClassPath);
                     response.getWriter().write(result);
                     break;
                 case "SaveProperties":
@@ -151,9 +151,14 @@ public class SimServlet extends HttpServlet {
                     int elementIndex = Integer.parseInt(request.getParameter("index"));
                     String Info = request.getParameter("info");
                     String[] parsedInfo = Info.split(",");
-                    for (int i = 0; i < parsedInfo.length; i++) {
-                        String[] keyval = parsedInfo[i].split("::");
-                        m.updateElementProperty(elementTopic, elementIndex, keyval[0], keyval[1]);
+
+                    if (elementTopic.equalsIgnoreCase("init")) {
+                        m.updateInitProperties(elementTopic, elementIndex, parsedInfo);
+                    } else {
+                        for (int i = 0; i < parsedInfo.length; i++) {
+                            String[] keyval = parsedInfo[i].split("::");
+                            m.updateElementProperty(elementTopic, elementIndex, keyval[0], keyval[1]);
+                        }
                     }
                     //System.out.println(Info);
                     response.getWriter().write("Changes have been successfully saved.");
@@ -187,7 +192,7 @@ public class SimServlet extends HttpServlet {
                 System.out.println("FileName=" + fileItem.getName());
                 System.out.println("ContentType=" + fileItem.getContentType());
                 System.out.println("Size in bytes=" + fileItem.getSize());
-                
+
                 //String absolutePath = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
                 Path currentRelativePath = Paths.get("");
                 String s = currentRelativePath.toAbsolutePath().toString();
@@ -195,7 +200,7 @@ public class SimServlet extends HttpServlet {
 
                 //File file = new File(("c:/tmp/Sim/") + File.separator + fileItem.getName());
                 File file = new File(s + File.separator + fileItem.getName());
-                
+
                 System.out.println("Absolute Path at server=" + file.getAbsolutePath());
                 // set parameter for the simulator, the path of the xml scenarios
                 SIMULATOR_SCENARIO_XML_PATH = file.getAbsolutePath();

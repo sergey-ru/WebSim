@@ -26,10 +26,20 @@ $(document).ready(function() {
         event.preventDefault();
         //alert("save changes");
         var elementToSave;
-        var radioCheckVal;
-        var actionSelect;
+        var radioCheckVal = "";
+        var actionSelect = "";
         var info = [];
         var index = 1; // always
+        var i = 0;
+
+        // If it is a Init save, there is a select to save
+        actionSelect = $("#ActionSelect option:selected").attr("id");
+
+        // action
+        if (actionSelect != "" && actionSelect) {
+            info[i] = "Action" + "::" + actionSelect;
+            i++;
+        }
 
         // the element name
         $("#form1 input[type=hidden]").each(function() {
@@ -47,29 +57,18 @@ $(document).ready(function() {
             radioCheckVal = this.value;
         });
 
-        // If it is a Init save, there is a select to save
-        actionSelect = $("#" + elementToSave + " option:selected").text();
-
-        // all text input
-        var i = 0;
-        $("#form1 input[type=text]").each(function() {
-            info[i] = this.id + "::" + this.value;
-            i++;
-        });
-
         // radio
         if (radioCheckVal != "") {
             info[i] = "Radio" + "::" + radioCheckVal;
             i++;
         }
 
-        // action
-        if (actionSelect != "") {
-            info[i] = "Action" + "::" + actionSelect;
+        // all text input
+        $("#form1 input[type=text]").each(function() {
+            info[i] = this.id + "::" + this.value;
             i++;
-        }
+        });
 
-        //alert("1");
 
         var parseInfo = "";
         for (var i = 0; i < info.length; i++) {
@@ -119,17 +118,42 @@ function upl() {
     });
 }
 
+function createPvaluesByActionPath(fullClassPath) {
+    var htmlcode = "";
+    $.get('SimServlet', {request: "GetPByActionValue", fullClassPath: fullClassPath}, function(responseText) {
+        var pListRes = responseText.split(",");
+        for (var i = 0; i < pListRes.length - 1; i++) {
+            var pList = pListRes[i].split("::");
+            htmlcode = '<div class="row">' +
+                    '<div class="col-md-2">' +
+                    '<label id="Labelp" ' +
+                    'for="' + pList[0] + '" ' +
+                    'class="col-sm-2 control-label">' +
+                    pList[0] +
+                    '</label>' +
+                    '</div>' +
+                    '<div class="col-md-10">' +
+                    '<input type="text" class="form-control input-sm" ' +
+                    'id="' + pList[0] + '" value="' +
+                    pList[1] +
+                    '">' +
+                    '</div>' +
+                    '</div><p></p>';
+        }
+
+        // add p and if no p, clean content 
+        $('#pValues').html(htmlcode);
+    });
+}
+
 function EditPropertyJS(node) {
     alert(node);
 
     $(document).ready(function() {
 
         $('#EditNodeDivHide').hide(); // always hide
-
         $('#EditNodeDivShow').hide();
         $('#EditNodeDivLoading').show();
-
-
 
         if (node == "Simulation") {
             var v0;
@@ -276,27 +300,23 @@ function EditPropertyJS(node) {
             var index = node.replace("Init", "");
             //alert(index);
             $.get('SimServlet', {request: "InitProperty", index: index}, function(responseText) {
-                //alert("responseText:" + responseText);
-
                 var res = responseText.split(",");
-                //alert(res);
-                var v0 = res[0].split("::");
-                var selected = res[res.length - 1].split("::");
-                selected = selected[1];
-                //alert(selected);
+                var InitNamKeyVal = res[0].split("::");
+                var selectedFullPathClass = res[res.length - 1].split("::");
+                selectedFullPathClass = selectedFullPathClass[1];
 
                 htmlcode = '<div class="row">' +
                         '<div class="col-md-2">' +
                         '<label id="NameLabel" ' +
                         'for="Name" ' +
                         'class="col-sm-2 control-label">' +
-                        v0[0] +
+                        InitNamKeyVal[0] +
                         '</label>' +
                         '</div>' +
                         '<div class="col-md-10">' +
                         '<input type="text" class="form-control input-sm" ' +
                         'id="Name" value="' +
-                        v0[1] +
+                        InitNamKeyVal[1] +
                         '">' +
                         '</div>' +
                         '</div><p></p>' +
@@ -309,55 +329,41 @@ function EditPropertyJS(node) {
                         '</label>' +
                         '</div>' +
                         '<div class="col-md-10">' +
-                        '<select class="form-control" id="' + node + '">';
+                        '<select class="form-control" id="ActionSelect">';
 
                 for (var i = 1; i < res.length - 1; i++) {
                     var listofclass = res[i].split("::");
                     var listAfterDots = listofclass[1].split(".");
-                    //alert(selected);
-                    //alert(listofclass[1]);
-                    if (selected != listofclass[1]) {
-                        htmlcode += "<option>" + listAfterDots[listAfterDots.length - 1] + "</option>";
+
+                    if (selectedFullPathClass != listofclass[1]) {
+                        htmlcode += "<option id='" + listofclass[1] + "'>" + listAfterDots[listAfterDots.length - 1] + "</option>";
                     }
                     else {
-                        htmlcode += "<option selected>" + listAfterDots[listAfterDots.length - 1] + "</option>";
+                        htmlcode += "<option id='" + listofclass[1] + "' selected>" + listAfterDots[listAfterDots.length - 1] + "</option>";
                     }
                 }
-                htmlcode += '</select></div></div>'
+                htmlcode += '</select></div></div>';
                 htmlcode += '<p></p>';
 
+                // div for all the p's
+                htmlcode += '<div id="pValues"></div><p></p>';
+                // hidden input for the saving
+                htmlcode += '<input id="initname" type="hidden" value="' + node + '" name="initname">';
+
+                // add all
+                $('#AllFormDynamicInputs').html(htmlcode);
+
                 // p in the xml (0..1)
-                $.get('SimServlet', {request: "GetPByActionName", selectedName: v0[1], selectedClass: selected}, function(responseText) {
-                    alert(responseText);
-                    var pListRes = responseText.split(",");
-                    var pList = pListRes[0].split("::");
-                    htmlcode += '<div class="row">' +
-                            '<div class="col-md-2">' +
-                            '<label id="Labelp" ' +
-                            'for="' + pList[0] + '" ' +
-                            'class="col-sm-2 control-label">' +
-                            pList[0] +
-                            '</label>' +
-                            '</div>' +
-                            '<div class="col-md-10">' +
-                            '<input type="text" class="form-control input-sm" ' +
-                            'id="' + pList[0] + '" value="' +
-                            pList[1] +
-                            '">' +
-                            '</div>' +
-                            '</div><p></p>';
-
-
-                    htmlcode += '<p></p>';
-                    alert(htmlcode);
-
-                    // add code on/off
-                    htmlcode = htmlcode + '<input id="scenarioname" type="hidden" value="' + node + '" name="scenarioname">';
-                    $('#AllFormDynamicInputs').html(htmlcode);
-
-                    $('#EditNodeDivLoading').hide();
-                    $('#EditNodeDivShow').show();
+                createPvaluesByActionPath(selectedFullPathClass);
+                // add method if select chenge, replace the p values
+                $('#ActionSelect').change(function() {
+                    var selectedFullPathClass = $('#ActionSelect option:selected').attr('id');
+                    createPvaluesByActionPath(selectedFullPathClass);
                 });
+
+
+                $('#EditNodeDivLoading').hide();
+                $('#EditNodeDivShow').show();
             });
         }
 

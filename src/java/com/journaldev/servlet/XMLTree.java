@@ -12,6 +12,7 @@ package com.journaldev.servlet;
 import static bgu.sim.Properties.StringsProperties.SIMULATOR_SCENARIO_XML_PATH;
 import bgu.sim.reflection.ClassesLister;
 import bgu.sim.ruleEngine.property.Property;
+import com.sun.org.apache.xerces.internal.dom.ElementDefinitionImpl;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import org.w3c.dom.Document;
@@ -27,19 +28,22 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.faces.flow.builder.NodeBuilder;
 import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.Attr;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 
 public final class XMLTree {
-    
+
     private static boolean ifSuccsessParswing;
     private StringBuilder result;
     private Element root;
     private Set<String> StatisticListenerChoosen = new HashSet<>();
     private Set<String> RoutingAlgoChoosen = new HashSet<>();
-    
+    Document doc;
+
     private XMLTree() {
         try {
             parse();
@@ -47,20 +51,59 @@ public final class XMLTree {
             System.err.println("Error Parsing XML.");
         }
     }
-    
+
     public Element getRoot() {
         return root;
     }
-    
+
     public void updateElementProperty(String Element, int Index, String Property, String Value) {
         Node ElementNode = root.getElementsByTagName(Element.toLowerCase()).item(Index - 1);
         ElementNode.getAttributes().getNamedItem(lowerCaseFirstLetter(Property)).setNodeValue(Value);
     }
-    
+
+    void updateInitProperties(String Element, int Index, String[] parsedInfo) {
+        Node InitNode = root.getElementsByTagName(Element.toLowerCase()).item(Index - 1);
+
+        // save action (first)
+        String[] newActionValue = parsedInfo[0].split("::");
+        Node action = InitNode.getFirstChild(); // one action
+        action.getAttributes().item(0).setNodeValue(newActionValue[1]);
+
+        // save init name (second)
+        String[] Property = parsedInfo[1].split("::");
+        InitNode.getAttributes().getNamedItem(lowerCaseFirstLetter(Property[0])).setNodeValue(Property[1]);
+
+        // --- save all p (third and so on...)---
+        // delete all children first
+        NodeList childrenDelete = action.getChildNodes();
+        for (int j = 0; j < childrenDelete.getLength(); j++) {
+            action.removeChild(childrenDelete.item(j));
+        }
+        // add all p
+        for (int i = 2; i < parsedInfo.length; i++) {
+            String[] info = parsedInfo[i].split("::");
+            String key = info[0];
+            String val = info[1];
+            // create attribute
+            Attr keyAttribute = doc.createAttribute("key");
+            keyAttribute.setValue(key);
+
+            Attr valAttribute = doc.createAttribute("value");
+            valAttribute.setValue(val);
+            
+            // create p
+            Element p = doc.createElement("p");
+            p.setAttributeNode(keyAttribute);
+            p.setAttributeNode(valAttribute);
+            
+            action.appendChild(p);
+        }
+    }
+
     public static XMLTree getInstance() {
         return XMLTree.XMLTreeHolder.INSTANCE;
     }
-    
+
     public StringBuilder getResult() {
         System.out.println("they called me!!!!!");
         if (ifSuccsessParsing()) {
@@ -69,25 +112,25 @@ public final class XMLTree {
             return new StringBuilder("Error.");
         }
     }
-    
+
     public static boolean ifSuccsessParsing() {
         return ifSuccsessParswing;
     }
-    
+
     public String ifStatisticIsChoosen(String name) {
         if (StatisticListenerChoosen.contains(name)) {
             return "true";
         }
         return "false";
     }
-    
+
     public String ifRoutAlgIsChoosen(String name) {
         if (RoutingAlgoChoosen.contains(name)) {
             return "true";
         }
         return "false";
     }
-    
+
     public String getSimulationProperties() {
         String res = "";
         NodeList li = root.getElementsByTagName("simulation");
@@ -101,7 +144,7 @@ public final class XMLTree {
         }
         return res;
     }
-    
+
     public String getScenarioProperties(int index) {
         String res = "";
         NodeList li = root.getElementsByTagName("scenario");
@@ -115,18 +158,18 @@ public final class XMLTree {
         }
         return res;
     }
-    
+
     public String getInitProperties(int index) {
         String res = "";
         NodeList li = root.getElementsByTagName("init");
-        Node simulation = li.item(index - 1); // cuz it is array
+        Node initNode = li.item(index - 1); // cuz it is array
 
-        NamedNodeMap fres = simulation.getAttributes();
+        NamedNodeMap initAtt = initNode.getAttributes();
         // name
-        for (int i = 0; i < fres.getLength(); i++) {
-            res += upperFirstLetter(fres.item(i).getNodeName()); // upper first letter
+        for (int i = 0; i < initAtt.getLength(); i++) {
+            res += upperFirstLetter(initAtt.item(i).getNodeName()); // upper first letter
             res += "::";
-            res += fres.item(i).getNodeValue();
+            res += initAtt.item(i).getNodeValue();
             //res += ","; // only one property
         }
         res += ",";
@@ -141,7 +184,7 @@ public final class XMLTree {
         }
 
         // must be one action
-        NodeList children = simulation.getChildNodes();
+        NodeList children = initNode.getChildNodes();
         // the one action
         Node child = children.item(0);
 
@@ -153,19 +196,24 @@ public final class XMLTree {
             res += tmp.item(i).getNodeValue();
             //res += ","; // only one property
         }
-        
+
         return res;
     }
-    
-    String getPvalByAction(String selectedName, String selectedClass) {
+
+    String getPValuesByActionValue(String fullClassPath) {
         ClassesLister allActions = ClassesLister.getInstance();
         String res = "";
+        String pKey;
+        String pVal;
         try {
-            List<Property> pList = allActions.getClassProperties(selectedClass);
+            List<Property> pList = allActions.getClassProperties(fullClassPath);
             for (int i = 0; i < pList.size(); i++) {
-                res += upperFirstLetter(pList.get(i).getMetadata().getName()); // upper first letter
+                pKey = upperFirstLetter(pList.get(i).getMetadata().getName());
+                pVal = getPValueByItsKey(fullClassPath, pKey);
+
+                res += pKey; // upper first letter
                 res += "::";
-                res += getPvalueByKey(getNameOfClass(selectedName), pList.get(i).getMetadata().getName());
+                res += pVal;
                 res += ","; // only one property
             }
         } catch (Exception ex) {
@@ -173,21 +221,21 @@ public final class XMLTree {
         }
         return res;
     }
-    
-    public String getPvalueByKey(String clazz, String Key) {
-        Node init = null;
-        NodeList li = root.getElementsByTagName("init");
+
+    public String getPValueByItsKey(String ClassName, String Key) {
+        Node action = null;
+        NodeList li = root.getElementsByTagName("action");
         // find init by its name
         for (int i = 0; i < li.getLength(); i++) {
             System.out.println(li.item(i).getAttributes().item(0).getNodeValue());
-            if (li.item(i).getAttributes().item(0).getNodeValue().equalsIgnoreCase(clazz)) {
-                init = li.item(i);
+            if (li.item(i).getAttributes().item(0).getNodeValue().equalsIgnoreCase(ClassName)) {
+                action = li.item(i);
                 break;
             }
         }
-        
-        NodeList children = init.getChildNodes();
-        Node action = children.item(0); // one action
+
+        //NodeList children = init.getChildNodes();
+        //Node action = children.item(0); // one action
         NodeList pList = action.getChildNodes();
         for (int i = 0; i < pList.getLength(); i++) {
             NamedNodeMap attMap = pList.item(i).getAttributes();
@@ -196,9 +244,9 @@ public final class XMLTree {
                 if (attMap.item(j).getNodeValue().equalsIgnoreCase(Key)) {
                     return attMap.item(j + 1).getNodeValue();
                 }
-            }            
+            }
         }
-        
+
         return "";
     }
 
@@ -215,8 +263,8 @@ public final class XMLTree {
             File fXmlFile = new File(SIMULATOR_SCENARIO_XML_PATH);
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(fXmlFile);
-            
+            doc = dBuilder.parse(fXmlFile);
+
             doc.getDocumentElement().normalize();
 
             // check if root is "experiment"
@@ -224,7 +272,7 @@ public final class XMLTree {
             validateName(experiment, "experiment");
             // add code to result for building a tree
             addHtmlHeader("Experiment", "Experiment", false);
-            
+
             root = experiment;
 
             // experiment childrens
@@ -276,13 +324,13 @@ public final class XMLTree {
 
             // checking that there is one Simulation and one and more Scenarios
             validateMinNumOfChildren(ExperimentNodeChildren, 2);
-            
+
             Node Scenario = experiment.getFirstChild().getNextSibling();
             validateName((Element) Scenario, "scenario");
 
             // go over the scenarios
             for (int i = 1; i < ExperimentNodeChildren.getLength(); i++) {
-                
+
                 Element currScenario = (Element) ExperimentNodeChildren.item(i);
                 // check if it is Scenario
                 validateName(currScenario, "scenario");
@@ -386,7 +434,7 @@ public final class XMLTree {
             ifSuccsessParswing = false;
         }
     }
-    
+
     public static void removeWhitespaceNodes(Element e) {
         NodeList children = e.getChildNodes();
         for (int i = children.getLength() - 1; i >= 0; i--) {
@@ -398,7 +446,7 @@ public final class XMLTree {
             }
         }
     }
-    
+
     private void validateName(Element experiment, String name) throws Exception {
         removeWhitespaceNodes(experiment);
         if (!experiment.getNodeName().equalsIgnoreCase(name)) {
@@ -406,27 +454,27 @@ public final class XMLTree {
             throw new Exception("XML is not build currectly.");
         }
     }
-    
+
     private void validateMinNumOfChildren(NodeList ListChildren, int i) throws Exception {
         if (ListChildren.getLength() < i) {
             ifSuccsessParswing = false;
             throw new Exception("XML is not build currectly.");
         }
     }
-    
+
     private void validateMaxNumOfChildren(NodeList ListChildren, int i) throws Exception {
         if (ListChildren.getLength() > i) {
             ifSuccsessParswing = false;
             throw new Exception("XML is not build currectly.");
         }
     }
-    
+
     private void checkActionChildren(NodeList actionChildren) {
         for (int k = 0; k < actionChildren.getLength(); k++) {
             addHtmlNode(actionChildren.item(k).getNodeName());
         }
     }
-    
+
     private void addHtmlHeader(String text, String id, boolean Selected) {
         //result.append("<li><label class=\"tree-toggle nav-header\">").append(text).append("</label>");
         //result.append("<ul class=\"nav nav-list tree\">");
@@ -463,7 +511,7 @@ public final class XMLTree {
                     .append("</span><ul>");
         }
     }
-    
+
     private void addHtmlNode(String text) {
         //result.append("<li><a href=\"#\" onclick=\"EditPropertyJS('" + text + "')\">").append(text).append("</a></li>");
         result.append("<li><span><a href=\"#\" onclick=\"EditPropertyJS('")
@@ -472,15 +520,15 @@ public final class XMLTree {
                 .append(text)
                 .append("</a></span></li>");
     }
-    
+
     private void addEndHtmlHeader() {
         result.append("</ul></li>");
     }
-    
+
     private void AddAllClassesThatImpStatisticListener() {
         // Now we will add the rest of the classes that implements "StatisticListener".
         ClassesLister allClassesImpSt = ClassesLister.getInstance();
-        
+
         List<Class> m = allClassesImpSt.GetStatisticListeners();
         for (Class class1 : m) {
             String id = getNameOfClass(class1.getName());
@@ -492,11 +540,11 @@ public final class XMLTree {
             addEndHtmlHeader();
         }
     }
-    
+
     private void AddAllClassesThatImpRoutingAlgorithm() {
         // Now we will add the rest of the classes that implements "RoutingAlgorithm".
         ClassesLister allClassesImpSt = ClassesLister.getInstance();
-        
+
         List<Class> m = allClassesImpSt.GetRoutingAlgorithms();
         for (Class class1 : m) {
             String id = getNameOfClass(class1.getName());
@@ -508,21 +556,21 @@ public final class XMLTree {
             addEndHtmlHeader();
         }
     }
-    
+
     public String getNameOfClass(String classPath) {
         String[] StatIdarr = classPath.split("\\.");
         return StatIdarr[StatIdarr.length - 1];
     }
-    
+
     private String lowerCaseFirstLetter(String userIdea) {
         return Character.toLowerCase(userIdea.charAt(0)) + userIdea.substring(1);
     }
-    
+
     private static class XMLTreeHolder {
-        
+
         private static final XMLTree INSTANCE = new XMLTree();
     }
-    
+
     public String upperFirstLetter(String userIdea) {
         return Character.toUpperCase(userIdea.charAt(0)) + userIdea.substring(1);
     }

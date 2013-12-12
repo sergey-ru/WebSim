@@ -6,24 +6,18 @@
         <title>Simulator</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-        <!-- Main Jquery-->
         <script type="text/javascript" src="js/jquery-2.0.3.min.js"></script>
 
-        <!-- Latest compiled and minified JavaScript-->
-        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
-        <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
 
-        <!--tree view-->
         <link rel="stylesheet" href="Included/TreeView/jquery.treeview.css" />
-        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.min.js"></script>
         <script src="Included/TreeView/jquery.cookie.js" type="text/javascript"></script>
         <script src="Included/TreeView/jquery.treeview.js" type="text/javascript"></script>
         <script type="text/javascript" src="Included/TreeView/demo.js"></script>
 
-        <!-- My Css Style -->
         <link rel="stylesheet" href="Style.css">
-
-        <!-- All JavaScript Code-->
         <script type="text/javascript" src="js/myjs.js"></script>
 
     </head>
@@ -36,14 +30,34 @@
                 <hr/>
             </div>
 
-            <!--CONTENT-->
-            <div class="outer-center" style="float: right; width: 1500px;">
-
-                <!--Tab menu by bootstrap-->
-                <ul id="myTab" class="nav nav-tabs">
-                    <li class="active"><a href="#home" data-toggle="tab">Simulator</a></li>
-                    <li><a href="#profile" data-toggle="tab">Edit</a></li>
+            <!--MENU-->
+            <div class="outer-west" style="float: left; width: 15%;">
+                <div id='loadingmessage' style='display:none'>
+                    <img src='Images/ajax-loader.gif' width="50%"/>
+                </div>
+                <ul id="red" class="treeview-gray">
+                    <%
+                        XMLTree m = XMLTree.getInstance();
+                        out.println(m.getResult());
+                    %>
                 </ul>
+                <div id="TreeValidation" style="position:absolute; bottom:0;">
+                    <div id="ifTreeValidDiv" class="alert alert-success">The Tree Is Valid</div>
+                </div>
+            </div>
+
+            <!--SPACE between menu and content-->
+            <div class="outer-center" style="float: right; width: 2%;"></div>
+
+            <!--CONTENT-->
+            <div class="outer-center" style="float: right; width: 83%;">
+                <!--Tab menu by bootstrap-->
+                <div id="myTabs">   
+                    <ul class="nav nav-tabs" id="myTab">
+                        <li id="simTab" class="active"><a href="#home" data-toggle="tab">Simulator</a></li>
+                        <li id="editTab"><a href="#profile" data-toggle="tab">Edit</a></li>
+                    </ul>
+                </div>
 
                 <!--menu content-->
                 <div id="myTabContent" class="tab-content">
@@ -92,50 +106,26 @@
                     </div>
                 </div>
             </div>
-
-            <!--MENU-->
-            <div class="outer-west" style="float: left; width: 200px;">
-                <div id='loadingmessage' style='display:none'>
-                    <img src='Images/ajax-loader.gif' width="50%"/>
-                </div>
-                <ul id="red" class="treeview-gray">
-                    <%
-                        XMLTree m = XMLTree.getInstance();
-                        out.println(m.getResult());
-                    %>
-                </ul>
-            </div>
-
         </form>
+
+        <!-- Modal -->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                    </div>
+                    <div class="modal-body">
+                       
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="ModalClose" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" id="ModalSave" class="btn btn-primary">Save changes</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal --> 
+
     </body>
-
-    <!--
-        <script type='text/javascript'>
-            $(document).ready(function() {
-                $('.tree-toggle').click(function() {
-                    $(this).parent().children('ul.tree').toggle(300);
-                });
-            });
-        </script>-->
-
-
-    <!-- Modal -->
-    <div class="modal fade" id="myModalAddToTree" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title" id="myModalLabel">Modal title</h4>
-                </div>
-                <div class="modal-body">
-                    ...
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-
 </html>

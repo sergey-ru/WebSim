@@ -1,14 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.journaldev.servlet;
 
 import static bgu.sim.Properties.StringsProperties.SIMULATOR_SCENARIO_XML_PATH;
 import bgu.sim.core.Simulator;
-import bgu.sim.reflection.ClassesLister;
-import bgu.sim.ruleEngine.property.Property;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -36,7 +29,6 @@ public class SimServlet extends HttpServlet {
     private Simulator simTest;
     private int nextTickIndex;
     private int nextScenarioIndex;
-    //private ServletPrintCollector gg = new ServletPrintCollector();
 
     @Override
     // Called when user press Upload.
@@ -46,18 +38,16 @@ public class SimServlet extends HttpServlet {
         // init sim
         initSim();
 
-        System.out.println("YAAAAAAAAAAAYYYYYYYYYYYYYYYYY");
+        // file
         DiskFileItemFactory fileFactory = new DiskFileItemFactory();
         File filepath = new File("c:/tmp/Sim/");
         fileFactory.setRepository(filepath);
         this.uploader = new ServletFileUpload(fileFactory);
-        System.out.println("Init UploadFileServer.");
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            // TODO Auto-generated method stub
             String theRequest;
             theRequest = request.getParameter("request");
             XMLTree m;
@@ -73,98 +63,102 @@ public class SimServlet extends HttpServlet {
                     runOneCenario(request, response);
                     returnResponse(response, "Simulator Finished One Next Step.");
                     break;
-                case "getElementProperties":
-                    String node = request.getParameter("element");
-                    // here its faling!!!!!!!!!
-                    List<Property> ans = ClassesLister.getInstance().getClassProperties("bgu.sim.core.Simulator");
-                    response.setContentType("text/plain");
-                    response.setCharacterEncoding("UTF-8");
-                    response.getWriter().write("yayyyyyyyyy");
-                    break;
                 case "loadXmlTree":
-                    try {
-                        m = XMLTree.getInstance();
-                        m.parse();
-                        response.getWriter().write(m.getResult().toString());
-                    } catch (IOException ex) {
-                        response.getWriter().write("error");
-                    } catch (Exception ex) {
-                        response.getWriter().write("error");
-                    }
+                    m = XMLTree.getInstance();
+                    m.parse();
+                    response.getWriter().write(m.getResult().toString());
                     break;
                 case "SimulationProperty":
-                    try {
-                        m = XMLTree.getInstance();
-                        response.getWriter().write(m.getSimulationProperties());
-                    } catch (IOException ex) {
-                        response.getWriter().write("error");
-                    }
+
+                    m = XMLTree.getInstance();
+                    response.getWriter().write(m.getSimulationProperties());
+
                     break;
                 case "ScenarioProperty":
-                    try {
-                        m = XMLTree.getInstance();
-                        int scenarioIndex = Integer.parseInt(request.getParameter("index"));
-                        response.getWriter().write(m.getScenarioProperties(scenarioIndex));
-                    } catch (IOException ex) {
-                        response.getWriter().write("error");
-                    }
+                    //m = XMLTree.getInstance();
+                    //int scenarioIndex = Integer.parseInt(request.getParameter("index"));
+                    //response.getWriter().write(m.getScenarioProperties(scenarioIndex));
                     break;
                 case "InitProperty":
-                    try {
-                        m = XMLTree.getInstance();
-                        int scenarioIndex = Integer.parseInt(request.getParameter("index"));
-                        response.getWriter().write(m.getInitProperties(scenarioIndex));
-                    } catch (IOException ex) {
-                        response.getWriter().write("error");
-                    }
+
+                    m = XMLTree.getInstance();
+                    int scenarioIndex = Integer.parseInt(request.getParameter("index"));
+                    response.getWriter().write(m.getInitProperties(scenarioIndex));
+
                     break;
-                case "IfStaticIsSelected":
-                    try {
-                        String statisticNodeToCheck = request.getParameter("element");
-                        statisticNodeToCheck = statisticNodeToCheck.replace("StaticListener ", "");
-                        m = XMLTree.getInstance();
-                        response.getWriter().write(m.ifStatisticIsChoosen(statisticNodeToCheck));
-                    } catch (IOException ex) {
-                        response.getWriter().write("error");
-                    }
+                case "DeviceExLinkProperty":
+
+                    m = XMLTree.getInstance();
+                    int Index = Integer.parseInt(request.getParameter("index"));
+                    String type = request.getParameter("type");
+                    response.getWriter().write(m.getDeviceExLinkProperties(type, Index));
+
                     break;
-                case "IfRoutingAlgSelected":
-                    try {
-                        String routalgNodeToCheck = request.getParameter("element");
-                        routalgNodeToCheck = routalgNodeToCheck.replace("RoutingAlgorithm ", "");
-                        m = XMLTree.getInstance();
-                        response.getWriter().write(m.ifRoutAlgIsChoosen(routalgNodeToCheck));
-                    } catch (IOException ex) {
-                        response.getWriter().write("error");
-                    }
+                case "StatisticProperties":
+
+                    String statisticNodeToCheck = request.getParameter("element");
+                    statisticNodeToCheck = statisticNodeToCheck.replace("statisticlistener ", "");
+                    m = XMLTree.getInstance();
+                    response.getWriter().write(m.getStatisticProperties(statisticNodeToCheck));
+
+                    break;
+                case "RoutingAlgProperties":
+
+                    String routalgNodeToCheck = request.getParameter("element");
+                    routalgNodeToCheck = routalgNodeToCheck.replace("RoutingAlgorithm ", "");
+                    m = XMLTree.getInstance();
+                    response.getWriter().write(m.getRoutingAlgProperties(routalgNodeToCheck));
+
                     break;
                 case "GetPByActionValue":
+
                     m = XMLTree.getInstance();
                     //String selectedName = request.getParameter("selectedName");
                     String fullClassPath = request.getParameter("fullClassPath");
                     String result = m.getPValuesByActionValue(fullClassPath);
                     response.getWriter().write(result);
+
                     break;
                 case "SaveProperties":
+
                     m = XMLTree.getInstance();
                     String elementTopic = request.getParameter("elementToSave");
                     int elementIndex = Integer.parseInt(request.getParameter("index"));
                     String Info = request.getParameter("info");
-                    String[] parsedInfo = Info.split(",");
+                    String[] parsedInfo = Info.split(",,");
+                    String BackRequest = "";
 
                     if (elementTopic.equalsIgnoreCase("init")) {
                         m.updateInitProperties(elementTopic, elementIndex, parsedInfo);
+                    } else if (elementTopic.equalsIgnoreCase("device") || (elementTopic.equalsIgnoreCase("external")) || (elementTopic.equalsIgnoreCase("link"))) {
+                        m.updateDevExLinkProperties(elementTopic, elementIndex, parsedInfo);
+                    } else if (elementTopic.indexOf("statisticlistener") != -1) {
+                        for (int i = 0; i < parsedInfo.length; i++) {
+                            String[] keyval = parsedInfo[i].split("::");
+                            BackRequest += m.updateStatisticListenerProperty(elementTopic, elementIndex, keyval[0], keyval[1]);
+                        }
+                    } else if (elementTopic.indexOf("routingalgorithm") != -1) {
+                        for (int i = 0; i < parsedInfo.length; i++) {
+                            String[] keyval = parsedInfo[i].split("::");
+                            BackRequest += m.updateRoutingAlgorithmProperty(elementTopic, elementIndex, keyval[0], keyval[1]);
+                        }
                     } else {
                         for (int i = 0; i < parsedInfo.length; i++) {
                             String[] keyval = parsedInfo[i].split("::");
                             m.updateElementProperty(elementTopic, elementIndex, keyval[0], keyval[1]);
                         }
                     }
-                    //System.out.println(Info);
-                    response.getWriter().write("Changes have been successfully saved.");
+                    response.getWriter().write(BackRequest);
+
+                    break;
+                case "IfTreeIsValid":
+                    m = XMLTree.getInstance();
+                    response.getWriter().write(m.parseAndCheckIfValid());
                     break;
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+            System.err.println("Error taking request from client.");
+        } catch (Exception ex) {
             System.err.println("Error taking request from client.");
         }
     }
@@ -193,10 +187,8 @@ public class SimServlet extends HttpServlet {
                 System.out.println("ContentType=" + fileItem.getContentType());
                 System.out.println("Size in bytes=" + fileItem.getSize());
 
-                //String absolutePath = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
                 Path currentRelativePath = Paths.get("");
                 String s = currentRelativePath.toAbsolutePath().toString();
-                //System.out.println(absolutePath);
 
                 //File file = new File(("c:/tmp/Sim/") + File.separator + fileItem.getName());
                 File file = new File(s + File.separator + fileItem.getName());
@@ -232,9 +224,6 @@ public class SimServlet extends HttpServlet {
 
         } catch (IOException | ClassNotFoundException | InterruptedException | QueryExecutionException e) {
             // Simlation failed.
-            //StringWriter sw = new StringWriter();
-            //e.printStackTrace(new PrintWriter(sw));
-            //String exceptionAsString = sw.toString();
             System.err.println("Error running the simulator.");
         }
         System.out.println("Done.");
@@ -245,7 +234,6 @@ public class SimServlet extends HttpServlet {
             simTest = Simulator.fromXML(SIMULATOR_SCENARIO_XML_PATH);
         } catch (Exception ex) {
             System.err.println("Error Init the simulator.");
-            //
         }
     }
 
@@ -269,9 +257,6 @@ public class SimServlet extends HttpServlet {
 
         } catch (IOException | ClassNotFoundException | InterruptedException | QueryExecutionException e) {
             // Simlation failed.
-            //StringWriter sw = new StringWriter();
-            //e.printStackTrace(new PrintWriter(sw));
-            //String exceptionAsString = sw.toString();
             System.err.println("Error running the simulator on one scenario.");
         }
         System.out.println("Done.");

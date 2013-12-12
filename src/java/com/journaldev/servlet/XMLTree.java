@@ -12,7 +12,6 @@ package com.journaldev.servlet;
 import static bgu.sim.Properties.StringsProperties.SIMULATOR_SCENARIO_XML_PATH;
 import bgu.sim.reflection.ClassesLister;
 import bgu.sim.ruleEngine.property.Property;
-import com.sun.org.apache.xerces.internal.dom.ElementDefinitionImpl;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import org.w3c.dom.Document;
@@ -22,13 +21,8 @@ import org.w3c.dom.Element;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.faces.flow.builder.NodeBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Attr;
 import org.w3c.dom.NamedNodeMap;
@@ -37,7 +31,7 @@ import org.xml.sax.SAXException;
 
 public final class XMLTree {
 
-    private static boolean ifSuccsessParswing;
+    private static boolean ifSuccsessParsing;
     private StringBuilder result;
     private Element root;
     private Set<String> StatisticListenerChoosen = new HashSet<>();
@@ -52,13 +46,103 @@ public final class XMLTree {
         }
     }
 
+    public static XMLTree getInstance() {
+        return XMLTree.XMLTreeHolder.INSTANCE;
+    }
+
     public Element getRoot() {
         return root;
     }
 
+    public StringBuilder getResult() {
+        if (ifSuccsessParsing()) {
+            return result;
+        } else {
+            return new StringBuilder("Error.");
+        }
+    }
+
+    public static boolean ifSuccsessParsing() {
+        return ifSuccsessParsing;
+    }
+
+    // ---------- UPDATE ELEMENTS ----------------
     public void updateElementProperty(String Element, int Index, String Property, String Value) {
         Node ElementNode = root.getElementsByTagName(Element.toLowerCase()).item(Index - 1);
         ElementNode.getAttributes().getNamedItem(lowerCaseFirstLetter(Property)).setNodeValue(Value);
+    }
+
+    String updateStatisticListenerProperty(String Element, int Index, String Property, String Value) {
+        // remove the vi sign
+        switch (Value) {
+            case "off": {
+                Node SimulationNode = root.getElementsByTagName("simulation").item(0);
+                Node ElementNode = root.getElementsByTagName("statisticlistener").item(0);
+                if (ElementNode != null) {
+                    SimulationNode.removeChild(ElementNode);
+                }
+                String tmpElement = Element.replace("statisticlistener ", "");
+                StatisticListenerChoosen.remove(tmpElement);
+
+                return "remove " + Element;
+            }
+            case "on": {
+                // add the vi sign to the title in xml tree
+                Node SimulationNode = root.getElementsByTagName("simulation").item(0);
+
+                // ------------create StatisticListener child
+                Attr valAttribute = doc.createAttribute("value");
+                String tmpElement = Element.replace("statisticlistener ", "");
+                valAttribute.setValue(tmpElement);
+
+                // create statisticlistener
+                Element p = doc.createElement("statisticlistener");
+                p.setAttributeNode(valAttribute);
+
+                SimulationNode.appendChild(p);
+                // -------------------------
+
+                StatisticListenerChoosen.add(tmpElement);
+                return "add " + Element;
+            }
+        }
+        return "";
+    }
+
+    String updateRoutingAlgorithmProperty(String Element, int Index, String Property, String Value) {
+        switch (Value) {
+            case "off": {
+                Node SimulationNode = root.getElementsByTagName("simulation").item(0);
+                Node ElementNode = root.getElementsByTagName("routingalgorithm").item(0);
+                if (ElementNode != null) {
+                    SimulationNode.removeChild(ElementNode);
+                }
+                String tmpElement = Element.replace("routingalgorithm ", "");
+                StatisticListenerChoosen.remove(tmpElement);
+
+                return "remove " + Element;
+            }
+            case "on": {
+                // add the vi sign to the title in xml tree
+                Node SimulationNode = root.getElementsByTagName("simulation").item(0);
+
+                // ------------create RoutingAlgorithm child
+                Attr valAttribute = doc.createAttribute("value");
+                String tmpElement = Element.replace("routingalgorithm ", "");
+                valAttribute.setValue(tmpElement);
+
+                // create routingalgorithm
+                Element p = doc.createElement("routingalgorithm");
+                p.setAttributeNode(valAttribute);
+
+                SimulationNode.appendChild(p);
+                // -------------------------
+
+                StatisticListenerChoosen.add(tmpElement);
+                return "add " + Element;
+            }
+        }
+        return "";
     }
 
     void updateInitProperties(String Element, int Index, String[] parsedInfo) {
@@ -90,45 +174,144 @@ public final class XMLTree {
 
             Attr valAttribute = doc.createAttribute("value");
             valAttribute.setValue(val);
-            
+
             // create p
             Element p = doc.createElement("p");
             p.setAttributeNode(keyAttribute);
             p.setAttributeNode(valAttribute);
-            
+
             action.appendChild(p);
         }
     }
 
-    public static XMLTree getInstance() {
-        return XMLTree.XMLTreeHolder.INSTANCE;
-    }
+    void updateDevExLinkProperties(String Element, int Index, String[] parsedInfo) {
+        Node InitNode = root.getElementsByTagName(Element.toLowerCase()).item(Index - 1);
 
-    public StringBuilder getResult() {
-        System.out.println("they called me!!!!!");
-        if (ifSuccsessParsing()) {
-            return result;
-        } else {
-            return new StringBuilder("Error.");
+        // save action (first)
+        String[] newActionValue = parsedInfo[0].split("::");
+        NodeList allDevChildren = InitNode.getChildNodes();
+        Node order = allDevChildren.item(0); // order
+        Node select = allDevChildren.item(1); // select
+        Node action = allDevChildren.item(2); // action
+
+        // set action path
+        action.getAttributes().item(0).setNodeValue(newActionValue[1]);
+
+        String[] Property;
+        // save init name (second)
+        Property = parsedInfo[1].split("::");
+        InitNode.getAttributes().getNamedItem(lowerCaseFirstLetter(Property[0])).setNodeValue(Property[1]);
+
+        // order 3
+        Property = parsedInfo[2].split("::");
+        order.getAttributes().item(0).setNodeValue(Property[1]);
+
+        // select 4
+        Property = parsedInfo[3].split("::");
+        select.getAttributes().item(0).setNodeValue(Property[1]);
+
+        // --- save all p (5 and so on...) ---
+        // delete all children first
+        NodeList childrenDelete = action.getChildNodes();
+        for (int j = 0; j < childrenDelete.getLength(); j++) {
+            action.removeChild(childrenDelete.item(j));
+        }
+        // add all p
+        for (int i = 4; i < parsedInfo.length; i++) {
+            String[] info = parsedInfo[i].split("::");
+            String key = info[0];
+            String val = info[1];
+            // create attribute
+            Attr keyAttribute = doc.createAttribute("key");
+            keyAttribute.setValue(key);
+
+            Attr valAttribute = doc.createAttribute("value");
+            valAttribute.setValue(val);
+
+            // create p
+            Element p = doc.createElement("p");
+            p.setAttributeNode(keyAttribute);
+            p.setAttributeNode(valAttribute);
+
+            action.appendChild(p);
         }
     }
+    // --- END UPDATE --------------
 
-    public static boolean ifSuccsessParsing() {
-        return ifSuccsessParswing;
-    }
+    // --- GET PROPERTIES -------------
+    public String getStatisticProperties(String name) {
+        //System.out.println(name);
+        String res = "";
+        ClassesLister allActions = ClassesLister.getInstance();
+        List<Property> pList;
 
-    public String ifStatisticIsChoosen(String name) {
+        // first - choosen or not
         if (StatisticListenerChoosen.contains(name)) {
-            return "true";
+            res += "Choosen";
+            res += "::";
+            res += "true";
+            res += ",,";
+        } else {
+            res += "Choosen";
+            res += "::";
+            res += "false";
+            res += ",,";
         }
-        return "false";
+
+        // second and so, the rest
+        try {
+            pList = allActions.getClassProperties(name);
+            for (Property property : pList) {
+                String pKey = upperFirstLetter(property.getMetadata().getName());
+                String pVal = getPValueByItsKey("StatisticListener", name, pKey);
+
+                res += pKey; // upper first letter
+                res += "::";
+                res += pVal;
+                res += ",,"; // only one property
+            }
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+            //Logger.getLogger(XMLTree.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return res;
     }
 
-    public String ifRoutAlgIsChoosen(String name) {
+    public String getRoutingAlgProperties(String name) {
+        //System.out.println(name);
+        String res = "";
+        ClassesLister allActions = ClassesLister.getInstance();
+        List<Property> pList;
+
+        // first - choosen or not
         if (RoutingAlgoChoosen.contains(name)) {
-            return "true";
+            res += "Choosen";
+            res += "::";
+            res += "true";
+            res += ",,";
+
+            // second and so, the rest
+            try {
+                pList = allActions.getClassProperties(name);
+                for (Property property : pList) {
+                    String pKey = upperFirstLetter(property.getMetadata().getName());
+                    String pVal = getPValueByItsKey("RoutingAlgorithm", name, pKey);
+
+                    res += pKey; // upper first letter
+                    res += "::";
+                    res += pVal;
+                    res += ",,"; // only one property
+                }
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+                //Logger.getLogger(XMLTree.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else {
+            res += "Choosen";
+            res += "::";
+            res += "false";
+            res += ",,";
         }
-        return "false";
+        return res;
     }
 
     public String getSimulationProperties() {
@@ -140,7 +323,7 @@ public final class XMLTree {
             res += upperFirstLetter(fres.item(i).getNodeName());
             res += "::";
             res += fres.item(i).getNodeValue();
-            res += ",";
+            res += ",,";
         }
         return res;
     }
@@ -172,15 +355,15 @@ public final class XMLTree {
             res += initAtt.item(i).getNodeValue();
             //res += ","; // only one property
         }
-        res += ",";
+        res += ",,";
         // actions
         ClassesLister allActions = ClassesLister.getInstance();
         List<Class> actionsList = allActions.GetActions();
         for (Class action : actionsList) {
-            res += "Action"; // upper first letter
+            res += "ActionList"; // upper first letter
             res += "::";
             res += action.getName();
-            res += ",";
+            res += ",,";
         }
 
         // must be one action
@@ -196,7 +379,6 @@ public final class XMLTree {
             res += tmp.item(i).getNodeValue();
             //res += ","; // only one property
         }
-
         return res;
     }
 
@@ -209,12 +391,12 @@ public final class XMLTree {
             List<Property> pList = allActions.getClassProperties(fullClassPath);
             for (int i = 0; i < pList.size(); i++) {
                 pKey = upperFirstLetter(pList.get(i).getMetadata().getName());
-                pVal = getPValueByItsKey(fullClassPath, pKey);
+                pVal = getPValueByItsKey("action", fullClassPath, pKey);
 
                 res += pKey; // upper first letter
                 res += "::";
                 res += pVal;
-                res += ","; // only one property
+                res += ",,"; // only one property
             }
         } catch (Exception ex) {
             return "Error";
@@ -222,9 +404,9 @@ public final class XMLTree {
         return res;
     }
 
-    public String getPValueByItsKey(String ClassName, String Key) {
+    public String getPValueByItsKey(String underElement, String ClassName, String Key) {
         Node action = null;
-        NodeList li = root.getElementsByTagName("action");
+        NodeList li = root.getElementsByTagName(underElement);
         // find init by its name
         for (int i = 0; i < li.getLength(); i++) {
             System.out.println(li.item(i).getAttributes().item(0).getNodeValue());
@@ -234,8 +416,6 @@ public final class XMLTree {
             }
         }
 
-        //NodeList children = init.getChildNodes();
-        //Node action = children.item(0); // one action
         NodeList pList = action.getChildNodes();
         for (int i = 0; i < pList.getLength(); i++) {
             NamedNodeMap attMap = pList.item(i).getAttributes();
@@ -246,18 +426,76 @@ public final class XMLTree {
                 }
             }
         }
-
         return "";
     }
+
+    String getDeviceExLinkProperties(String type, int index) {
+        String res = "";
+        NodeList li = root.getElementsByTagName(type);
+        Node initNode = li.item(index - 1); // cuz it is array
+
+        NamedNodeMap initAtt = initNode.getAttributes();
+        // name
+        for (int i = 0; i < initAtt.getLength(); i++) {
+            res += upperFirstLetter(initAtt.item(i).getNodeName()); // upper first letter
+            res += "::";
+            res += initAtt.item(i).getNodeValue();
+        }
+        res += ",,";
+
+        // Order & Select
+        NodeList Children = initNode.getChildNodes();
+        for (int i = 0; i < Children.getLength(); i++) {
+            Node devExLink = Children.item(i);
+            String typeName = devExLink.getNodeName();
+            String val = devExLink.getAttributes().item(0).getNodeValue(); // one value
+            val = val.replace("\"", "\'");
+            res += upperFirstLetter(typeName);
+            res += "::";
+            res += val;
+            res += ",,"; // only one property
+        }
+        //res += ",";
+
+        // actions
+        ClassesLister allActions = ClassesLister.getInstance();
+        List<Class> actionsList = allActions.GetActions();
+        for (Class action : actionsList) {
+            res += "ActionList"; // upper first letter
+            res += "::";
+            res += action.getName();
+            res += ",,";
+        }
+
+        // must be one action
+        NodeList children = initNode.getChildNodes();
+        // the one action after order and select
+        Node child = children.item(2);
+
+        // get the value attribute. selected action.
+        NamedNodeMap tmp = child.getAttributes();
+        for (int i = 0; i < tmp.getLength(); i++) {
+            res += upperFirstLetter(tmp.item(i).getNodeName()); // upper first letter
+            res += "::";
+            res += tmp.item(i).getNodeValue();
+            //res += ","; // only one property
+        }
+
+        return res;
+    }
+    // --- END PROPERTIES -------------
 
     /*  
      PARSE THE XML TREE INTO HTML CODE
      */
     public void parse() throws Exception {
         int initIndex = 0;
-        //int actionIndex = 0;
+        int deviceIndex = 0;
+        int externalIndex = 0;
+        int linkIndex = 0;
+
         result = new StringBuilder("");
-        ifSuccsessParswing = true;
+        ifSuccsessParsing = true;
         try {
             System.out.println("start parsing");
             File fXmlFile = new File(SIMULATOR_SCENARIO_XML_PATH);
@@ -271,13 +509,14 @@ public final class XMLTree {
             Element experiment = doc.getDocumentElement();
             validateName(experiment, "experiment");
             // add code to result for building a tree
+
+            // 1 exp
             addHtmlHeader("Experiment", "Experiment", false);
 
             root = experiment;
 
             // experiment childrens
             NodeList ExperimentNodeChildren = experiment.getChildNodes();
-            //System.out.println("ExperimentNodeChildren count: " + ExperimentNodeChildren.getLength());
 
             // check if after experiment, the node "simulation" is coming
             Element simulation = (Element) experiment.getFirstChild();
@@ -298,18 +537,18 @@ public final class XMLTree {
                 switch (currChild.getNodeName().toLowerCase()) {
                     case "statisticlistener":
                         // Get Class Name
-                        String StatId = getNameOfClass(currChild.getAttributes().item(0).getNodeValue().toString());
+                        String StatId = currChild.getAttributes().item(0).getNodeValue().toString();
                         // Add as choosen class
                         StatisticListenerChoosen.add(StatId);
                         break;
                     case "routingalgorithm":
                         // Get Class Name
-                        String RoutId = getNameOfClass(currChild.getAttributes().item(0).getNodeValue().toString());
+                        String RoutId = currChild.getAttributes().item(0).getNodeValue().toString();
                         // Add as choosen class
                         RoutingAlgoChoosen.add(RoutId);
                         break;
                     default:
-                        ifSuccsessParswing = false;
+                        ifSuccsessParsing = false;
                         return;
                 }
             }
@@ -334,6 +573,8 @@ public final class XMLTree {
                 Element currScenario = (Element) ExperimentNodeChildren.item(i);
                 // check if it is Scenario
                 validateName(currScenario, "scenario");
+
+                // 2 Scenario
                 addHtmlHeader("Scenario", "Scenario" + i, false);
 
                 // check Scenario childrens
@@ -345,7 +586,9 @@ public final class XMLTree {
                     if (scenarioChild.getNodeName().equalsIgnoreCase("init")) {
                         NodeList initChildren = scenarioChild.getChildNodes();
                         initIndex++;
-                        addHtmlHeader("Init", "Init" + initIndex, false);
+
+                        addHtmlNode("Init", "Init" + initIndex, false);
+
                         // must be exactly one action
                         validateMinNumOfChildren(initChildren, 1);
                         validateMaxNumOfChildren(initChildren, 1);
@@ -353,23 +596,29 @@ public final class XMLTree {
                         // check action name
                         Element action = (Element) initChildren.item(0);
                         validateName(action, "action");
-                        //addHtmlHeader("Action", "Action" + initIndex, false);
-
-                        // p (0..*)
-                        //NodeList actionChildren = action.getChildNodes();
-                        //checkActionChildren(actionChildren);
-                        // action end code
-                        //addEndHtmlHeader();
-//                        // Init end code
-//                        addEndHtmlHeader();
                     }
 
                     // check Device/External/Link (0..*)
                     if (scenarioChild.getNodeName().equalsIgnoreCase("device")
                             || scenarioChild.getNodeName().equalsIgnoreCase("external")
                             || scenarioChild.getNodeName().equalsIgnoreCase("link")) {
+
+                        switch (scenarioChild.getNodeName()) {
+                            case "external":
+                                externalIndex++;
+                                addHtmlNode(scenarioChild.getNodeName(), scenarioChild.getNodeName() + externalIndex, false);
+                                break;
+                            case "device":
+                                deviceIndex++;
+                                addHtmlNode(scenarioChild.getNodeName(), scenarioChild.getNodeName() + deviceIndex, false);
+                                break;
+                            case "link":
+                                linkIndex++;
+                                addHtmlNode(scenarioChild.getNodeName(), scenarioChild.getNodeName() + linkIndex, false);
+                                break;
+                        }
+
                         NodeList DeviceExternalLinkChildren = scenarioChild.getChildNodes();
-                        addHtmlHeader(scenarioChild.getNodeName(), scenarioChild.getNodeName(), false);
 
                         // must have 1 Order 1 Select 1 Action. Length must be exactly 3.
                         validateMinNumOfChildren(DeviceExternalLinkChildren, 3);
@@ -381,60 +630,26 @@ public final class XMLTree {
                         if (!DeviceExternalLinkChildren.item(0).getNodeName().equalsIgnoreCase("order")
                                 || !DeviceExternalLinkChildren.item(1).getNodeName().equalsIgnoreCase("select")
                                 || !DeviceExternalLinkChildren.item(2).getNodeName().equalsIgnoreCase("action")) {
-                            ifSuccsessParswing = false;
+                            ifSuccsessParsing = false;
                             return;
                         }
 
-                        //addHtmlNode("Order");
-                        //addHtmlNode("Select");
-                        //addHtmlHeader("Action", "Action", false);
                         Element action = (Element) DeviceExternalLinkChildren.item(2);
                         removeWhitespaceNodes(action);
-                        // check action children. p (0..*)
-                        //NodeList actionChildren = action.getChildNodes();
-                        //checkActionChildren(actionChildren);
-
-                        // action end code
-                        //addEndHtmlHeader();
                     }
-                    // Device/External/Link end code
-                    addEndHtmlHeader();
                 }
-                // Scenario end code
+                // 2 Scenario end code
                 addEndHtmlHeader();
             }
-            // Experiment end code
+            // 1 Experiment end code
             addEndHtmlHeader();
 
-//            System.out.println("Root element : " + doc.getDocumentElement().getNodeName());
-//            NodeList nList = doc.getElementsByTagName("simulation");
-//            System.out.println("----------------------------");
-//
-//            Node simulationNode = nList.item(0);
-//            Element simulationElement = (Element) simulationNode;
-//            NodeList firstNameList = simulationElement.getElementsByTagName("StatisticListener");
-//
-//            for (int temp = 0; temp < nList.getLength(); temp++) {
-//
-//                Node nNode = nList.item(temp);
-//
-//                System.out.println("\nCurrent Element :" + nNode.getNodeName());
-//
-//                if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-//                    Element eElement = (Element) nNode;
-//
-//                    System.out.println("Staff id : " + eElement.getAttribute("id"));
-//                    System.out.println("First Name : " + eElement.getElementsByTagName("firstname").item(0).getTextContent());
-//                    System.out.println("Last Name : " + eElement.getElementsByTagName("lastname").item(0).getTextContent());
-//                    System.out.println("Nick Name : " + eElement.getElementsByTagName("nickname").item(0).getTextContent());
-//                    System.out.println("Salary : " + eElement.getElementsByTagName("salary").item(0).getTextContent());
-//                }
-//            }
         } catch (IOException | ParserConfigurationException | SAXException e) {
-            ifSuccsessParswing = false;
+            ifSuccsessParsing = false;
         }
     }
 
+    // --- HELPERS -------------
     public static void removeWhitespaceNodes(Element e) {
         NodeList children = e.getChildNodes();
         for (int i = children.getLength() - 1; i >= 0; i--) {
@@ -450,75 +665,70 @@ public final class XMLTree {
     private void validateName(Element experiment, String name) throws Exception {
         removeWhitespaceNodes(experiment);
         if (!experiment.getNodeName().equalsIgnoreCase(name)) {
-            ifSuccsessParswing = false;
+            ifSuccsessParsing = false;
             throw new Exception("XML is not build currectly.");
         }
     }
 
     private void validateMinNumOfChildren(NodeList ListChildren, int i) throws Exception {
         if (ListChildren.getLength() < i) {
-            ifSuccsessParswing = false;
+            ifSuccsessParsing = false;
             throw new Exception("XML is not build currectly.");
         }
     }
 
     private void validateMaxNumOfChildren(NodeList ListChildren, int i) throws Exception {
         if (ListChildren.getLength() > i) {
-            ifSuccsessParswing = false;
+            ifSuccsessParsing = false;
             throw new Exception("XML is not build currectly.");
         }
     }
 
-    private void checkActionChildren(NodeList actionChildren) {
-        for (int k = 0; k < actionChildren.getLength(); k++) {
-            addHtmlNode(actionChildren.item(k).getNodeName());
-        }
-    }
-
     private void addHtmlHeader(String text, String id, boolean Selected) {
-        //result.append("<li><label class=\"tree-toggle nav-header\">").append(text).append("</label>");
-        //result.append("<ul class=\"nav nav-list tree\">");
-        if (!"".equals(id)) {
-            if (Selected) {
-                // add a icon next to text
-                result.append("<li><span id='")
-                        .append(id)
-                        .append("'>")
-                        .append("<a href=\"#\" onclick=\"EditPropertyJS('")
-                        .append(id)
-                        .append("')\">")
-                        .append(text)
-                        .append("&#10004;</span><ul>");
-            } else {
-                result.append("<li><span id='")
-                        .append(id)
-                        .append("'>")
-                        .append("<a href=\"#\" onclick=\"EditPropertyJS('")
-                        .append(id)
-                        .append("')\">")
-                        .append(text)
-                        .append("</a>")
-                        .append("<button type=\"button\" class=\"close\" aria-hidden=\"true\">&times;</button>")
-                        .append("<button type=\"button\" class=\"close\" aria-hidden=\"true\">+</button>")
-                        .append("</span><ul>");
-            }
-        } else {
-            result.append("<li><span>")
-                    .append("<a href=\"#\" onclick=\"EditPropertyJS('")
-                    .append(id)
-                    .append("')\">")
-                    .append(text)
-                    .append("</span><ul>");
+        result.append("<li><span id='")
+                .append(id)
+                .append("'>")
+                .append("<a href=\"#\" onclick=\"EditPropertyJS('")
+                .append(id)
+                .append("')\" id=\"a_href_")
+                .append(id)
+                .append("\">")
+                .append(text);
+
+        if (Selected) {
+            // add a icon next to text
+            result.append("&#10004;");
         }
+        result.append("</a>");
+
+        if (text.contains("Scenario") || text.contains("Experiment")) {
+            result.append("<button type=\"button\" id=\"" + text + "_" + id + "_delete\" class=\"close\" aria-hidden=\"true\" data-target=\"#myModal\">&times;</button>");
+            result.append("<button type=\"button\" id=\"" + text + "_" + id + "_add\" class=\"close\" aria-hidden=\"true\" data-target=\"#myModal\">+</button>");
+        }
+        result.append("</span><ul>");
     }
 
-    private void addHtmlNode(String text) {
-        //result.append("<li><a href=\"#\" onclick=\"EditPropertyJS('" + text + "')\">").append(text).append("</a></li>");
-        result.append("<li><span><a href=\"#\" onclick=\"EditPropertyJS('")
-                .append(text)
+    private void addHtmlNode(String text, String id, boolean Selected) {
+        result.append("<li><span id='")
+                .append(id)
+                .append("'>")
+                .append("<a href=\"#\" onclick=\"EditPropertyJS('")
+                .append(id)
+                .append("')\" id=\"a_href_")
+                .append(id)
                 .append("')\">")
-                .append(text)
-                .append("</a></span></li>");
+                .append(text);
+
+        if (Selected) {
+            result.append("&#10004;</a>");
+        } else {
+            result.append("</a>");
+        }
+
+        if (text.contains("Init") || text.contains("device") || text.contains("external") || text.contains("link")) {
+            result.append("<button type=\"button\" id=\"" + text + "_" + id + "_delete\" class=\"close\" aria-hidden=\"true\" data-target=\"#myModal\">&times;</button>");
+        }
+        result.append("</span></li>");
     }
 
     private void addEndHtmlHeader() {
@@ -528,16 +738,16 @@ public final class XMLTree {
     private void AddAllClassesThatImpStatisticListener() {
         // Now we will add the rest of the classes that implements "StatisticListener".
         ClassesLister allClassesImpSt = ClassesLister.getInstance();
-
         List<Class> m = allClassesImpSt.GetStatisticListeners();
+
         for (Class class1 : m) {
-            String id = getNameOfClass(class1.getName());
+            String id = class1.getName();
             if (StatisticListenerChoosen.contains(id)) {
-                addHtmlHeader(id, "StaticListener " + id, true);
+                addHtmlNode(getNameOfClass(id), "statisticlistener " + id, true);
             } else {
-                addHtmlHeader(id, "StaticListener " + id, false);
+                addHtmlNode(getNameOfClass(id), "statisticlistener " + id, false);
             }
-            addEndHtmlHeader();
+            //addEndHtmlHeader();
         }
     }
 
@@ -547,13 +757,13 @@ public final class XMLTree {
 
         List<Class> m = allClassesImpSt.GetRoutingAlgorithms();
         for (Class class1 : m) {
-            String id = getNameOfClass(class1.getName());
+            String id = class1.getName();
             if (RoutingAlgoChoosen.contains(id)) {
-                addHtmlHeader(id, "RoutingAlgorithm " + id, true);
+                addHtmlNode(getNameOfClass(id), "RoutingAlgorithm " + id, true);
             } else {
-                addHtmlHeader(id, "RoutingAlgorithm " + id, false);
+                addHtmlNode(getNameOfClass(id), "RoutingAlgorithm " + id, false);
             }
-            addEndHtmlHeader();
+            //addEndHtmlHeader();
         }
     }
 
@@ -564,6 +774,125 @@ public final class XMLTree {
 
     private String lowerCaseFirstLetter(String userIdea) {
         return Character.toLowerCase(userIdea.charAt(0)) + userIdea.substring(1);
+    }
+
+    String parseAndCheckIfValid() {
+        if (ifRootIsValid()) {
+            return "true";
+        }
+        return "false";
+    }
+
+    private boolean ifRootIsValid() {
+        try {
+            ifSuccsessParsing = true;
+            Element experiment = root;
+            validateName(experiment, "experiment");
+            // add code to result for building a tree
+
+            // experiment childrens
+            NodeList ExperimentNodeChildren = experiment.getChildNodes();
+
+            // check if after experiment, the node "simulation" is coming
+            Element simulation = (Element) experiment.getFirstChild();
+            validateName(simulation, "simulation");
+
+            // check simulation childrens
+            NodeList SimulationNodeChildren = simulation.getChildNodes();
+            validateMinNumOfChildren(SimulationNodeChildren, 1);
+
+            // check that first child of Simulation is StatisticListener
+            validateName((Element) SimulationNodeChildren.item(0), "statisticlistener");
+
+            if (StatisticListenerChoosen.size() != 1) {
+                ifSuccsessParsing = false;
+                return ifSuccsessParsing;
+            }
+
+            // check statisticlistener and routingAlgorithms
+            for (int i = 0; i < SimulationNodeChildren.getLength(); i++) {
+                Node currChild = SimulationNodeChildren.item(i);
+                System.out.println(currChild.getNodeName().toLowerCase());
+                switch (currChild.getNodeName().toLowerCase()) {
+                    case "statisticlistener":
+                        // Get Class Name
+                        String StatId = currChild.getAttributes().item(0).getNodeValue().toString();
+                        // Add as choosen class
+                        StatisticListenerChoosen.add(StatId);
+                        break;
+                    case "routingalgorithm":
+                        // Get Class Name
+                        String RoutId = currChild.getAttributes().item(0).getNodeValue().toString();
+                        // Add as choosen class
+                        RoutingAlgoChoosen.add(RoutId);
+                        break;
+                    default:
+                        ifSuccsessParsing = false;
+                        return ifSuccsessParsing;
+                }
+            }
+            validateMinNumOfChildren(ExperimentNodeChildren, 2);
+
+            Node Scenario = experiment.getFirstChild().getNextSibling();
+            validateName((Element) Scenario, "scenario");
+
+            // go over the scenarios
+            for (int i = 1; i < ExperimentNodeChildren.getLength(); i++) {
+
+                Element currScenario = (Element) ExperimentNodeChildren.item(i);
+                // check if it is Scenario
+                validateName(currScenario, "scenario");
+
+                NodeList ScenarioNodeChildren = currScenario.getChildNodes();
+                for (int j = 0; j < ScenarioNodeChildren.getLength(); j++) {
+                    Node scenarioChild = ScenarioNodeChildren.item(j);
+
+                    // check Init (0..*)
+                    if (scenarioChild.getNodeName().equalsIgnoreCase("init")) {
+                        NodeList initChildren = scenarioChild.getChildNodes();
+                        //nitIndex++;
+
+                        //addHtmlNode("Init", "Init" + initIndex, false);
+                        // must be exactly one action
+                        validateMinNumOfChildren(initChildren, 1);
+                        validateMaxNumOfChildren(initChildren, 1);
+
+                        // check action name
+                        Element action = (Element) initChildren.item(0);
+                        validateName(action, "action");
+                    }
+
+                    // check Device/External/Link (0..*)
+                    if (scenarioChild.getNodeName().equalsIgnoreCase("device")
+                            || scenarioChild.getNodeName().equalsIgnoreCase("external")
+                            || scenarioChild.getNodeName().equalsIgnoreCase("link")) {
+
+                        NodeList DeviceExternalLinkChildren = scenarioChild.getChildNodes();
+
+                        // must have 1 Order 1 Select 1 Action. Length must be exactly 3.
+                        validateMinNumOfChildren(DeviceExternalLinkChildren, 3);
+                        validateMaxNumOfChildren(DeviceExternalLinkChildren, 3);
+
+                        // check first is 1 Order
+                        // check second is 1 select
+                        // check third is 1 action
+                        if (!DeviceExternalLinkChildren.item(0).getNodeName().equalsIgnoreCase("order")
+                                || !DeviceExternalLinkChildren.item(1).getNodeName().equalsIgnoreCase("select")
+                                || !DeviceExternalLinkChildren.item(2).getNodeName().equalsIgnoreCase("action")) {
+                            ifSuccsessParsing = false;
+                            return ifSuccsessParsing;
+                        }
+
+                        Element action = (Element) DeviceExternalLinkChildren.item(2);
+                        removeWhitespaceNodes(action);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            ifSuccsessParsing = false;
+        }
+
+        return ifSuccsessParsing;
     }
 
     private static class XMLTreeHolder {

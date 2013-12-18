@@ -1,4 +1,4 @@
-package com.journaldev.servlet;
+package sim.web.samples;
 
 import static bgu.sim.Properties.StringsProperties.SIMULATOR_SCENARIO_XML_PATH;
 import bgu.sim.core.Simulator;

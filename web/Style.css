@@ -45,3 +45,19 @@ p {
     background-image: url(application_firefox.gif);
     background-position: 0 0;
 }
+
+div.growlUI { background: url(http://malsup.com/jquery/block/check48.png) no-repeat 10px 10px }
+div.growlUI h1, div.growlUI h2 {
+    color: white; 
+    padding: 5px 5px 5px 75px;
+    text-align: left;
+}
+
+div.growlUI h1 {
+    font-size: 17px;
+}
+
+div.growlUI h2 {
+    font-size: 15px;
+}
+

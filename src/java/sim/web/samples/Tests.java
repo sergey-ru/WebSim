@@ -3,7 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.journaldev.servlet;
+package sim.web.samples;
+
+import sim.web.servlet.XMLTree;
 
 /**
  *

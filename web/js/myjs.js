@@ -32,6 +32,14 @@ $(document).ready(function() {
         });
         // $.growlUI('Simulation', 'Simulation Finished'); 
     });
+    
+    
+    // load the edited tree mwnu to the simulator
+    $('#loadXmlToSim').click(function(event) {
+        $.get('SimServlet', {request: "SaveTree"}, function(responseText) {
+            $('#statis').text(responseText);
+        });
+    });
 
     // new tree
     $('#newTree').click(function(event) {
@@ -387,7 +395,7 @@ function EditPropertyJS(node) {
             });
         }
 
-        else if (node.indexOf("statisticlistener") != -1) {
+        else if (node.indexOf("StatisticListener") != -1) {
 
             $.get('SimServlet', {request: "StatisticProperties", element: node}, function(responseText) {
                 //alert("req sent");
@@ -458,7 +466,7 @@ function EditPropertyJS(node) {
             });
         }
 
-        else if (node.indexOf("routingalgorithm") != -1) {
+        else if (node.indexOf("RoutingAlgorithm") != -1) {
             $.get('SimServlet', {request: "RoutingAlgProperties", element: node}, function(responseText) {
                 //alert("req sent");
                 //alert(responseText);

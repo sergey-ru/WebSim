@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -573,7 +574,8 @@ public final class XMLTree {
 
         // actions
         ClassesLister allActions = ClassesLister.getInstance();
-        List<Class> actionsList = allActions.GetActions();
+        List<Class> actionsList = allActions.GetInitActions();
+
         for (Class action : actionsList) {
             res += "ActionList"; // upper first letter
             res += KEY_VAL_SPLITTER;
@@ -681,8 +683,20 @@ public final class XMLTree {
         }
 
         // actions
+        List<Class> actionsList = null;
         ClassesLister allActions = ClassesLister.getInstance();
-        List<Class> actionsList = allActions.GetActions();
+        switch (type) {
+            case XML_DEVICE:
+                actionsList = allActions.GetDeviceActions();
+                break;
+            case XML_EXTERNAL:
+                actionsList = allActions.GetExternalActions();
+                break;
+            case XML_LINK:
+                actionsList = allActions.GetLinkActions();
+                break;
+        }
+
         for (Class action : actionsList) {
             res += "ActionList"; // upper first letter
             res += KEY_VAL_SPLITTER;
@@ -858,10 +872,11 @@ public final class XMLTree {
 
     private void parseStatisticAndRouting(NodeList SimulationNodeChildren) throws DOMException {
         // check statisticlistener and routingAlgorithms
+
         for (int i = 0; i < SimulationNodeChildren.getLength(); i++) {
             Node currChild = SimulationNodeChildren.item(i);
-            switch (currChild.getNodeName().toLowerCase()) {
-                case XML_STATISTICLISTENER:
+            switch (currChild.getNodeName()) {
+                case XML_STATISTICLISTENER_LOW:
                     // Get Class Name
                     String StatId = currChild.getAttributes().item(0).getNodeValue().toString();
                     // Add as chosen class
@@ -869,12 +884,28 @@ public final class XMLTree {
                         _StatisticListenerChosen.add(StatId);
                     }
                     break;
-                case XML_ROUTINGALGORITHM:
+                case XML_ROUTINGALGORITHM_LOW:
                     // Get Class Name
                     String RoutId = currChild.getAttributes().item(0).getNodeValue().toString();
                     // Add as chosen class
                     if (!"".equals(RoutId)) {
                         _RoutingAlgoChosen.add(RoutId);
+                    }
+                    break;
+                case XML_STATISTICLISTENER:
+                    // Get Class Name
+                    String StatIda = currChild.getAttributes().item(0).getNodeValue().toString();
+                    // Add as chosen class
+                    if (!"".equals(StatIda)) {
+                        _StatisticListenerChosen.add(StatIda);
+                    }
+                    break;
+                case XML_ROUTINGALGORITHM:
+                    // Get Class Name
+                    String RoutIdaa = currChild.getAttributes().item(0).getNodeValue().toString();
+                    // Add as chosen class
+                    if (!"".equals(RoutIdaa)) {
+                        _RoutingAlgoChosen.add(RoutIdaa);
                     }
                     break;
                 default:
@@ -1197,13 +1228,15 @@ public final class XMLTree {
             String relativePath = currentRelativePath.toAbsolutePath().toString();
 
             StreamResult result = new StreamResult(new File(relativePath + "\\SimulatorExperiment.xml"));
+            
+            SIMULATOR_SCENARIO_XML_PATH = relativePath + "\\SimulatorExperiment.xml";
 
             // Output to console for testing
             // StreamResult result = new StreamResult(System.out);
             transformer.transform(source, result);
 
             return "File saved in " + relativePath + "\\SimulatorExperiment.xml";
-            
+
         } catch (Exception ex) {
             return "Sorry, cant save file. " + ex.getMessage();
         }

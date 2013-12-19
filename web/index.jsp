@@ -83,6 +83,9 @@
                             <button type="button" id="UploadFileButton" onclick="upl();" class ="btn btn-primary"><span class="glyphicon glyphicon-upload"></span> Upload</button>
                             <br/>
                             <br/>
+                            <button type="button" id="loadXmlToSim" class="btn btn-primary btn-lg doAction">Load the tree into the simulator</button>
+                            <br/>
+                            <br/>
                             <button type="button" id="runfull" class="btn btn-primary btn-lg doAction"><span class="glyphicon glyphicon-play"></span> Run Full Simulator</button>
                             <button type="button" id="runscenario" class="btn btn-primary btn-lg doAction"><span class="glyphicon glyphicon-step-forward"></span> Run Next Scenario In Simulator</button>
                             <br/>

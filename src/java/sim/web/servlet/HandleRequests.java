@@ -10,7 +10,6 @@ import bgu.sim.core.Simulator;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.josql.QueryExecutionException;
 import static sim.web.utils.Constans.*;
 
 /**
@@ -22,12 +21,12 @@ public class HandleRequests {
     private int _nextScenarioIndex;
     private int _nextTickIndex;
     private Simulator _simTest;
+    private boolean _ifInitSim;
 
     public HandleRequests() {
         _nextTickIndex = 0;
         _nextScenarioIndex = 0;
-
-        initSim();
+        _ifInitSim = false;
     }
 
     public void checkRequest(String theRequest, HttpServletRequest request, HttpServletResponse response) {
@@ -222,9 +221,10 @@ public class HandleRequests {
     /*
      Init simulator
      */
-    private void initSim() {
+    public void initSim() {
         try {
             _simTest = Simulator.fromXML(SIMULATOR_SCENARIO_XML_PATH);
+            _ifInitSim = true;
         } catch (Exception ex) {
             System.err.println("Error Init the simulator.");
         }
@@ -234,6 +234,10 @@ public class HandleRequests {
      Run full simulator
      */
     protected void runFull(HttpServletRequest request, HttpServletResponse response) {
+        // init sim first
+        initSim();
+
+        // run
         try {
             while (_simTest.nextScenario()) {
                 long start = System.currentTimeMillis();
@@ -248,8 +252,9 @@ public class HandleRequests {
                 returnResponse(response, timeForRunningFull);
             }
 
-        } catch (IOException | ClassNotFoundException | InterruptedException | QueryExecutionException e) {
+        } catch (Exception e) {
             // Simlation failed.
+            returnResponse(response, "Error running the simulator.");
             System.err.println("Error running the simulator.");
         }
         System.out.println("Done.");
@@ -259,6 +264,11 @@ public class HandleRequests {
      Run only one scenario in the simulator
      */
     private void runScenario(HttpServletRequest request, HttpServletResponse response) {
+        // if sim is not init
+        if (!_ifInitSim) {
+            initSim();
+        }
+
         try {
             if (_simTest.nextScenario()) {
                 long start = System.currentTimeMillis();
@@ -277,8 +287,9 @@ public class HandleRequests {
                 System.out.println("No More Scenarios.");
             }
 
-        } catch (IOException | ClassNotFoundException | InterruptedException | QueryExecutionException e) {
+        } catch (Exception e) {
             // Simlation failed.
+            returnResponse(response, "Error running the simulator.");
             System.err.println("Error running the simulator on one scenario.");
         }
         System.out.println("Done.");

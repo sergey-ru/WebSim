@@ -24,8 +24,10 @@ public final class Constans {
     public static final String XML_EXTERNAL = "external";
     public static final String XML_LINK = "link";
     public static final String XML_INIT = "init";
-    public static final String XML_STATISTICLISTENER = "statisticlistener";
-    public static final String XML_ROUTINGALGORITHM = "routingalgorithm";
+    public static final String XML_STATISTICLISTENER = "StatisticListener";
+    public static final String XML_ROUTINGALGORITHM = "RoutingAlgorithm";
+    public static final String XML_STATISTICLISTENER_LOW = "statisticlistener";
+    public static final String XML_ROUTINGALGORITHM_LOW = "routingalgorithm";
     public static final String XML_PROPERTY = "p";
     
     public static final String TREEVIEW_EXPERIMENT = "Experiment";

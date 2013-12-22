@@ -1,0 +1,49 @@
+Network Chart javascript library.
+
+Copyright 2013, Data Visualization Tools Lab. All rights reserved.
+http://dvsl.co
+
+Version 1.01
+* Added length option to links - controls link length.
+* RightClick event introduced.
+* API cleanup, replaced addNode, removeNode by showNode, hideNode.
+
+====== Changelog ===========================
+
+Version 1.00
+* Assets cleanup - only netchart assets are packaged.
+* Layout cleanup - several bugs fixed. 
+  Appearing/dissapearing of objects is much smoother now.
+
+Version 0.99
+* Fixed on click position drift.
+
+Version 0.98
+* Fixed some layout issues.
+
+Version 0.97
+* Fixed some data processing issues.
+
+Version 0.96
+* Fixed some layout animation issues.
+
+Version 0.95
+* More link icon options.
+
+Version 0.94
+* Focus based navigation fixed.
+* Menu switched to right click / long press.
+* Fixed node label rendering when inside node.
+
+
+Version 0.93
+* Added filters.nodeLinksProcessor filter.
+
+Version 0.92
+* Fixed broken URL encoding node IDs in data requests.
+
+Version 0.91
+* Added nodeExpanded, nodeFocused styles.
+
+Version 0.9
+* Initial public release.

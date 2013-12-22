@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Network chart example</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="js/jquery.js"></script>
+    <script src="../../lib/netchart.js"></script>
+</head>
+<body>
+<div style="height:100%" id="chart">
+</div>
+<div id="sidebar">
+    <p>Save/restore:</p>
+    <span><button onclick="save()">Save state</button><button onclick="restore()">Restore state</button></span>
+    <span id="state"></span>
+    <p>Events:</p>
+    <div id="log"></div>
+</div>
+
+<script type="text/javascript">
+    settings = {
+        container: $("#chart")[0],
+        data: {
+            randomLinks: 30,
+            randomNodes: 25
+        },
+        events:{
+            onSelectionChange:onSelectionChange,
+            onClick:onClick,
+            onDoubleClick:onDoubleClick,
+            onHoverChange:onHoverChange
+        }
+    };
+
+    saved = null;
+
+    function save(){
+        saved = JSON.stringify(JSON.parse(chart.saveState()), undefined, " ");
+        $("#state")[0].innerHTML = "Saved";
+    }
+
+    function restore(){
+        chart.restoreState(saved);
+    }
+
+    $(document).ready(function() {
+        chart = new NetChart(settings);
+    });
+
+    function onSelectionChange(event){
+        var selection = chart.selection();
+        var contents = "";
+        for (var i = 0; i < selection.length; i ++){
+            var item = selection[i];
+            var type;
+            if (item.isNode)
+                type = "node";
+            else
+                type = "link";
+            contents += "<li>"+type + " " + item.label +"</li>";
+        }
+        $('#log').prepend("<b>Selection change</b><ul>"+contents+"</ul><br/>");
+    }
+
+    function onClick(event){
+        var contents = "nothing";
+        if (event.clickNode){
+            contents = event.clickNode.label
+        }else if (event.clickLink){
+            contents = event.clickLink.label
+        }
+
+        $('#log').prepend("<b>Click on </b><ul>"+contents+"</ul><br/>");
+    }
+
+    function onHoverChange(event){
+        var contents = "nothing";
+        if (event.hoverNode){
+            contents = event.hoverNode.label
+        }else if (event.hoverLink){
+            contents = event.hoverLink.label
+        }
+
+        $('#log').prepend("<b>Hover on </b><ul>"+contents+"</ul><br/>");
+    }
+
+    function onDoubleClick(event){
+        var contents = "nothing";
+        if (event.clickNode){
+            contents = event.clickNode.label
+        }else if (event.clickLink){
+            contents = event.clickLink.label
+        }
+
+        $('#log').prepend("<b>Double click on </b><ul>"+contents+"</ul><br/>");
+    }
+
+
+</script>
+</body>
+</html>

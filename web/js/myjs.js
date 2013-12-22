@@ -14,13 +14,19 @@ $(document).ready(function() {
 
     // run full scenario
     $('#runfull').click(function(event) {
-        //$.growlUI('Simulation', 'Simulation Started'); 
-        $('#statis').text("");
-        $.get('SimServlet', {request: "startfull"}, function(responseText) {
-            $('#statis').append(responseText);
-        });
-        // $.growlUI('Simulation', 'Simulation Finished'); 
+        //$('#runfull').animate({top: '-760px'},
+        //1000,
+        //        function() {
+                    //redirect here
+                    window.location.href = "SimView.jsp";
+
+                    //$('#statis').text("");
+                    //$.get('SimServlet', {request: "startfull"}, function(responseText) {
+                    //    $('#statis').append(responseText);
+                    //});\
+          //      });
     });
+
 
     // run full scenario
     $('#runscenario').click(function(event) {
@@ -32,8 +38,8 @@ $(document).ready(function() {
         });
         // $.growlUI('Simulation', 'Simulation Finished'); 
     });
-    
-    
+
+
     // load the edited tree mwnu to the simulator
     $('#loadXmlToSim').click(function(event) {
         $.get('SimServlet', {request: "SaveTree"}, function(responseText) {

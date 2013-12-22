@@ -1,0 +1,5 @@
+Copyright 2013, Data Visualization Tools Lab. 
+All rights reserved.
+
+This software includes the following third-party software:
+* css-color-parser-js by Dean McNamee <dean@gmail.com>, 2012, https://github.com/deanm/css-color-parser-js

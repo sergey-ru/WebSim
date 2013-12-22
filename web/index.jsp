@@ -76,49 +76,62 @@
                     <div class="tab-pane fade in active" id="home">
                         <p>
                         <div id="RunSimDiv">
-                            Select XML Simulator Scenario File To Simulate:
-                            <br/><br/>
-                            <input type="file" name="sampleFile" id="sampleFile">
-                            <br/>
-                            <button type="button" id="UploadFileButton" onclick="upl();" class ="btn btn-primary"><span class="glyphicon glyphicon-upload"></span> Upload</button>
-                            <br/>
-                            <br/>
-                            <button type="button" id="loadXmlToSim" class="btn btn-primary btn-lg doAction">Load the tree into the simulator</button>
-                            <br/>
-                            <br/>
-                            <button type="button" id="runfull" class="btn btn-primary btn-lg doAction"><span class="glyphicon glyphicon-play"></span> Run Full Simulator</button>
-                            <button type="button" id="runscenario" class="btn btn-primary btn-lg doAction"><span class="glyphicon glyphicon-step-forward"></span> Run Next Scenario In Simulator</button>
-                            <br/>
-                            <br/>
-                            <textarea name="statis" id="statis" class="form-control" rows="13">
-                            </textarea>
+                            <h3> Step 1: </h3>
+                                    Select XML Simulator Scenario File To Simulate:
+                                    <br/><br/>
+                                    <input type="file" name="sampleFile" id="sampleFile">
+                                    <br/>
+                          <h3> Step 2: </h3>
+                                    Upload the file.
+                                    <button type="button" id="UploadFileButton" onclick="upl();" class ="btn btn-primary"><span class="glyphicon glyphicon-upload"></span> Upload</button>
+                                    <br/>
+                                    <br/>
+                          <h3> Step 3: </h3>
+                                    Edit the tree.
+                                    <br/>
+                                    <br/>
+                          <h3> Step 4: </h3>
+                                    Load the tree into the simulator.
+                                    <button type="button" id="loadXmlToSim" class="btn btn-primary doAction">Load</button>
+                                    <br/>
+                                    <br/>
+                          <h3> Step 5: </h3>
+                                    Run simulator.  
+                                    <br/>
+                                    <button type="button" id="runfull" class="btn btn-primary btn-lg doAction"><span class="glyphicon glyphicon-play"></span> Run Full Simulator</button>
+                                    <button type="button" id="runscenario" class="btn btn-primary btn-lg doAction"><span class="glyphicon glyphicon-step-forward"></span> Run Next Scenario In Simulator</button>
+<!--                                    <br/>
+                                    <br/>
+                                    <textarea name="statis" id="statis" class="form-control" rows="13">
+                                    </textarea>-->
+                            </div>
+                            </p>
                         </div>
-                        </p>
-                    </div>
-                    <div class="tab-pane fade" id="profile">
+                        <div class="tab-pane fade" id="profile">
+                            <div id="EditNodeDivHide">
+                                Select property from the xml tree to edit.
+                            </div>
+                            <div id="EditNodeDivLoading" style="display:none">
+                                <img src='Images/ajax-loader.gif' width="5%"/>
+                            </div>
+                            <div id="EditNodeDivShow" style="width: 80%; margin: 20px 20px 20px 20px;">
 
-                        <div id="EditNodeDivHide">
-                            Select property from the xml tree to edit.
-                        </div>
-                        <div id="EditNodeDivLoading" style="display:none">
-                            <img src='Images/ajax-loader.gif' width="5%"/>
-                        </div>
-                        <div id="EditNodeDivShow" style="width: 80%; margin: 20px 20px 20px 20px;">
+                                <div id="AllFormDynamicInputs">
+                                    <label id="Key" for="Value" class="col-sm-2 control-label">Value</label>
+                                    <div class="col-sm-10">
+                                        <input type="email" class="form-control" id="Value" placeholder="">
+                                    </div>
+                                </div>
 
-                            <div id="AllFormDynamicInputs">
-                                <label id="Key" for="Value" class="col-sm-2 control-label">Value</label>
-                                <div class="col-sm-10">
-                                    <input type="email" class="form-control" id="Value" placeholder="">
+                                <br/>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <button type="submit" id="SavePropertyChanges" class="btn btn-primary">Save</button>
+                                    </div>
                                 </div>
                             </div>
+                        </div>  
 
-                            <br/>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <button type="submit" id="SavePropertyChanges" class="btn btn-primary">Save</button>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>

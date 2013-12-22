@@ -13,7 +13,7 @@ import sim.web.servlet.XMLTree;
  */
 public class Tests {
 
-    public static void main(String[] args) {
+    public static void main1(String[] args) {
         try {
             XMLTree k = XMLTree.getInstance();
             System.out.println("Result: " + k.getResult());

@@ -1228,7 +1228,7 @@ public final class XMLTree {
             String relativePath = currentRelativePath.toAbsolutePath().toString();
 
             StreamResult result = new StreamResult(new File(relativePath + "\\SimulatorExperiment.xml"));
-            
+
             SIMULATOR_SCENARIO_XML_PATH = relativePath + "\\SimulatorExperiment.xml";
 
             // Output to console for testing
@@ -1249,5 +1249,17 @@ public final class XMLTree {
 
     public String upperFirstLetter(String userIdea) {
         return Character.toUpperCase(userIdea.charAt(0)) + userIdea.substring(1);
+    }
+
+    public String getNetFilePath() {
+        Node simulationNode = _root.getElementsByTagName(XML_SIMULATION).item(0);
+        NamedNodeMap sim_attributrs = simulationNode.getAttributes();
+        for (int i = 0; i < sim_attributrs.getLength(); i++) {
+            String key = (sim_attributrs.item(i).getNodeName());
+            if (key.equalsIgnoreCase(SIMULATION_PROPERTY_NETFILEPATH)) {
+                return sim_attributrs.item(i).getNodeValue();
+            }
+        }
+        return "";
     }
 }

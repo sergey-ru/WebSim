@@ -5,12 +5,19 @@
  */
 package sim.web.simgui;
 
+import bgu.sim.data.*;
+import bgu.sim.netFile.NetFileParser;
+import bgu.sim.netFile.SimulatedEnvironment;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
+import sim.web.servlet.XMLTree;
 
 /**
  *
@@ -23,25 +30,39 @@ public class createJsonData {
         JSONArray nodes = new JSONArray();
         JSONArray links = new JSONArray();
 
-        // add one node
-        for (int i = 0; i < 2; i++) {
+        // get the net file path
+        XMLTree m = XMLTree.getInstance();
+        String netFilePath = m.getNetFilePath();
+        File netfile = new File(netFilePath);
+        SimulatedEnvironment parser = null;
+        try {
+            parser = NetFileParser.read(netfile);
+        } catch (IOException ex) {
+            System.err.println("Cant parse net file.");
+            System.exit(1);
+        }
+
+        // add nodes
+        for (NetDevice netdevice : parser.getNodesArray()) {
             Map node = new LinkedHashMap();
-            node.put("id", Integer.toString(i));
+            node.put("id", netdevice.getObjectId());
             node.put("type", "company");
             node.put("expanded", "true");
             nodes.add(node);
         }
 
-        // add one link
-        Map link = new LinkedHashMap();
+        // add links
+        for (NetLink netlink : parser.getLinksArray()) {
+            Map link = new LinkedHashMap();
 
-        link.put("end", null);
-        link.put("to", "0");
-        link.put("from", "1");
-        link.put("type", "share");
-        link.put("id", "0");
+            link.put("end", null);
+            link.put("to", netlink.getDevice1ID());
+            link.put("from", netlink.getDevice2ID());
+            link.put("type", "share");
+            link.put("id", netlink.getObjectId());
 
-        links.add(link);
+            links.add(link); 
+        }
 
         JSONObject obj = new JSONObject();
         obj.put("nodes", nodes);

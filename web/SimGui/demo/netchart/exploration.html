@@ -17,12 +17,12 @@
             container: $("#chart")[0],
             navigation:{
                 mode:"focusnodes",
-                initialNodes: ["3244"],
+                initialNodes: ["3"],
                 focusNodeExpansionRadius:1,
                 focusHistoryRelevanceCooldown: 0.4,
                 numberOfFocusNodes:3
             },
-            data: {url:"data/companyNet2.json"},
+            data: {url:"data/test.json"},
             style:{nodeRules:{
                 "radius":function(node){
                   node.radius = Math.max(0.2, node.relevance);

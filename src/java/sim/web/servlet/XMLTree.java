@@ -9,9 +9,7 @@ package sim.web.servlet;
  *
  * @author Keren Fruchter
  */
-import static bgu.sim.Properties.StringsProperties.SIMULATOR_SCENARIO_XML_PATH;
-import bgu.sim.reflection.ClassesLister;
-import bgu.sim.ruleEngine.property.Property;
+import bgu.sim.api.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import org.w3c.dom.Document;
@@ -23,14 +21,10 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -458,8 +452,7 @@ public final class XMLTree {
     public String getStatisticProperties(String name) {
         //System.out.println(name);
         String res = "";
-        ClassesLister allActions = ClassesLister.getInstance();
-        List<Property> pList;
+        List<String> pList;
 
         // first - chosen or not
         if (_StatisticListenerChosen.contains(name)) {
@@ -476,9 +469,9 @@ public final class XMLTree {
 
         // second and so, the rest
         try {
-            pList = allActions.getClassProperties(name);
-            for (Property property : pList) {
-                String pKey = upperFirstLetter(property.getMetadata().getName());
+            pList = SimApi.getPropertyList(name);
+            for (String property : pList) {
+                String pKey = upperFirstLetter(property);
                 String pVal = getPValueByItsKey(XML_STATISTICLISTENER, name, pKey, -1);
 
                 res += pKey; // upper first letter
@@ -487,7 +480,7 @@ public final class XMLTree {
                 res += PARAMETERS_SPLITTER; // only one property
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-            //Logger.getLogger(XMLTree.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println("Error in getStatisticProperties method.");
         }
 
         return res;
@@ -496,8 +489,7 @@ public final class XMLTree {
     public String getRoutingAlgProperties(String name) {
         //System.out.println(name);
         String res = "";
-        ClassesLister allActions = ClassesLister.getInstance();
-        List<Property> pList;
+        List<String> pList;
 
         // first - chosen or not
         if (_RoutingAlgoChosen.contains(name)) {
@@ -514,9 +506,9 @@ public final class XMLTree {
 
         // second and so, the rest
         try {
-            pList = allActions.getClassProperties(name);
-            for (Property property : pList) {
-                String pKey = upperFirstLetter(property.getMetadata().getName());
+           pList = SimApi.getPropertyList(name);
+            for (String property : pList) {
+                String pKey = upperFirstLetter(property);
                 String pVal = getPValueByItsKey(XML_ROUTINGALGORITHM, name, pKey, -1);
 
                 res += pKey; // upper first letter
@@ -525,7 +517,7 @@ public final class XMLTree {
                 res += PARAMETERS_SPLITTER; // only one property
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-            //Logger.getLogger(XMLTree.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println("Error in getRoutingAlgProperties method.");
         }
 
         return res;
@@ -573,8 +565,7 @@ public final class XMLTree {
         res += PARAMETERS_SPLITTER;
 
         // actions
-        ClassesLister allActions = ClassesLister.getInstance();
-        List<Class> actionsList = allActions.GetInitActions();
+        List<Class> actionsList = SimApi.getActionsList();
 
         for (Class action : actionsList) {
             res += "ActionList"; // upper first letter
@@ -600,14 +591,13 @@ public final class XMLTree {
     }
 
     String getPValuesByActionValue(String fullClassPath, int index) {
-        ClassesLister allActions = ClassesLister.getInstance();
         String res = "";
         String pKey;
         String pVal;
         try {
-            List<Property> pList = allActions.getClassProperties(fullClassPath);
+            List<String> pList = SimApi.getPropertyList(fullClassPath);
             for (int i = 0; i < pList.size(); i++) {
-                pKey = upperFirstLetter(pList.get(i).getMetadata().getName());
+                pKey = upperFirstLetter(pList.get(i));
                 pVal = getPValueByItsKey(XML_ACTION, fullClassPath, pKey, index);
 
                 res += pKey; // upper first letter
@@ -684,16 +674,15 @@ public final class XMLTree {
 
         // actions
         List<Class> actionsList = null;
-        ClassesLister allActions = ClassesLister.getInstance();
         switch (type) {
             case XML_DEVICE:
-                actionsList = allActions.GetDeviceActions();
+                actionsList = SimApi.getDevicesActionsList();
                 break;
             case XML_EXTERNAL:
-                actionsList = allActions.GetExternalActions();
+                actionsList = SimApi.getExternalActionsList();
                 break;
             case XML_LINK:
-                actionsList = allActions.GetLinkActions();
+                actionsList = SimApi.getLinkActionsList();
                 break;
         }
 
@@ -918,7 +907,7 @@ public final class XMLTree {
     private Element initParseByXmlFile() throws SAXException, ParserConfigurationException, IOException {
         // by path
         Element experiment;
-        File fXmlFile = new File(SIMULATOR_SCENARIO_XML_PATH);
+        File fXmlFile = new File(SimApi.getSimulatorScenarioXmlPath());
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         _doc = dBuilder.parse(fXmlFile);
@@ -1032,8 +1021,7 @@ public final class XMLTree {
 
     private void AddAllClassesThatImpStatisticListener() {
         // Now we will add the rest of the classes that implements XML_STATISTICLISTENER.
-        ClassesLister allClassesImpSt = ClassesLister.getInstance();
-        List<Class> m = allClassesImpSt.GetStatisticListeners();
+        List<Class> m = SimApi.getStatisticListenersList();
 
         for (Class class1 : m) {
             String id = class1.getName();
@@ -1047,9 +1035,8 @@ public final class XMLTree {
 
     private void AddAllClassesThatImpRoutingAlgorithm() {
         // Now we will add the rest of the classes that implements "RoutingAlgorithm".
-        ClassesLister allClassesImpSt = ClassesLister.getInstance();
-
-        List<Class> m = allClassesImpSt.GetRoutingAlgorithms();
+        List<Class> m = SimApi.getRoutingAlgorithmsList();
+        
         for (Class class1 : m) {
             String id = class1.getName();
             if (_RoutingAlgoChosen.contains(id)) {
@@ -1156,8 +1143,8 @@ public final class XMLTree {
 
     private boolean validateStatisticClasses() {
         // check if classes are really exist
-        ClassesLister allClassesImpSt = ClassesLister.getInstance();
-        List<Class> m = allClassesImpSt.GetStatisticListeners();
+        List<Class> m = SimApi.getStatisticListenersList();
+        
         boolean ifIsExist = true;
         boolean tmp = false;
         for (String chosenClass : _StatisticListenerChosen) {
@@ -1229,7 +1216,7 @@ public final class XMLTree {
 
             StreamResult result = new StreamResult(new File(relativePath + "\\SimulatorExperiment.xml"));
 
-            SIMULATOR_SCENARIO_XML_PATH = relativePath + "\\SimulatorExperiment.xml";
+            SimApi.setSimulatorScenarioXmlPath(relativePath + "\\SimulatorExperiment.xml");
 
             // Output to console for testing
             // StreamResult result = new StreamResult(System.out);

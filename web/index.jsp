@@ -34,7 +34,6 @@
             <!--MENU-->
             <div class="outer-west" style="float: left; width: 15%;">
 
-                <button type="button" id="newTree" class="btn btn-default btn-sm">New Experiment</button>
                 <button type="button" id="saveTree" class="btn btn-default btn-sm">Save Experiment</button>
 
                 <p></p>
@@ -68,6 +67,7 @@
                     <ul class="nav nav-tabs" id="myTab">
                         <li id="simTab" class="active"><a href="#home" data-toggle="tab">Simulator</a></li>
                         <li id="editTab"><a href="#profile" data-toggle="tab">Edit</a></li>
+                        <li id="viewTab"><a href="#view" data-toggle="tab">View</a></li>
                     </ul>
                 </div>
 
@@ -77,86 +77,101 @@
                         <p>
                         <div id="RunSimDiv">
                             <h3> Step 1: </h3>
-                                    Select XML Simulator Scenario File To Simulate:
-                                    <br/><br/>
-                                    <input type="file" name="sampleFile" id="sampleFile">
-                                    <br/>
-                          <h3> Step 2: </h3>
-                                    Upload the file.
-                                    <button type="button" id="UploadFileButton" onclick="upl();" class ="btn btn-primary"><span class="glyphicon glyphicon-upload"></span> Upload</button>
-                                    <br/>
-                                    <br/>
-                          <h3> Step 3: </h3>
-                                    Edit the tree.
-                                    <br/>
-                                    <br/>
-                          <h3> Step 4: </h3>
-                                    Load the tree into the simulator.
-                                    <button type="button" id="loadXmlToSim" class="btn btn-primary doAction">Load</button>
-                                    <br/>
-                                    <br/>
-                          <h3> Step 5: </h3>
-                                    Run simulator.  
-                                    <br/>
-                                    <button type="button" id="runfull" class="btn btn-primary btn-lg doAction"><span class="glyphicon glyphicon-play"></span> Run Full Simulator</button>
-                                    <button type="button" id="runscenario" class="btn btn-primary btn-lg doAction"><span class="glyphicon glyphicon-step-forward"></span> Run Next Scenario In Simulator</button>
-<!--                                    <br/>
-                                    <br/>
-                                    <textarea name="statis" id="statis" class="form-control" rows="13">
-                                    </textarea>-->
+                            Select XML Simulator Scenario File To Simulate or create a new:
+                            <br/><br/>
+
+                            <div class="row" style="width: 90%;">
+                                <div class="col-md-2"><input type="file" name="sampleFile" id="sampleFile"></div>
+                                <div class="col-md-1"> <b>or</b> </div>
+                                <div class="col-md-2"><button type="button" id="newTree" class="btn btn-primary btn-sm">New Experiment</button></div>
                             </div>
-                            </p>
+
+                            <br/>
+                            <h3> Step 2: </h3>
+                            Upload the file.
+                            <br/>
+                            <button type="button" id="UploadFileButton" onclick="upl();" class ="btn btn-primary">Upload</button>
+                            <br/>
+                            <br/>
+                            <h3> Step 3: </h3>
+                            Edit the tree.
+                            <br/>
+                            <br/>
+                            <h3> Step 4: </h3>
+                            Load the tree into the simulator.
+                            <br/>
+                            <button type="button" id="loadXmlToSim" class="btn btn-primary doAction">Load</button>
+                            <br/>
+                            <br/>
+                            <h3> Step 5: </h3>
+                            Run simulator.  
+                            <br/>
+                            <button type="button" id="runfull" class="btn btn-primary btn-lg doAction">View Simulator</button>
+                            
+                            <!-- <br/>
+                                 <br/>
+                                 <textarea name="statis" id="statis" class="form-control" rows="13">
+                                 </textarea>-->
                         </div>
-                        <div class="tab-pane fade" id="profile">
-                            <div id="EditNodeDivHide">
-                                Select property from the xml tree to edit.
-                            </div>
-                            <div id="EditNodeDivLoading" style="display:none">
-                                <img src='Images/ajax-loader.gif' width="5%"/>
-                            </div>
-                            <div id="EditNodeDivShow" style="width: 80%; margin: 20px 20px 20px 20px;">
+                        </p>
+                    </div>
+                    <div class="tab-pane fade" id="profile">
+                        <div id="EditNodeDivHide">
+                            Select property from the xml tree to edit.
+                        </div>
+                        <div id="EditNodeDivLoading" style="display:none">
+                            <img src='Images/ajax-loader.gif' width="5%"/>
+                        </div>
+                        <div id="EditNodeDivShow" style="width: 80%; margin: 20px 20px 20px 20px;">
 
-                                <div id="AllFormDynamicInputs">
-                                    <label id="Key" for="Value" class="col-sm-2 control-label">Value</label>
-                                    <div class="col-sm-10">
-                                        <input type="email" class="form-control" id="Value" placeholder="">
-                                    </div>
-                                </div>
-
-                                <br/>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <button type="submit" id="SavePropertyChanges" class="btn btn-primary">Save</button>
-                                    </div>
+                            <div id="AllFormDynamicInputs">
+                                <label id="Key" for="Value" class="col-sm-2 control-label">Value</label>
+                                <div class="col-sm-10">
+                                    <input type="email" class="form-control" id="Value" placeholder="">
                                 </div>
                             </div>
-                        </div>  
 
+                            <br/>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <button type="submit" id="SavePropertyChanges" class="btn btn-primary">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>  
+                    <div class="tab-pane fade" id="view">
+                        <div id="ViewSimulatorDiv">
+                            <iframe  src="SimGui/demo/netchart/exploration.html" height="740" width="98%" frameborder="0"></iframe>
+                        </div>
+                        <button type="button" id="runInit" class="btn btn-primary btn-lg doAction"><span class="glyphicon glyphicon-play"></span> Run Init</button>
+                        <button type="button" id="runFull" class="btn btn-primary btn-lg doAction"><span class="glyphicon glyphicon-play"></span> Run Full</button>
+                        <button type="button" id="runScenario" class="btn btn-primary btn-lg doAction"><span class="glyphicon glyphicon-step-forward"></span> Run Next Step</button>
                     </div>
                 </div>
             </div>
-        </form>
+        </div>
+    </form>
 
-        <!-- Modal -->
-        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
-                    </div>
-                    <div class="modal-body">
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                </div>
+                <div class="modal-body">
 
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" id="ModalClose" class="btn btn-default" data-dismiss="modal">Close</button>
-                        <button type="button" id="ModalSave" class="btn btn-primary" data-dismiss="modal">Save changes</button>
-                    </div>
-                </div><!-- /.modal-content -->
-            </div><!-- /.modal-dialog -->
-        </div><!-- /.modal --> 
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="ModalClose" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" id="ModalSave" class="btn btn-primary" data-dismiss="modal">Save changes</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal --> 
 
-    </body>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+</body>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
 </html>

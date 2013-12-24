@@ -5,8 +5,7 @@
  */
 package sim.web.servlet;
 
-import static bgu.sim.Properties.StringsProperties.SIMULATOR_SCENARIO_XML_PATH;
-import bgu.sim.core.Simulator;
+import bgu.sim.api.*;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,7 +19,6 @@ public class HandleRequests {
 
     private int _nextScenarioIndex;
     private int _nextTickIndex;
-    private Simulator _simTest;
     private boolean _ifInitSim;
 
     public HandleRequests() {
@@ -141,7 +139,7 @@ public class HandleRequests {
 
                     break;
                 case "NewTree":
-
+                    
                     m = XMLTree.getInstance();
                     response.getWriter().write(m.newTree());
 
@@ -152,6 +150,12 @@ public class HandleRequests {
                     String res = m.saveTree();
                     response.getWriter().write(res);
 
+                    break;
+                case "getNodeInfo":
+                    
+                    int nodeId = Integer.parseInt(request.getParameter("node"));
+                    response.getWriter().write(SimApi.getNodeInfo(nodeId));
+                    
                     break;
             }
         } catch (Exception ex) {
@@ -223,7 +227,7 @@ public class HandleRequests {
      */
     public void initSim() {
         try {
-            _simTest = Simulator.fromXML(SIMULATOR_SCENARIO_XML_PATH);
+            SimApi.initSim();
             _ifInitSim = true;
         } catch (Exception ex) {
             System.err.println("Error Init the simulator.");
@@ -239,10 +243,10 @@ public class HandleRequests {
 
         // run
         try {
-            while (_simTest.nextScenario()) {
+            while (SimApi.ifNextScenario()) {
                 long start = System.currentTimeMillis();
 
-                while (_simTest.nextTick()) {
+                while (SimApi.ifNextTick()) {
                     _nextTickIndex++;
                 }
 
@@ -270,10 +274,10 @@ public class HandleRequests {
         }
 
         try {
-            if (_simTest.nextScenario()) {
+            if (SimApi.ifNextScenario()) {
                 long start = System.currentTimeMillis();
 
-                while (_simTest.nextTick()) {
+                while (SimApi.ifNextTick()) {
                     _nextTickIndex++;
                 }
 

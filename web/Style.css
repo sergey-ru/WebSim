@@ -7,6 +7,11 @@ and open the template in the editor.
     Created on : Dec 2, 2013, 11:29:36 AM
     Author     : Keren Fruchter
 */
+body, html {
+    padding:5px 5px 5px 5px;
+    margin:5px 5px 5px 5px;
+}
+
 #header {
     width:100%;
 }

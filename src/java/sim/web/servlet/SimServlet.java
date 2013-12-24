@@ -1,6 +1,6 @@
 package sim.web.servlet;
 
-import static bgu.sim.Properties.StringsProperties.SIMULATOR_SCENARIO_XML_PATH;
+import bgu.sim.api.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -62,7 +62,7 @@ public class SimServlet extends HttpServlet {
                 File file = new File(relativePath + File.separator + fileItem.getName());
                 fileItem.write(file);
 
-                SIMULATOR_SCENARIO_XML_PATH = file.getAbsolutePath();
+                SimApi.setSimulatorScenarioXmlPath(file.getAbsolutePath());
 
                 // file info
                 System.out.println("FieldName = " + fileItem.getFieldName());

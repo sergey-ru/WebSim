@@ -2,6 +2,7 @@ $(document).ready(function() {
     // hide edit properties
     $('#EditNodeDivShow').hide();
     $('#EditNodeDivHide').show();
+    $('#ViewSimulatorDiv').hide();
     $('#expandTree').trigger("click");
 
 
@@ -10,21 +11,29 @@ $(document).ready(function() {
     // hide manu tab
     $('#simTab').click(function(event) {
         $('#EditNodeDivShow').hide();
+        $('#ViewSimulatorDiv').hide();
+    });
+
+    $('#viewTab').click(function(event) {
+        $('#EditNodeDivShow').hide();
+        $('#ViewSimulatorDiv').show();
+    });
+
+    $('#editTab').click(function(event) {
+        $('#ViewSimulatorDiv').hide();
     });
 
     // run full scenario
     $('#runfull').click(function(event) {
-        //$('#runfull').animate({top: '-760px'},
-        //1000,
-        //        function() {
-                    //redirect here
-                    window.location.href = "SimView.jsp";
+        $('#simTab').removeClass("active");
+        $('#editTab').removeClass("active");
+        $('#viewTab').attr("Class", "in active");
 
-                    //$('#statis').text("");
-                    //$.get('SimServlet', {request: "startfull"}, function(responseText) {
-                    //    $('#statis').append(responseText);
-                    //});\
-          //      });
+        $('#home').removeClass("active");
+        $('#profile').removeClass("active");
+        $('#view').attr("Class", "in active");
+
+        $('#ViewSimulatorDiv').show();
     });
 
 
@@ -349,9 +358,11 @@ function EditPropertyJS(node) {
     //alert(node);
 
     $('#simTab').removeClass("active");
+    $('#viewTab').removeClass("active");
     $('#editTab').attr("Class", "in active");
 
     $('#home').removeClass("active");
+    $('#view').removeClass("active");
     $('#profile').attr("Class", "in active");
 
 
@@ -359,6 +370,7 @@ function EditPropertyJS(node) {
 
         $('#EditNodeDivHide').hide(); // always hide
         $('#EditNodeDivShow').hide();
+        $('#ViewSimulatorDiv').hide();
         $('#EditNodeDivLoading').show();
 
         if (node === "simulation") {
@@ -803,5 +815,12 @@ function EditPropertyJS(node) {
             $('#EditNodeDivLoading').hide();
             $('#EditNodeDivShow').show();
         }
+    });
+}
+
+function getNodeInfo(id) {
+    $.get('SimServlet', {request: "getNodeInfo", node: id}, function(responseText) {
+        //alert("responseText: " + responseText);
+        //$('#iframeID').contents().find('#state').html(responseText);
     });
 }

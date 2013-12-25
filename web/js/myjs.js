@@ -4,8 +4,14 @@ $(document).ready(function() {
     $('#EditNodeDivHide').show();
     $('#ViewSimulatorDiv').hide();
     $('#expandTree').trigger("click");
+    var guiInfoDiv;
 
-
+    // get iframe element
+    $('#iframeID').load(function() {
+        guiInfoDiv = $('#iframeID').contents().find('#infodiv');
+        alert("very good");
+        //$('#iframeID').contents().find('#infodiv').html(responseText);
+    });
 
     // ----- CLICK EVENT HANDLE -------
     // hide manu tab
@@ -23,8 +29,7 @@ $(document).ready(function() {
         $('#ViewSimulatorDiv').hide();
     });
 
-    // run full scenario
-    $('#runfull').click(function(event) {
+    $('#viewgui').click(function(event) {
         $('#simTab').removeClass("active");
         $('#editTab').removeClass("active");
         $('#viewTab').attr("Class", "in active");
@@ -36,10 +41,19 @@ $(document).ready(function() {
         $('#ViewSimulatorDiv').show();
     });
 
+    $('#runInitSim').click(function(event) {
+        // run init simulator
+        alert("init");
+        $.get('SimServlet', {request: "runInit"}, function(responseText) {
+            alert(responseText);
+            guiInfoDiv.text(responseText);
+        });
+    });
+
 
     // run full scenario
-    $('#runscenario').click(function(event) {
-        //alert("start scenario");
+    $('#runScenario').click(function(event) {
+        alert("start scenario");
         //$.growlUI('Simulation', 'Simulation Started'); 
         $('#statis').text("");
         $.get('SimServlet', {request: "startscenario"}, function(responseText) {
@@ -47,7 +61,6 @@ $(document).ready(function() {
         });
         // $.growlUI('Simulation', 'Simulation Finished'); 
     });
-
 
     // load the edited tree mwnu to the simulator
     $('#loadXmlToSim').click(function(event) {

@@ -106,8 +106,8 @@
                             <h3> Step 5: </h3>
                             Run simulator.  
                             <br/>
-                            <button type="button" id="runfull" class="btn btn-primary btn-lg doAction">View Simulator</button>
-                            
+                            <button type="button" id="viewgui" class="btn btn-primary btn-lg doAction">View Simulator</button>
+
                             <!-- <br/>
                                  <br/>
                                  <textarea name="statis" id="statis" class="form-control" rows="13">
@@ -141,11 +141,11 @@
                     </div>  
                     <div class="tab-pane fade" id="view">
                         <div id="ViewSimulatorDiv">
-                            <iframe  src="SimGui/demo/netchart/exploration.html" height="740" width="98%" frameborder="0"></iframe>
+                            <iframe id="iframeID" src="SimGui/demo/netchart/exploration.html" height="740" width="98%" frameborder="0"></iframe>    
+                            <button type="button" id="runInitSim" class="btn btn-primary btn-lg doAction"><span class="glyphicon glyphicon-play"></span> Run Init</button>
+                            <button type="button" id="runFull" class="btn btn-primary btn-lg doAction"><span class="glyphicon glyphicon-play"></span> Run Full</button>
+                            <button type="button" id="runScenario" class="btn btn-primary btn-lg doAction"><span class="glyphicon glyphicon-step-forward"></span> Run Next Step</button>
                         </div>
-                        <button type="button" id="runInit" class="btn btn-primary btn-lg doAction"><span class="glyphicon glyphicon-play"></span> Run Init</button>
-                        <button type="button" id="runFull" class="btn btn-primary btn-lg doAction"><span class="glyphicon glyphicon-play"></span> Run Full</button>
-                        <button type="button" id="runScenario" class="btn btn-primary btn-lg doAction"><span class="glyphicon glyphicon-step-forward"></span> Run Next Step</button>
                     </div>
                 </div>
             </div>

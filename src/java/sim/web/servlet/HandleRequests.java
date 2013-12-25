@@ -45,6 +45,13 @@ public class HandleRequests {
                     returnResponse(response, "Simulator Finished One Next Step.");
 
                     break;
+                case "runInit":
+
+                    returnResponse(response, "Init Simulator.");
+                    SimApi.initSim();
+                    returnResponse(response, "Init Simulator Finished.");
+
+                    break;
                 case "loadXmlTree":
 
                     m = XMLTree.getInstance();
@@ -139,7 +146,7 @@ public class HandleRequests {
 
                     break;
                 case "NewTree":
-                    
+
                     m = XMLTree.getInstance();
                     response.getWriter().write(m.newTree());
 
@@ -152,10 +159,10 @@ public class HandleRequests {
 
                     break;
                 case "getNodeInfo":
-                    
+
                     int nodeId = Integer.parseInt(request.getParameter("node"));
                     response.getWriter().write(SimApi.getNodeInfo(nodeId));
-                    
+
                     break;
             }
         } catch (Exception ex) {

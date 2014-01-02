@@ -47,10 +47,6 @@
                     <path-in-war>WEB-INF/lib</path-in-war>
                 </library>
                 <library dirs="200">
-                    <file>${file.reference.json-simple-1.1.1.jar}</file>
-                    <path-in-war>WEB-INF/lib</path-in-war>
-                </library>
-                <library dirs="200">
                     <file>${reference.Sim.jar}</file>
                     <path-in-war>WEB-INF/lib</path-in-war>
                 </library>

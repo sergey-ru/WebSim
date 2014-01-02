@@ -9,8 +9,6 @@ $(document).ready(function() {
     // get iframe element
     $('#iframeID').load(function() {
         guiInfoDiv = $('#iframeID').contents().find('#infodiv');
-        alert("very good");
-        //$('#iframeID').contents().find('#infodiv').html(responseText);
     });
 
     // ----- CLICK EVENT HANDLE -------
@@ -39,27 +37,68 @@ $(document).ready(function() {
         $('#view').attr("Class", "in active");
 
         $('#ViewSimulatorDiv').show();
+
+        $('#scenarioNumberInfo').text("Scenario 1");
+
+        /////////// INIT /////////////  
+        // run the base init of the simulator (reading net and init simenvironment)
+        $.get('SimServlet', {request: "runBaseInit"}, function(responseText) {
+            // nothing.
+        });
     });
 
-    $('#runInitSim').click(function(event) {
+    // run the init rules of the current scenario
+    $('#runInitRules').click(function(event) {
         // run init simulator
-        alert("init");
-        $.get('SimServlet', {request: "runInit"}, function(responseText) {
-            alert(responseText);
-            guiInfoDiv.text(responseText);
+        $.get('SimServlet', {request: "runInitRules"}, function(responseText) {
+            $("#runInitRules").attr("disabled", "disabled");
+            $("#runOneStepInScenario").removeAttr("disabled");
+            $("#runFullScenario").removeAttr("disabled");
         });
     });
 
 
-    // run full scenario
-    $('#runScenario').click(function(event) {
-        alert("start scenario");
-        //$.growlUI('Simulation', 'Simulation Started'); 
-        $('#statis').text("");
-        $.get('SimServlet', {request: "startscenario"}, function(responseText) {
-            $('#statis').append(responseText);
+    // run one and next step in the current scenario
+    $('#runOneStepInScenario').click(function(event) {
+        $.get('SimServlet', {request: "runOneStepInScenario"}, function(responseText) {
+            if (responseText.indexOf("false") != -1) {
+                $("#runOneStepInScenario").attr("disabled", "disabled");
+                $("#runFullScenario").attr("disabled", "disabled");
+                $("#nextScenario").removeAttr("disabled");
+            }
         });
-        // $.growlUI('Simulation', 'Simulation Finished'); 
+    });
+
+
+    // run full scenario till its end
+    $('#runFullScenario').click(function(event) {
+        //$.growlUI('Simulation', 'Simulation Started'); 
+        $.get('SimServlet', {request: "runFullScenario"}, function(responseText) {
+            $("#runOneStepInScenario").attr("disabled", "disabled");
+            $("#runFullScenario").attr("disabled", "disabled");
+            $("#nextScenario").removeAttr("disabled");
+        });
+    });
+
+    // prepare next scenarop
+    $('#nextScenario').click(function(event) {
+        var num = 0;
+        var patt1 = /\d+/g;
+        var matches = $("#scenarioNumberInfo").text().match(patt1);
+        if (matches != null) {
+            num = matches[0];
+        }
+        num++;
+        $("#scenarioNumberInfo").text("Scenario " + num);
+        $("#runInitRules").removeAttr("disabled");
+        $("#nextScenario").attr("disabled", "disabled");
+
+        $.get('SimServlet', {request: "ifExistNextScenario"}, function(responseText) {
+            if (responseText.indexOf("false") != -1) {
+                $("#scenarioNumberInfo").text("No More Scenarios");
+                $("#runInitRules").attr("disabled", "disabled");
+            }
+        });
     });
 
     // load the edited tree mwnu to the simulator
@@ -71,7 +110,6 @@ $(document).ready(function() {
 
     // new tree
     $('#newTree').click(function(event) {
-        //alert("newTree");
         newTree();
     });
 
@@ -79,16 +117,6 @@ $(document).ready(function() {
     $('#saveTree').click(function(event) {
         saveTree();
     });
-
-    // when adding a new scenario rule, handle select change
-//    $('#ModalListOfRules').change(function() {
-//        var htmlcode = "";
-//        var selectedRule = $('#ModalListOfRules option:selected').text();
-//        if (selectedRule == "Init") {
-//            htmlcode += "";
-//        }
-//        $('#DivOfSelectedRulesToAdd').html(htmlcode);
-//    });
 
     // Save Changes in XML Tree
     $('#SavePropertyChanges').click(function(event) {
@@ -828,12 +856,5 @@ function EditPropertyJS(node) {
             $('#EditNodeDivLoading').hide();
             $('#EditNodeDivShow').show();
         }
-    });
-}
-
-function getNodeInfo(id) {
-    $.get('SimServlet', {request: "getNodeInfo", node: id}, function(responseText) {
-        //alert("responseText: " + responseText);
-        //$('#iframeID').contents().find('#state').html(responseText);
     });
 }

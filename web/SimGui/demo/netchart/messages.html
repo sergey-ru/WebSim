@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    </head>
+    <body>
+        <canvas id="demo" width=500 height=500></canvas>
+
+        <script>
+
+            var ctx = demo.getContext('2d'),
+                    animObjects = [];
+
+            loop();
+
+            function loop() {
+
+                ctx.clearRect(0, 0, demo.width, demo.height);
+
+                for (var j = 0; j < animObjects.length; j++) {
+                    //ao.update();
+                    ao = animObjects[j];
+
+                    function runner(i) {
+                        //function1();
+                        //alert("runner1");
+                        //alert("ao.toArr 0: " + ao.toArr[i][0]);
+                        //alert("ao.toArr 1: " + ao.toArr[i][1]);
+                        ao.update(j, ao.toArr, 1000);
+                        //alert("runner2");
+
+                        if (i == ao.toArr.length)
+                            return;
+
+
+                        setTimeout(function() {
+                            runner(i + 1);
+                        }, 1000);
+                    }
+
+                    runner(0);
+
+                }
+                requestAnimationFrame(loop);
+            }
+
+            // animCircle object
+            function animCircle(x, y, r, color, toArr) {
+
+                var me = this;
+
+                this.x = x;
+                this.y = y;
+                this.radius = r;
+                this.color = color;
+                this.toArr = toArr;
+
+//                this.update = function() {
+//                    me.x += me.stepX;
+//                    me.y += me.stepY;
+//                    if (me.x < 0 || me.x > ctx.canvas.width)
+//                        me.stepX = -me.stepX;
+//                    if (me.y < 0 || me.y > ctx.canvas.height)
+//                        me.stepY = -me.stepY;
+//
+//                    render();
+//                }
+
+                this.update = function(index, toArr, duration) {
+                    // The calculations required for the step function
+
+
+                    var start = new Date().getTime();
+                    var end = start + duration;
+                    var current;
+                    if (prop == 'x')
+                        current = me.x;
+                    if (prop == 'y')
+                        current = me.y;
+                    var distance = val - current;
+
+                    alert("distance" + distance);
+
+
+                    var step = function() {
+                        // Get our current progres
+                        var timestamp = new Date().getTime();
+                        var progress = Math.min((duration - (end - timestamp)) / duration, 1);
+
+                        //alert("current:"+current);
+                        //alert("distance"+distance);
+                        //alert("progress"+progress);
+
+                        // Update the square's property
+                        if (prop == 'x') {
+                            // alert(me.x);
+                            me.x = current + (distance * progress);
+                            // alert(me.x);
+                        }
+                        if (prop == 'y')
+                            me.y = current + (distance * progress);
+
+                        render();
+
+                        if (progress < 1)
+                            requestAnimationFrame(step);
+                        else {
+                            animObjects.splice(index, 1);
+                            //alert("?:" + animObjects.length);
+                        }
+                    };
+                    return step();
+                    // If the animation hasn't finished, repeat the step.
+                    // if (progress < 1)
+                    //     requestAnimationFrame(step);
+                    // else
+                    //    animObjects.splice(index, 1);
+                };
+
+
+                function render() {
+                    ctx.beginPath();
+                    ctx.arc(me.x, me.y, me.radius, 0, 2 * Math.PI);
+                    ctx.closePath();
+                    ctx.fillStyle = me.color;
+                    ctx.fill();
+                }
+
+                return this;
+            }
+
+
+            var MessagePath = function(fromPos, toArr) {
+
+                animObjects.push(new animCircle(fromPos[0], fromPos[1], 40, 'red', toArr));
+                //animObjects.push(new animCircle(ctx, 500, 250, 110, 'blue', -0.5, 0.2));
+
+
+//                function runner(i) {
+//                    //function1();
+//                    animate(messageObj,index, 'x', toArr[i][0], 1000);
+//                    animate(messageObj,index, 'y', toArr[i][1], 1000);
+//
+//                    if (i == toArr.length)
+//                        return;
+//
+//
+//                    setTimeout(function() {
+//                        runner(i + 1);
+//                    }, 1000);
+//                }
+//
+//                runner(0);
+
+            };
+
+            // call animation
+            MessagePath([0, 0], [[300, 300], [300, 10], [600, 600], [0, 0]]);
+            //MessagePath([10, 10], [[123, 400], [30, 600], [600, 200], [30, 0]]);
+        </script>
+    </body>
+</html>

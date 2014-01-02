@@ -5,30 +5,43 @@
     <title>Test</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
+    <!--    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">-->
     <link rel="stylesheet" href="style.css" type="text/css" />
 
-<!--    <script src="js/jquery.js"></script>-->
+
+    <script src="js/jquery.js"></script>
     <script src="../../lib/netchart.js"></script>
+
+
+    <style>
+        body {
+            margin: 0px;
+            padding: 0px;
+        }
+        #buttons {
+            position: absolute;
+            top: 5px;
+            left: 10px;
+        }
+        #buttons > input {
+            padding: 10px;
+            display: block;
+            margin-top: 5px;
+        }
+    </style>
 </head>
 <body>
     <div id="chart" style="margin: 0 auto; clear:both;"></div>
 
     <div id="sidebar">
-        <span id="state" class="label label-info"></span>
-        <span id="infodiv" class="label label-info">bla</span>
-        <table class="table">
-            <tr>
-                <td>Name:</td>
-                <td><span id="node_name_span"></span></td>
-            </tr>
-            <tr>
-                <td>Type:</td>
-                <td><span id="node_type_span"></span></td>
-            </tr>
-        </table>
-        <br/>
+        <span id="state"></span>
     </div>
 
+    <div id="container"></div>
+    <div id="buttons">
+        <input type="button" id="start" value="Start">
+        <input type="button" id="stop" value="Stop">
+    </div>
 
     <script type="text/javascript">
 //        parent.childGetElementById = function(id) {
@@ -95,21 +108,29 @@
                 events: {onClick: function(event) {
                         if (event.clickNode) {
                             chart.addFocusNode(event.clickNode.id);
-                            $("#state")[0].innerHTML = event.clickNode.id + " " + event.clickNode.data.type;
-                            $("#node_name_span")[0].innerHTML = event.clickNode.id;
-                            $("#node_type_span")[0].innerHTML = event.clickNode.data.type;
-                            //alert("go");
-                            //$.get('SimServlet', {request: "NewTree"}, function(responseText) {
-                            //    alert("yayyyyy!");
-                            //});
-                            //parent.getNodeInfo(event.clickNode.id));
+
+                            var newTable = "<table class=\"table table-striped\">";
+                            newTable += "<tr><td>ID</td><td>" + event.clickNode.id + "</td></tr>";
+                            newTable += "<tr><td>Type</td><td>" + event.clickNode.data.type + "</td></tr>";
 
                             var request = new XMLHttpRequest();
-                            request.open('GET', '/ServletFileUploadDownloadExample/SimServlet?request=getNodeInfo&node=2', false);  // `false` makes the request synchronous
+                            request.open('GET', '/ServletFileUploadDownloadExample/SimServlet?request=getNodeInfo&node=' + event.clickNode.id, false);  // `false` makes the request synchronous
                             request.send(null);
 
                             if (request.status === 200) {
-                                $("#state")[0].innerHTML = request.responseText + " ?? ";
+                                var res = request.responseText.split(",");
+
+                                var line;
+
+                                for (var i = 0; i < res.length; i++) {
+                                    res[i] = res[i].replace("{", "");
+                                    res[i] = res[i].replace("}", "");
+                                    line = res[i].split("=");
+                                    newTable += "<tr><td>" + line[0] + "</td><td>" + line[1] + "</td></tr>";
+                                }
+                                newTable += "</table>";
+
+                                $("#state")[0].innerHTML = newTable;
                             }
 
                         }
@@ -120,7 +141,68 @@
         });
     </script>
 
+
+
+
+
+
+
+
+
+
+
+
+    <script src="js/kinetic-v4.7.4.min.js"></script>   
+    <script defer="defer">
+        var stage = new Kinetic.Stage({
+            container: 'container'
+        });
+        var layer = new Kinetic.Layer();
+
+        var hexagon = new Kinetic.RegularPolygon({
+            x: 200,
+            y: 200,
+            sides: 6,
+            radius: 10,
+            fill: 'red',
+            stroke: 'black',
+            strokeWidth: 2
+        });
+
+        layer.add(hexagon);
+        stage.add(layer);
+
+        var amplitude = 150;
+        // in ms
+        var period = 2000;
+        var centerX = stage.getWidth() / 2;
+        var centerY = 700;
+
+        var anim = new Kinetic.Animation(function(frame) {
+            hexagon.setX(amplitude * Math.sin(frame.time * 2 * Math.PI / period) + centerX);
+            hexagon.setY(amplitude * Math.sin(frame.time * 2 * Math.PI / period) + centerY);
+        }, layer);
+
+        document.getElementById('start').addEventListener('click', function() {
+            anim.start();
+        }, false);
+
+        document.getElementById('stop').addEventListener('click', function() {
+            anim.stop();
+        }, false);
+    </script>
+
+
+
+
+
+
+
+
+
+
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+    <!--    <script src="https://code.jquery.com/jquery.js"></script>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>-->
 </body>
 </html>

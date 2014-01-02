@@ -506,7 +506,7 @@ public final class XMLTree {
 
         // second and so, the rest
         try {
-           pList = SimApi.getPropertyList(name);
+            pList = SimApi.getPropertyList(name);
             for (String property : pList) {
                 String pKey = upperFirstLetter(property);
                 String pVal = getPValueByItsKey(XML_ROUTINGALGORITHM, name, pKey, -1);
@@ -1036,7 +1036,7 @@ public final class XMLTree {
     private void AddAllClassesThatImpRoutingAlgorithm() {
         // Now we will add the rest of the classes that implements "RoutingAlgorithm".
         List<Class> m = SimApi.getRoutingAlgorithmsList();
-        
+
         for (Class class1 : m) {
             String id = class1.getName();
             if (_RoutingAlgoChosen.contains(id)) {
@@ -1144,7 +1144,7 @@ public final class XMLTree {
     private boolean validateStatisticClasses() {
         // check if classes are really exist
         List<Class> m = SimApi.getStatisticListenersList();
-        
+
         boolean ifIsExist = true;
         boolean tmp = false;
         for (String chosenClass : _StatisticListenerChosen) {
@@ -1245,6 +1245,21 @@ public final class XMLTree {
             String key = (sim_attributrs.item(i).getNodeName());
             if (key.equalsIgnoreCase(SIMULATION_PROPERTY_NETFILEPATH)) {
                 return sim_attributrs.item(i).getNodeValue();
+            }
+        }
+        return "";
+    }
+
+    public String getRoutingAlgorithmDataPath() {
+        Node RoutingAlgorithmNode = _root.getElementsByTagName(XML_ROUTINGALGORITHM).item(0);
+        if (RoutingAlgorithmNode != null) {
+            NodeList pOfRoutingAlgo = RoutingAlgorithmNode.getChildNodes();
+            NamedNodeMap att = pOfRoutingAlgo.item(0).getAttributes();
+            for (int i = 0; i < att.getLength(); i++) {
+                String key = (att.item(i).getNodeName());
+                if (key.equals(ATTRIBUTE_VALUE)) {
+                    return att.item(i).getNodeValue();
+                }
             }
         }
         return "";

@@ -141,10 +141,13 @@
                     </div>  
                     <div class="tab-pane fade" id="view">
                         <div id="ViewSimulatorDiv">
-                            <iframe id="iframeID" src="SimGui/demo/netchart/exploration.html" height="740" width="98%" frameborder="0"></iframe>    
-                            <button type="button" id="runInitSim" class="btn btn-primary btn-lg doAction"><span class="glyphicon glyphicon-play"></span> Run Init</button>
-                            <button type="button" id="runFull" class="btn btn-primary btn-lg doAction"><span class="glyphicon glyphicon-play"></span> Run Full</button>
-                            <button type="button" id="runScenario" class="btn btn-primary btn-lg doAction"><span class="glyphicon glyphicon-step-forward"></span> Run Next Step</button>
+                            <iframe id="iframeID" src="SimGui/demo/netchart/SimViewGraph.html" height="740" width="99%" frameborder="0"></iframe>    
+                            <span id="scenarioNumberInfo" class="label label-info">New</span>
+                            <br/>
+                            <button type="button" id="runInitRules" class="btn btn-primary btn-lg doAction"><span class="glyphicon glyphicon-play"></span> Run Init</button>
+                            <button type="button" id="runOneStepInScenario" class="btn btn-primary btn-lg doAction" disabled="disabled"><span class="glyphicon glyphicon-step-forward"></span> Run One Step</button>
+                            <button type="button" id="runFullScenario" class="btn btn-primary btn-lg doAction" disabled="disabled"><span class="glyphicon glyphicon-play"></span> Run Full Scenario</button>
+                            <button type="button" id="nextScenario" class="btn btn-primary btn-lg doAction" disabled="disabled"><span class="glyphicon glyphicon-play"></span> Next Scenario</button>
                         </div>
                     </div>
                 </div>

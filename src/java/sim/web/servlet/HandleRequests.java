@@ -6,7 +6,12 @@
 package sim.web.servlet;
 
 import bgu.sim.api.*;
+import bgu.sim.core.Routing.DB.BinaryFile;
+import bgu.sim.core.Routing.DB.SqlLiteData;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import static sim.web.utils.Constans.*;
@@ -31,25 +36,36 @@ public class HandleRequests {
         try {
             XMLTree m;
             switch (theRequest) {
-                case "startfull":
+                case "runBaseInit":
 
-                    returnResponse(response, "Simulator Started.");
-                    runFull(request, response);
-                    returnResponse(response, "Simulator Finished.");
+                    SimApi.initBaseSim();
 
                     break;
-                case "startscenario":
+                case "runInitRules":
 
-                    returnResponse(response, "Simulator Started Next Scenario.");
-                    runScenario(request, response);
-                    returnResponse(response, "Simulator Finished One Next Step.");
+                    SimApi.nextScenario();
+                    returnResponse(response, Boolean.toString(SimApi.ifNextScenario()));
 
                     break;
-                case "runInit":
+                case "runOneStepInScenario":
 
-                    returnResponse(response, "Init Simulator.");
-                    SimApi.initSim();
-                    returnResponse(response, "Init Simulator Finished.");
+                    boolean ifNextStep = SimApi.ifNextTick();
+                    if (ifNextStep) {
+                        SimApi.nextTick();
+                        returnResponse(response, "true");
+                    } else {
+                        returnResponse(response, "false");
+                    }
+
+                    break;
+                case "runFullScenario":
+
+                    SimApi.runFullScenario();
+
+                    break;
+                case "ifExistNextScenario":
+
+                    returnResponse(response, Boolean.toString(SimApi.ifNextScenario()));
 
                     break;
                 case "loadXmlTree":
@@ -164,9 +180,28 @@ public class HandleRequests {
                     response.getWriter().write(SimApi.getNodeInfo(nodeId));
 
                     break;
+                case "getShortestPath":
+
+                     m = XMLTree.getInstance();
+                    ArrayList<Integer> path = new ArrayList<>();
+                    
+                    int source = Integer.parseInt(request.getParameter("source"));
+                    int target = Integer.parseInt(request.getParameter("target"));
+                    //BinaryFile data = BinaryFile.getInstance(SimApi.getNumberOfNodes(), m.getRoutingAlgorithmDataPath());
+                    // change it
+                    BinaryFile data = BinaryFile.getInstance(1035, m.getRoutingAlgorithmDataPath());
+                    int nextStep = data.readFromFile(source, target);
+                    path.add(nextStep);
+                    while (nextStep != target) {
+                        nextStep = data.readFromFile(nextStep, target);
+                        path.add(nextStep);
+                    }
+                    response.getWriter().write(path.toString());
+
+                    break;
             }
         } catch (Exception ex) {
-            System.err.println("Error taking request.");
+            System.err.println("Error taking request. " + ex.getMessage());
         }
     }
 
@@ -234,7 +269,7 @@ public class HandleRequests {
      */
     public void initSim() {
         try {
-            SimApi.initSim();
+            SimApi.initBaseSim();
             _ifInitSim = true;
         } catch (Exception ex) {
             System.err.println("Error Init the simulator.");

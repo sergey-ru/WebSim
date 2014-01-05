@@ -8,12 +8,16 @@ package sim.web.servlet;
 import bgu.sim.api.*;
 import bgu.sim.core.Routing.DB.BinaryFile;
 import bgu.sim.core.Routing.DB.SqlLiteData;
+import bgu.sim.core.stat.CSVListener;
+import bgu.sim.core.stat.StatisticCollector;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.w3c.dom.css.CSSValueList;
 import static sim.web.utils.Constans.*;
 
 /**
@@ -182,14 +186,13 @@ public class HandleRequests {
                     break;
                 case "getShortestPath":
 
-                     m = XMLTree.getInstance();
+                    m = XMLTree.getInstance();
                     ArrayList<Integer> path = new ArrayList<>();
-                    
+
                     int source = Integer.parseInt(request.getParameter("source"));
                     int target = Integer.parseInt(request.getParameter("target"));
-                    //BinaryFile data = BinaryFile.getInstance(SimApi.getNumberOfNodes(), m.getRoutingAlgorithmDataPath());
-                    // change it
-                    BinaryFile data = BinaryFile.getInstance(1035, m.getRoutingAlgorithmDataPath());
+                    int numOfNodes = 1035;//SimApi.getNumberOfNodes();
+                    BinaryFile data = BinaryFile.getInstance(numOfNodes, m.getRoutingAlgorithmDataPath());
                     int nextStep = data.readFromFile(source, target);
                     path.add(nextStep);
                     while (nextStep != target) {
@@ -197,6 +200,50 @@ public class HandleRequests {
                         path.add(nextStep);
                     }
                     response.getWriter().write(path.toString());
+
+                    break;
+                case "getStatistics":
+
+                    //BufferedWriter ll = CSVListener._bufferWriter2;
+                    //BufferedWriter llg = ll;
+
+                    String statistics = "{"
+                            + "\"labels\" : [\"January\",\"February\",\"March\",\"April\",\"May\",\"June\",\"July\"],"
+                            + "\"datasets\" : ["
+                            + "{"
+                            + "\"fillColor\" : \"rgba(220,220,220,0.5)\","
+                            + "\"strokeColor\" : \"rgba(220,220,220,1)\","
+                            + "\"pointColor\" : \"rgba(220,220,220,1)\","
+                            + "\"pointStrokeColor\" : \"#fff\","
+                            + "\"data\" : [65,59,90,81,56,55,40]"
+                            + "}"
+                            + ","
+                            + "{"
+                            + "\"fillColor\" : \"rgba(200,220,120,0.5)\","
+                            + "\"strokeColor\" : \"rgba(200,220,120,1)\","
+                            + "\"pointColor\" : \"rgba(200,220,120,1)\","
+                            + "\"pointStrokeColor\" : \"#fff\","
+                            + "\"data\" : [25,39,30,31,59,95,60]"
+                            + "}"
+                            + ","
+                            + "{"
+                            + "\"fillColor\" : \"rgba(110,165,220,0.5)\","
+                            + "\"strokeColor\" : \"rgba(110,165,220,1)\","
+                            + "\"pointColor\" : \"rgba(110,165,220,1)\","
+                            + "\"pointStrokeColor\" : \"#fff\","
+                            + "\"data\" : [65,19,30,67,51,13,80]"
+                            + "}"
+                            + ","
+                            + "{"
+                            + "\"fillColor\" : \"rgba(151,187,205,0.5)\","
+                            + "\"strokeColor\" : \"rgba(151,187,205,1)\","
+                            + "\"pointColor\" : \"rgba(151,187,205,1)\","
+                            + "\"pointStrokeColor\" : \"#fff\","
+                            + "\"data\" : [28,48,40,19,96,27,100]"
+                            + "}"
+                            + "]"
+                            + "}";
+                    response.getWriter().write(statistics);
 
                     break;
             }

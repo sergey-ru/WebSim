@@ -68,6 +68,7 @@
                         <li id="simTab" class="active"><a href="#home" data-toggle="tab">Simulator</a></li>
                         <li id="editTab"><a href="#profile" data-toggle="tab">Edit</a></li>
                         <li id="viewTab"><a href="#view" data-toggle="tab">View</a></li>
+                        <li id="statTab"><a href="#stat" data-toggle="tab">Statistics</a></li>
                     </ul>
                 </div>
 
@@ -149,6 +150,11 @@
                             <button type="button" id="runFullScenario" class="btn btn-primary btn-lg doAction" disabled="disabled"><span class="glyphicon glyphicon-play"></span> Run Full Scenario</button>
                             <button type="button" id="nextScenario" class="btn btn-primary btn-lg doAction" disabled="disabled"><span class="glyphicon glyphicon-play"></span> Next Scenario</button>
                         </div>
+                    </div>
+                    <div class="tab-pane fade" id="stat">
+                        <div id="StatisticsDiv">
+                            <iframe id="iframeStat" src="Chart/samples/line.html" height="740" width="99%" frameborder="0"></iframe>  
+                        </div>  
                     </div>
                 </div>
             </div>

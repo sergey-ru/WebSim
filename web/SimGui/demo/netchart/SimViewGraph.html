@@ -19,6 +19,19 @@
 
     <div id="sidebar">
         <span id="state"></span>
+        <span id="sendMessageForm">
+            <form class="form-inline" role="form">
+                <div class="form-group">
+                    <label class="sr-only" for="exampleInputEmail2">Node Id 1</label>
+                    <input type="text" class="form-control input-sm" id="nodeid1">
+                </div>
+                <div class="form-group">
+                    <label class="sr-only" for="exampleInputPassword2">Node Id 2</label>
+                    <input type="text" class="form-control input-sm" id="nodeid2">
+                </div>
+                <button type="submit" id="sendAMessage" class="btn btn-default">Send</button>
+            </form>
+        </span>
     </div>
 
     <script type="text/javascript">
@@ -124,7 +137,7 @@
             chart = new NetChart(chartOptions);
 
             //chart.expandNode("3");
-//            chart.runMovingMessage("1", "2");
+            //chart.runMovingMessage("1", "2");
 //            setTimeout(function() {
 //                chart.runMovingMessage("2", "3");
 //                setTimeout(function() {
@@ -132,43 +145,50 @@
 //                }, 2200);
 //            }, 2200);
 
+            $("#sendAMessage").click(function(e) {
+                e.preventDefault();
+                var source = $("#nodeid1").val();
+                var terget = $("#nodeid2").val();
+                //alert(source);
+                //alert(terget);
 
-            var source = 11;
-            var terget = 983;
+                var request = new XMLHttpRequest();
+                request.open('GET', '/ServletFileUploadDownloadExample/SimServlet?request=getShortestPath&source=' + source + "&target=" + terget, false); // `false` makes the request synchronous
+                request.send(null);
+                if (request.status === 200) {
+                    //alert(request.responseText);
 
-            var request = new XMLHttpRequest();
-            request.open('GET', '/ServletFileUploadDownloadExample/SimServlet?request=getShortestPath&source=' + source + "&target=" + terget, false); // `false` makes the request synchronous
-            request.send(null);
-            if (request.status === 200) {
-                //alert(request.responseText);
+                    // split the path
+                    var result = request.responseText;
+                    result = result.replace("]", "");
+                    result = result.replace("[", "");
+                    result = result.split(",");
 
-                // split the path
-                var result = request.responseText;
-                result = result.replace("]", "");
-                result = result.replace("[", "");
-                result = result.replace(" ", "");
-                result = result.split(",");
+                    // sending firts message from source to nextStep
+                    //alert("from " + source + " to " + result[0]);
+                    chart.runMovingMessage(source, result[0]);
 
-                // sending firts message from source to nextStep
-                //alert("from " + source + " to " + result[0]);
-                chart.runMovingMessage(source, result[0]);
+                    function runner(i) {
 
-                function runner(i) {
+                        //alert("i:" + i);
+                        //alert("result.length - 1:" + ((result.length) - 1));
 
-                    if (i == result.length - 1)
-                        return;
+                        if (i == ((result.length) - 1))
+                            return;
 
-                    setTimeout(function() {
+                        setTimeout(function() {
 
-                        //alert("from " + result[i].replace(" ","") + " to " + result[i + 1].replace(" ",""));
-                        chart.runMovingMessage(result[i].replace(" ", ""), result[i + 1].replace(" ", ""));
+                            //alert("from " + result[i].replace(" ", "") + " to " + result[i + 1].replace(" ", ""));
+                            chart.runMovingMessage(result[i].replace(" ", ""), result[i + 1].replace(" ", ""));
+                            runner(i + 1);
 
-                        runner(i + 1);
-                    }, 2100);
+                        }, 1000);
+                    }
+
+                    runner(0);
                 }
+            });
 
-                runner(0);
-            }
         });
     </script>
 

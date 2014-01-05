@@ -16,16 +16,28 @@ $(document).ready(function() {
     $('#simTab').click(function(event) {
         $('#EditNodeDivShow').hide();
         $('#ViewSimulatorDiv').hide();
+        $('#StatisticsDiv').hide();
     });
 
     $('#viewTab').click(function(event) {
         $('#EditNodeDivShow').hide();
         $('#ViewSimulatorDiv').show();
+        $('#StatisticsDiv').hide();
     });
 
     $('#editTab').click(function(event) {
         $('#ViewSimulatorDiv').hide();
+        $('#StatisticsDiv').hide();
     });
+
+    $('#statTab').click(function(event) {
+        $('#ViewSimulatorDiv').hide();
+        $('#EditNodeDivShow').hide();
+        $('#StatisticsDiv').show();
+
+    });
+
+
 
     $('#viewgui').click(function(event) {
         $('#simTab').removeClass("active");

@@ -1285,14 +1285,14 @@
         };
         Z.prototype.runMovingMessage = function(nodeId1, nodeId2) {
             if ((this.nodes[nodeId1] && this.nodes[nodeId1].initial)) {
-                this.updateAction(nodeId1, {runMovingMessage: true, id1: nodeId1, id2: nodeId2});
+                this.updateAction(nodeId1, {runMovingMessage: true, id1: nodeId1, id2: nodeId2, runMovingMessageStepX: 0});
             } else {
-                this.addAction(nodeId1, {runMovingMessage: true, id1: nodeId1, id2: nodeId2});
+                this.addAction(nodeId1, {runMovingMessage: true, id1: nodeId1, id2: nodeId2, runMovingMessageStepX: 0});
             }
             if ((this.nodes[nodeId2] && this.nodes[nodeId2].initial)) {
-                this.updateAction(nodeId2, {runMovingMessage: true, id1: nodeId1, id2: nodeId2});
+                this.updateAction(nodeId2, {runMovingMessage: true, id1: nodeId1, id2: nodeId2, runMovingMessageStepX: 0});
             } else {
-                this.addAction(nodeId2, {runMovingMessage: true, id1: nodeId1, id2: nodeId2});
+                this.addAction(nodeId2, {runMovingMessage: true, id1: nodeId1, id2: nodeId2, runMovingMessageStepX: 0});
             }
             return;
         };
@@ -5226,7 +5226,7 @@
             }
         };
 //        Z.prototype.runMovingMessage = function(direction) {	// keren
-//            // running animated circle as a message 
+//            // running animated circle as a message
 //            if (direction == "left") {
 //                return
 //            } else {
@@ -7600,10 +7600,11 @@
 
                                 var distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
 
-                                if (distance == 0) {
-                                    nodeWithNewAtt1.runMovingMessage = false;
-                                    nodeWithNewAtt2.runMovingMessage = false;
-                                }
+//                                if (at.runMovingMessageStepX > 0.99) {
+//                                    nodeWithNewAtt1.runMovingMessage = false;
+//                                    nodeWithNewAtt2.runMovingMessage = false;
+//                                    at.runMovingMessageStepX=0.1;
+//                                }
 
 
                                 var directionX = deltaX / distance;
@@ -7613,6 +7614,12 @@
                                 var newY = messagefromy + directionY * (distance * at.runMovingMessageStepX);
 
                                 aW.arc(newX, newY, aU * 4, 0, 2 * Math.PI); // keren
+                            }
+                            else
+                            {
+                                nodeWithNewAtt1.runMovingMessage = false;
+                                nodeWithNewAtt2.runMovingMessage = false;
+                                at.runMovingMessageStepX = 0.1;
                             }
                         }
                     }
@@ -7643,11 +7650,6 @@
 
                                 var distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
 
-                                if (distance == 0) {
-                                    nodeWithNewAtt1.runMovingMessage = false;
-                                    nodeWithNewAtt2.runMovingMessage = false;
-                                }
-
                                 var directionX = deltaX / distance;
                                 var directionY = deltaY / distance;
 
@@ -7655,6 +7657,11 @@
                                 var newY = messagefromy + directionY * (distance * at.runMovingMessageStepX);
 
                                 aW.arc(newX, newY, aU * 4, 0, 2 * Math.PI); // keren
+                            }
+                            else {
+                                nodeWithNewAtt1.runMovingMessage = false;
+                                nodeWithNewAtt2.runMovingMessage = false;
+                                at.runMovingMessageStepX = 0.1;
                             }
                         }
                     }

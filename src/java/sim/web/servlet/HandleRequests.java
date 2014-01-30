@@ -7,17 +7,16 @@ package sim.web.servlet;
 
 import bgu.sim.api.*;
 import bgu.sim.core.Routing.DB.BinaryFile;
-import bgu.sim.core.Routing.DB.SqlLiteData;
-import bgu.sim.core.stat.CSVListener;
-import bgu.sim.core.stat.StatisticCollector;
-import java.io.BufferedWriter;
+import bgu.sim.data.Message;
+import bgu.sim.data.StatisticsDataStruct;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.w3c.dom.css.CSSValueList;
+import javax.servlet.http.HttpSession;
 import static sim.web.utils.Constans.*;
 
 /**
@@ -29,6 +28,7 @@ public class HandleRequests {
     private int _nextScenarioIndex;
     private int _nextTickIndex;
     private boolean _ifInitSim;
+    private String sessionId;
 
     public HandleRequests() {
         _nextTickIndex = 0;
@@ -40,6 +40,23 @@ public class HandleRequests {
         try {
             XMLTree m;
             switch (theRequest) {
+                case "initSession":
+
+                    // create  new seassion for user
+                    HttpSession session = request.getSession();
+                    if (session == null) {
+                        // Session is not created.
+                    } else {
+                        sessionId = session.getId();
+                    }
+                    returnResponse(response, sessionId);
+
+                    break;
+                case "getJSONgraphData":
+
+                    returnResponse(response, Paths.get("").toAbsolutePath().toString() + "\\" + sessionId + ".json");
+
+                    break;
                 case "runBaseInit":
 
                     SimApi.initBaseSim();
@@ -67,9 +84,24 @@ public class HandleRequests {
                     SimApi.runFullScenario();
 
                     break;
+                case "getNextScenarioName":
+
+                    response.getWriter().write(SimApi.getNextScenarioName());
+
+                    break;
+                case "getFirstScenarioName":
+
+                    response.getWriter().write(SimApi.getFirstScenarioName());
+
+                    break;
                 case "ifExistNextScenario":
 
                     returnResponse(response, Boolean.toString(SimApi.ifNextScenario()));
+
+                    break;
+                case "restart":
+
+                    SimApi.resetSim();
 
                     break;
                 case "loadXmlTree":
@@ -175,6 +207,8 @@ public class HandleRequests {
 
                     m = XMLTree.getInstance();
                     String res = m.saveTree();
+                    // create json file for the graph
+                    createJsonData createJsonData = new createJsonData(sessionId);
                     response.getWriter().write(res);
 
                     break;
@@ -182,6 +216,11 @@ public class HandleRequests {
 
                     int nodeId = Integer.parseInt(request.getParameter("node"));
                     response.getWriter().write(SimApi.getNodeInfo(nodeId));
+
+                    break;
+                case "getNodesCount":
+
+                    response.getWriter().write(SimApi.getNodesCount());
 
                     break;
                 case "getShortestPath":
@@ -203,47 +242,49 @@ public class HandleRequests {
 
                     break;
                 case "getStatistics":
+                    String allRows = "";
+                    String tmpListAsString;
 
-                    //BufferedWriter ll = CSVListener._bufferWriter2;
-                    //BufferedWriter llg = ll;
+                    Map<Integer, StatisticsDataStruct> stats = SimApi.getStatistics();
+                    int i = 0;
+                    for (i = 0; i < stats.size(); i++) {
+                        StatisticsDataStruct ListAndScenarioNumber = stats.get(i);
+                        List<String> list = ListAndScenarioNumber.newList;
 
-                    String statistics = "{"
-                            + "\"labels\" : [\"January\",\"February\",\"March\",\"April\",\"May\",\"June\",\"July\"],"
-                            + "\"datasets\" : ["
-                            + "{"
-                            + "\"fillColor\" : \"rgba(220,220,220,0.5)\","
-                            + "\"strokeColor\" : \"rgba(220,220,220,1)\","
-                            + "\"pointColor\" : \"rgba(220,220,220,1)\","
-                            + "\"pointStrokeColor\" : \"#fff\","
-                            + "\"data\" : [65,59,90,81,56,55,40]"
-                            + "}"
-                            + ","
-                            + "{"
-                            + "\"fillColor\" : \"rgba(200,220,120,0.5)\","
-                            + "\"strokeColor\" : \"rgba(200,220,120,1)\","
-                            + "\"pointColor\" : \"rgba(200,220,120,1)\","
-                            + "\"pointStrokeColor\" : \"#fff\","
-                            + "\"data\" : [25,39,30,31,59,95,60]"
-                            + "}"
-                            + ","
-                            + "{"
-                            + "\"fillColor\" : \"rgba(110,165,220,0.5)\","
-                            + "\"strokeColor\" : \"rgba(110,165,220,1)\","
-                            + "\"pointColor\" : \"rgba(110,165,220,1)\","
-                            + "\"pointStrokeColor\" : \"#fff\","
-                            + "\"data\" : [65,19,30,67,51,13,80]"
-                            + "}"
-                            + ","
-                            + "{"
-                            + "\"fillColor\" : \"rgba(151,187,205,0.5)\","
-                            + "\"strokeColor\" : \"rgba(151,187,205,1)\","
-                            + "\"pointColor\" : \"rgba(151,187,205,1)\","
-                            + "\"pointStrokeColor\" : \"#fff\","
-                            + "\"data\" : [28,48,40,19,96,27,100]"
-                            + "}"
-                            + "]"
-                            + "}";
-                    response.getWriter().write(statistics);
+                        tmpListAsString = list.toString();
+
+                        if (tmpListAsString.contains("Scenario")) {
+                            tmpListAsString = tmpListAsString.replace("[", "");
+                            tmpListAsString = tmpListAsString.replace("]", "");
+                            if (allRows != "") {
+                                allRows = allRows.substring(0, allRows.length() - 1);
+                            }
+                            allRows += tmpListAsString;
+
+                        } else {
+                            tmpListAsString = list.toString() + ", " + ListAndScenarioNumber.ScenarioNumber;
+                            tmpListAsString = tmpListAsString.replace("[", "");
+                            tmpListAsString = tmpListAsString.replace("]", "");
+
+                            allRows += tmpListAsString + "\r\n";
+                        }
+                    }
+
+                    allRows = allRows.substring(0, allRows.length() - 1);
+                    response.getWriter().write(allRows);
+
+                    break;
+                case "getMessages":
+
+                    String allPaths = "";
+
+                    for (Message me : SimApi.getMessages()) {
+                        allPaths += me.getRoute() + ",,";
+                    }
+                    if (allPaths != "") {
+                        allPaths = allPaths.substring(1, allPaths.length() - 2);
+                    }
+                    response.getWriter().write(allPaths);
 
                     break;
             }

@@ -1,9 +1,6 @@
 /*
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
-*/
-/* 
+    Main Style
+
     Created on : Dec 2, 2013, 11:29:36 AM
     Author     : Keren Fruchter
 */
@@ -12,9 +9,13 @@ body, html {
     margin:0px 0px 0px 0px;
 }
 
-#header {
-    width:100%;
+td, th {
+    padding: 0.1rem;
+    overflow: hidden;
+    display: inline-block;
+    white-space: nowrap;
 }
+
 #menu {
     height:800px;
     width:20%;
@@ -66,3 +67,102 @@ div.growlUI h2 {
     font-size: 15px;
 }
 
+#treeMenu {
+    float: left; 
+    width: 12%;
+}
+
+#loadingmessage {
+    display:none;
+}
+
+#loadingmessageSrc {
+    width: 20%;
+}
+
+#treecontrol, #treecontrol > a {
+    display: none;
+}
+
+#TreeValidation {
+    position:absolute; 
+    bottom:0;
+}
+
+#spaceMenuContent {
+    float: right; 
+    width: 2%;
+}
+
+#content {
+    float: right; 
+    width: 83%;
+}
+
+.rowOfStep1 {
+    width: 40%;
+}
+
+#EditNodeDivLoading {
+    display:none;
+}
+
+#EditNodeDivShow {
+    width: 80%; 
+    margin: 20px 20px 20px 20px;
+}
+
+#scenarioNameTd {
+    width: 15%;
+    text-align: center;
+    font-size: large;
+    font-weight: bold;
+    color: #222;
+    text-shadow: 0px 2px 3px #555;
+    text-transform:capitalize;
+}
+
+#ticksTd {
+    width: 10%; 
+    text-align: center;
+}
+
+#slider {
+    float: top;
+    clear: inherit;
+    width: 90%;
+    margin:5px 5px 5px 5px;
+}
+
+#simConsol {
+    width: 10%; 
+    text-align: center;
+}
+
+#1td {
+
+}
+
+#2td {
+
+}
+
+#3td {
+
+}
+
+#4td {
+
+}
+
+#5td {
+
+}
+
+#6td {
+
+}
+
+#7td {
+
+}

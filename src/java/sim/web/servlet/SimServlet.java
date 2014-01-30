@@ -1,16 +1,13 @@
 package sim.web.servlet;
 
 import bgu.sim.api.*;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.List;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.*;
+import javax.servlet.http.*;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -31,6 +28,7 @@ public class SimServlet extends HttpServlet {
         _uploader = null;
         _requests = new HandleRequests();
 
+        // init file environment
         initLoadingFileEnviroment();
     }
 

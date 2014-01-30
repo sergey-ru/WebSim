@@ -19,39 +19,53 @@
 
     <div id="sidebar">
         <span id="state"></span>
-        <span id="sendMessageForm">
-            <form class="form-inline" role="form">
-                <div class="form-group">
-                    <label class="sr-only" for="exampleInputEmail2">Node Id 1</label>
-                    <input type="text" class="form-control input-sm" id="nodeid1">
-                </div>
-                <div class="form-group">
-                    <label class="sr-only" for="exampleInputPassword2">Node Id 2</label>
-                    <input type="text" class="form-control input-sm" id="nodeid2">
-                </div>
-                <button type="submit" id="sendAMessage" class="btn btn-default">Send</button>
-            </form>
-        </span>
     </div>
 
     <script type="text/javascript">
-//        parent.childGetElementById = function(id) {
-//            return document.getElementById(id);
-//        }
-//        parent.childLoaded();
+
+        var chart;
 
         $(document).ready(function() {
+
+            //var initGraph = function() {
+
+            // get numver of nodes so that graph will expand all
+            var request = new XMLHttpRequest();
+            var numOfNodes = 0;
+            request.open('GET', '/Simulator/SimServlet?request=getNodesCount', false);
+            request.send(null);
+            //alert(request.status);
+            if (request.status === 200) {
+                //alert(request.responseText);
+               // numOfNodes = parseInt(request.responseText);
+            }
+            //------------
+
+
+            // get numver of nodes so that graph will expand all
+            request = new XMLHttpRequest();
+            var jsonFilePath = "";
+            request.open('GET', '/Simulator/SimServlet?request=getJSONgraphData', false);
+            request.send(null);
+            if (request.status === 200) {
+                jsonFilePath = request.responseText;
+                jsonFilePath = jsonFilePath.replace("&#10;","");
+                //alert("jsonPath: " + jsonFilePath);
+            }
+            //------------
+
+
             chartOptions = {
                 height: 700,
                 container: $("#chart")[0],
                 navigation: {
                     mode: "focusnodes",
-                    initialNodes: ["1", "2", "3"],
-                    focusNodeExpansionRadius: 1,
+                    initialNodes: ["1"],
+                    focusNodeExpansionRadius: 5, //numOfNodes,
                     focusHistoryRelevanceCooldown: 0.4,
-                    numberOfFocusNodes: 2
+                    numberOfFocusNodes: 1
                 },
-                data: {url: "data/test.json"},
+                data: {url: "data/test.json"},//jsonFilePath},
                 style: {nodeRules: {
                         "radius": function(node) {
                             node.radius = Math.max(0.2, node.relevance);
@@ -101,8 +115,8 @@
                             var newTable = "<table class=\"table table-striped\">";
                             newTable += "<tr><td>ID</td><td>" + event.clickNode.id + "</td></tr>";
                             newTable += "<tr><td>Type</td><td>" + event.clickNode.data.type + "</td></tr>";
-                            newTable += "<tr><td>x</td><td>" + event.clickNode.x + "</td></tr>";
-                            newTable += "<tr><td>y</td><td>" + event.clickNode.y + "</td></tr>";
+//                            newTable += "<tr><td>x</td><td>" + event.clickNode.x + "</td></tr>";
+//                            newTable += "<tr><td>y</td><td>" + event.clickNode.y + "</td></tr>";
                             var request = new XMLHttpRequest();
                             request.open('GET', '/ServletFileUploadDownloadExample/SimServlet?request=getNodeInfo&node=' + event.clickNode.id, false); // `false` makes the request synchronous
                             request.send(null);
@@ -121,73 +135,66 @@
                             }
 
                         }
-//                        if (event.clickLink) {
-//                            var newTable = "<table class=\"table table-striped\">";
-//                            newTable += "<tr><td>ID</td><td>" + event.clickLink.Base_Animator() + "</td></tr>";
-//                            newTable += "<tr><td>x</td><td>" + event.clickLink.x0 + "</td></tr>";
-//                            newTable += "<tr><td>y</td><td>" + event.clickLink.x1 + "</td></tr>";
-//                            newTable += "</table>";
-//
-//                            $("#state")[0].innerHTML = newTable;
-//                        }
                         event.preventDefault();
                     }}
             };
 
             chart = new NetChart(chartOptions);
+            //    }
 
-            //chart.expandNode("3");
-            //chart.runMovingMessage("1", "2");
-//            setTimeout(function() {
-//                chart.runMovingMessage("2", "3");
-//                setTimeout(function() {
-//                    chart.runMovingMessage("3", "15");
-//                }, 2200);
-//            }, 2200);
 
-            $("#sendAMessage").click(function(e) {
-                e.preventDefault();
-                var source = $("#nodeid1").val();
-                var terget = $("#nodeid2").val();
-                //alert(source);
-                //alert(terget);
+            function sendMessageList(result) {
+                $('#runOneStepInScenario', parent.document).attr("disabled", "disabled");
+                $('#runFullScenario', parent.document).attr("disabled", "disabled");
 
-                var request = new XMLHttpRequest();
-                request.open('GET', '/ServletFileUploadDownloadExample/SimServlet?request=getShortestPath&source=' + source + "&target=" + terget, false); // `false` makes the request synchronous
-                request.send(null);
-                if (request.status === 200) {
-                    //alert(request.responseText);
+                //result = "20,3,,12,3,14";
+                var messagesList = result.split(",,");
 
-                    // split the path
-                    var result = request.responseText;
-                    result = result.replace("]", "");
-                    result = result.replace("[", "");
-                    result = result.split(",");
+                var ifStop = false;
+                var oneHasMore;
+                var time = 0;
 
-                    // sending firts message from source to nextStep
-                    //alert("from " + source + " to " + result[0]);
-                    chart.runMovingMessage(source, result[0]);
 
-                    function runner(i) {
+                while (!ifStop) {
+                    oneHasMore = false;
+                    for (var i = 0; i < messagesList.length; i++) {
+                        var allSourceAndTarget = messagesList[i].split(",");
 
-                        //alert("i:" + i);
-                        //alert("result.length - 1:" + ((result.length) - 1));
+                        // go over nodes list
+                        if (messagesList[i] == "e")
+                            continue;
 
-                        if (i == ((result.length) - 1))
-                            return;
+                        var source = allSourceAndTarget[0];
+                        var target = allSourceAndTarget[1];
 
-                        setTimeout(function() {
+                        if (allSourceAndTarget.length > 2) {
+                            oneHasMore = true;
+                            // remove first node from list
+                            messagesList[i] = allSourceAndTarget.splice(1).toString();
+                        }
+                        else {
+                            messagesList[i] = "e";
+                        }
 
-                            //alert("from " + result[i].replace(" ", "") + " to " + result[i + 1].replace(" ", ""));
-                            chart.runMovingMessage(result[i].replace(" ", ""), result[i + 1].replace(" ", ""));
-                            runner(i + 1);
-
-                        }, 1000);
+                        (function(source1, target1)
+                        {
+                            setTimeout(function()
+                            {
+                                chart.runMovingMessage(source1, target1);
+                            }, time);
+                        })(source, target);
                     }
+                    time = time + 1000;
 
-                    runner(0);
+                    // if nobody has more nodes, stop.
+                    if (oneHasMore == false) {
+                        ifStop = true;
+                    }
                 }
-            });
+
+                $('#runOneStepInScenario', parent.document).removeAttr("disabled");
+                $('#runFullScenario', parent.document).removeAttr("disabled");
+            }
 
         });
     </script>

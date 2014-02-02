@@ -8,13 +8,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <link rel="shortcut icon" href="favicon.ico" /> 
 
-        <!--Main jQuery-->
+        <!-- Main jQuery -->
         <script type="text/javascript" src="js/jquery-2.0.3.min.js"></script>
         <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
         <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
         <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
 
-        <!--Tree View-->
+        <!--  Tree View -->
         <link rel="stylesheet" href="Included/TreeView/jquery.treeview.css" />
         <script src="Included/TreeView/jquery.cookie.js" type="text/javascript"></script>
         <script src="Included/TreeView/jquery.treeview.js" type="text/javascript"></script>
@@ -27,11 +27,13 @@
         <script type="text/javascript" src="js/simulation.Control.js"></script>
         <!-- tree methods -->
         <script type="text/javascript" src="js/tree.Control.js"></script>
+
+
         <!-- ajax queue: call ajax calls in order -->
         <script type="text/javascript" src="js/jquery.ajaxQueue.js"></script>
         <script type="text/javascript" src="js/ajaxQueue.js"></script>
 
-        <script type="text/javascript" src="js/jquery.blockUI.js"></script>
+        <!-- <script type="text/javascript" src="js/jquery.blockUI.js"></script>-->
 
         <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
 
@@ -95,34 +97,35 @@
                     <div class="tab-pane fade in active" id="home">
                         <p>
                         <div id="RunSimDiv">
-                            <h3> Step 1: </h3>
+                            <h3> Step 1.a: </h3>
                             Select XML Simulator Scenario File To Simulate or create a new:
                             <br/><br/>
 
                             <table border="0">
-                                <tr><td><input type="file" name="sampleFile" id="sampleFile"></td></tr>
-                                <tr><td><center>or</center></td></tr>
-                                <tr><td><button type="button" id="newTree" class="btn btn-primary btn-sm">New Experiment</button></td></tr>
+                                <tr>
+                                    <td><input type="file" name="sampleFile" id="sampleFile"></td>
+                                    <td><button type="button" id="UploadFileButton" onclick="upl();" class ="btn btn-primary" accept=".xml">Upload</button></td>
+                                </tr>
                             </table>
 
                             <br/>
+                            <h3> Step 1.b: </h3>
+                            Or, Create a new experiment.
+                            <br/>
+                            <button type="button" id="newTree" class="btn btn-primary btn-sm">New Experiment</button>
+                            <br/>
+                            <br/>
                             <h3> Step 2: </h3>
-                            Upload the file.
-                            <br/>
-                            <button type="button" id="UploadFileButton" onclick="upl();" class ="btn btn-primary">Upload</button>
-                            <br/>
-                            <br/>
-                            <h3> Step 3: </h3>
                             Edit the tree.
                             <br/>
                             <br/>
-                            <h3> Step 4: </h3>
+                            <h3> Step 3: </h3>
                             Load the tree into the simulator.
                             <br/>
                             <button type="button" id="loadTreeToSim" class="btn btn-primary doAction">Load</button>
                             <br/>
                             <br/>
-                            <h3> Step 5: </h3>
+                            <h3> Step 4: </h3>
                             Run simulator.  
                             <br/>
                             <button type="button" id="viewgui" class="btn btn-primary btn-lg doAction">View Simulator</button>

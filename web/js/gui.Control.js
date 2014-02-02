@@ -8,6 +8,7 @@ $(document).ready(function() {
     $('#EditNodeDivHide').show();
     $('#ViewSimulatorDiv').hide();
     $('#expandTree').trigger("click");
+    $("#viewgui").attr("disabled", "disabled");
 
 
     // SIMULATOR INIT
@@ -16,10 +17,10 @@ $(document).ready(function() {
     
     // init session id
     $.get('SimServlet', {request: "initSession"}, function(responseText) {
-        // nothing.
         $("#sessionId").text(responseText);
     });
 
+    // get iframe child
     $("iframe").each(function()
     {
         $(this).one("load", function()
@@ -31,7 +32,6 @@ $(document).ready(function() {
     // slider
     $("#slider").slider({
         slide: function(event, ui) {
-            //alert(ui.value);
             $("#sliderVal").text("Tick = " + ui.value + " Seconds");
         }
     });
@@ -60,7 +60,7 @@ $(document).ready(function() {
         $('#EditNodeDivShow').hide();
         $('#StatisticsDiv').show();
 
-        $('#iframeStat').attr("src", "index.zul");
+        $('#iframeStat').attr("src", "Statistics/statistics.html");
     });
 
     $('#viewgui').click(function(event) {
@@ -84,15 +84,4 @@ $(document).ready(function() {
         });
         // });
     });
-
-
-    function sleep(milliseconds) {
-        var start = new Date().getTime();
-        for (var i = 0; i < 1e7; i++) {
-            if ((new Date().getTime() - start) > milliseconds) {
-                break;
-            }
-        }
-    }
-
 });  

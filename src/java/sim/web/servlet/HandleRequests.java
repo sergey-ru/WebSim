@@ -9,14 +9,20 @@ import bgu.sim.api.*;
 import bgu.sim.core.Routing.DB.BinaryFile;
 import bgu.sim.data.Message;
 import bgu.sim.data.StatisticsDataStruct;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import static sim.web.utils.Constans.*;
 
 /**
@@ -29,11 +35,13 @@ public class HandleRequests {
     private int _nextTickIndex;
     private boolean _ifInitSim;
     private String sessionId;
+    private ServletFileUpload _uploader;
 
     public HandleRequests() {
         _nextTickIndex = 0;
         _nextScenarioIndex = 0;
         _ifInitSim = false;
+        _uploader = null;
     }
 
     public void checkRequest(String theRequest, HttpServletRequest request, HttpServletResponse response) {
@@ -49,7 +57,7 @@ public class HandleRequests {
                     } else {
                         sessionId = session.getId();
                     }
-                    returnResponse(response, sessionId);
+                    returnResponse(response, sessionId + "  path: " + Paths.get("").toAbsolutePath().toString());
 
                     break;
                 case "getJSONgraphData":
@@ -197,6 +205,11 @@ public class HandleRequests {
                     response.getWriter().write(m.validate());
 
                     break;
+                case "getParserTreeErrorMessage":
+
+                    response.getWriter().write(XMLTree.getParserErrorMessage());
+
+                    break;
                 case "NewTree":
 
                     m = XMLTree.getInstance();
@@ -206,7 +219,7 @@ public class HandleRequests {
                 case "SaveTree":
 
                     m = XMLTree.getInstance();
-                    String res = m.saveTree();
+                    String res = m.saveTree(sessionId);
                     // create json file for the graph
                     createJsonData createJsonData = new createJsonData(sessionId);
                     response.getWriter().write(res);
@@ -290,6 +303,57 @@ public class HandleRequests {
             }
         } catch (Exception ex) {
             System.err.println("Error taking request. " + ex.getMessage());
+        }
+    }
+
+    public void loadNewXml(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            List<FileItem> fileItemsList = _uploader.parseRequest(request);
+            Iterator<FileItem> fileItemsIterator = fileItemsList.iterator();
+            while (fileItemsIterator.hasNext()) {
+                FileItem fileItem = fileItemsIterator.next();
+
+                // relative path
+                Path currentRelativePath = Paths.get("");
+                String relativePath = currentRelativePath.toAbsolutePath().toString();
+
+                // save file
+                String newFileName = fileItem.getName();
+                int lastDot = newFileName.lastIndexOf('.');
+                newFileName = newFileName.substring(0, lastDot);
+                newFileName = sessionId + "_" + newFileName + ".xml";
+                File file = new File(relativePath + File.separator + newFileName);
+                fileItem.write(file);
+
+                SimApi.setSimulatorScenarioXmlPath(file.getAbsolutePath());
+                XMLTree m = XMLTree.getInstance();
+                m.parse(true);
+
+                // file info
+                System.out.println("FieldName = " + fileItem.getFieldName());
+                System.out.println("FileName = " + fileItem.getName());
+                System.out.println("ContentType = " + fileItem.getContentType());
+                System.out.println("Size in bytes = " + fileItem.getSize());
+                System.out.println("Absolute Path at server = " + file.getAbsolutePath());
+            }
+        } catch (Exception e) {
+            System.out.println("Exception in uploading file. " + e.getMessage());
+        }
+    }
+
+    public void initLoadingFileEnviroment() {
+        // file init
+        try {
+            Path currentRelativePath = Paths.get("");
+            String relativePath = currentRelativePath.toAbsolutePath().toString();
+
+            DiskFileItemFactory fileFactory = new DiskFileItemFactory();
+            File filepath = new File(relativePath);
+            fileFactory.setRepository(filepath);
+            this._uploader = new ServletFileUpload(fileFactory);
+
+        } catch (Exception ex) {
+            System.err.println("Error init new file environment. " + ex.getMessage());
         }
     }
 

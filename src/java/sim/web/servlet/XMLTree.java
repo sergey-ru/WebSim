@@ -40,6 +40,8 @@ public final class XMLTree {
     private Element _root;
     private StringBuilder _result;
     private static boolean _ifSuccsessParsing;
+    private static String parserErrorMessage;
+
     private Set<String> _RoutingAlgoChosen = new HashSet<>();
     private Set<String> _StatisticListenerChosen = new HashSet<>();
 
@@ -49,11 +51,16 @@ public final class XMLTree {
     int linkIndex;
 
     private XMLTree() {
+        parserErrorMessage = "";
         try {
             parse(true);
         } catch (Exception ex) {
             System.err.println(ERROR_PARSING_XML);
         }
+    }
+
+    public static String getParserErrorMessage() {
+        return parserErrorMessage;
     }
 
     public static XMLTree getInstance() {
@@ -759,7 +766,7 @@ public final class XMLTree {
             addEndHtmlHeader();
 
             // checking that there is one Simulation and one and more Scenarios
-            validateMinNumOfChildren(experimentChildren, 2);
+            validateMinNumOfChildren(experimentChildren, 2, TREEVIEW_EXPERIMENT);
 
             // validate name of one scenario
             Node Scenario = experiment.getFirstChild().getNextSibling();
@@ -818,8 +825,8 @@ public final class XMLTree {
         addHtmlNode(TREEVIEW_INIT, XML_INIT + initIndex, false);
 
         // must be exactly one action
-        validateMinNumOfChildren(initChildren, 1);
-        validateMaxNumOfChildren(initChildren, 1);
+        validateMinNumOfChildren(initChildren, 1, TREEVIEW_INIT);
+        validateMaxNumOfChildren(initChildren, 1, TREEVIEW_INIT);
 
         // check action name
         Element action = (Element) initChildren.item(0);
@@ -843,8 +850,8 @@ public final class XMLTree {
         }
         NodeList DeviceExternalLinkChildren = scenarioChild.getChildNodes();
         // must have 1 Order 1 Select 1 Action. Length must be exactly 3.
-        validateMinNumOfChildren(DeviceExternalLinkChildren, 3);
-        validateMaxNumOfChildren(DeviceExternalLinkChildren, 3);
+        validateMinNumOfChildren(DeviceExternalLinkChildren, 3, TREEVIEW_DeviceExternalLink);
+        validateMaxNumOfChildren(DeviceExternalLinkChildren, 3, TREEVIEW_DeviceExternalLink);
         // check first is 1 Order
         // check second is 1 select
         // check third is 1 action
@@ -899,6 +906,7 @@ public final class XMLTree {
                     break;
                 default:
                     _ifSuccsessParsing = false;
+                    parserErrorMessage = currChild.getNodeName() + " is not valid in simulator.";
                     return;
             }
         }
@@ -946,20 +954,23 @@ public final class XMLTree {
         removeWhitespaceNodes(experiment);
         if (!experiment.getNodeName().equalsIgnoreCase(name)) {
             _ifSuccsessParsing = false;
+            parserErrorMessage = experiment.getNodeName() + " must be equal to " + name;
             throw new Exception("XML is not build currectly.");
         }
     }
 
-    private void validateMinNumOfChildren(NodeList ListChildren, int i) throws Exception {
+    private void validateMinNumOfChildren(NodeList ListChildren, int i, String errorMessage) throws Exception {
         if (ListChildren.getLength() < i) {
             _ifSuccsessParsing = false;
+            parserErrorMessage = errorMessage + " must have at least " + i + " children.";
             throw new Exception("XML is not build currectly.");
         }
     }
 
-    private void validateMaxNumOfChildren(NodeList ListChildren, int i) throws Exception {
+    private void validateMaxNumOfChildren(NodeList ListChildren, int i, String errorMessage) throws Exception {
         if (ListChildren.getLength() > i) {
             _ifSuccsessParsing = false;
+            parserErrorMessage = errorMessage + " must have less than " + i + " children.";
             throw new Exception("XML is not build currectly.");
         }
     }
@@ -1078,7 +1089,7 @@ public final class XMLTree {
 
             // validate simulation childrens
             NodeList simulationChildren = simulation.getChildNodes();
-            validateMinNumOfChildren(simulationChildren, 1);
+            validateMinNumOfChildren(simulationChildren, 1, TREEVIEW_SIMULATION);
 
             // validate that first child of simulation is StatisticListener
             validateName((Element) simulationChildren.item(0), XML_STATISTICLISTENER);
@@ -1086,12 +1097,21 @@ public final class XMLTree {
             // validate that at least one is chosen
             if (_StatisticListenerChosen.size() < 1) {
                 _ifSuccsessParsing = false;
+                parserErrorMessage = XML_PARSER_ERROR_STATISTICLISTENER;
+                return _ifSuccsessParsing;
+            }
+
+            // GUIListener is MUST set on true at the gui
+            if (!_StatisticListenerChosen.contains(GUILISTENER_A_MUST)) {
+                _ifSuccsessParsing = false;
+                parserErrorMessage = XML_PARSER_ERROR_GUILISTENER_IS_A_MUST;
                 return _ifSuccsessParsing;
             }
 
             // validate that one or non RoutingAlgorithm is chosen
             if (_RoutingAlgoChosen.size() > 1) {
                 _ifSuccsessParsing = false;
+                parserErrorMessage = XML_PARSER_ERROR_ROUTINGALGO;
                 return _ifSuccsessParsing;
             }
 
@@ -1099,15 +1119,17 @@ public final class XMLTree {
             parseStatisticAndRouting(simulationChildren);
 
             if (!validateStatisticClasses()) {
-                return false;
+                _ifSuccsessParsing = false;
+                return _ifSuccsessParsing;
             }
 
-            validateMinNumOfChildren(experimentChildren, 2);
+            validateMinNumOfChildren(experimentChildren, 2, TREEVIEW_EXPERIMENT);
 
             Node Scenario = experiment.getFirstChild().getNextSibling();
             validateName((Element) Scenario, XML_SCENARIO);
             if (!validateScenarios(experimentChildren)) {
-                return false;
+                _ifSuccsessParsing = false;
+                return _ifSuccsessParsing;
             }
         } catch (Exception e) {
             _ifSuccsessParsing = false;
@@ -1133,6 +1155,7 @@ public final class XMLTree {
                         || scenarioChild.getNodeName().equalsIgnoreCase(XML_EXTERNAL)
                         || scenarioChild.getNodeName().equalsIgnoreCase(XML_LINK)) {
                     if (!validateDevExtLink(scenarioChild)) {
+                        parserErrorMessage = scenarioChild.getLocalName() + " is not valid.";
                         return false;
                     }
                 }
@@ -1148,8 +1171,8 @@ public final class XMLTree {
         boolean ifIsExist = true;
         boolean tmp = false;
         for (String chosenClass : _StatisticListenerChosen) {
+            tmp = false;
             for (Class class1 : m) {
-                tmp = false;
                 if (class1.getName().equals(chosenClass)) {
                     tmp = true;
                 }
@@ -1160,6 +1183,7 @@ public final class XMLTree {
         }
         if (!ifIsExist) {
             _ifSuccsessParsing = false;
+            parserErrorMessage = "One of the choosen class do not exist anymore.";
             return false;
         }
         return true;
@@ -1169,8 +1193,8 @@ public final class XMLTree {
         NodeList initChildren = scenarioChild.getChildNodes();
 
         // must be exactly one action
-        validateMinNumOfChildren(initChildren, 1);
-        validateMaxNumOfChildren(initChildren, 1);
+        validateMinNumOfChildren(initChildren, 1, TREEVIEW_INIT);
+        validateMaxNumOfChildren(initChildren, 1, TREEVIEW_INIT);
 
         // check action name
         Element action = (Element) initChildren.item(0);
@@ -1180,8 +1204,8 @@ public final class XMLTree {
     private boolean validateDevExtLink(Node scenarioChild) throws Exception {
         NodeList DeviceExternalLinkChildren = scenarioChild.getChildNodes();
         // must have 1 Order 1 Select 1 Action. Length must be exactly 3.
-        validateMinNumOfChildren(DeviceExternalLinkChildren, 3);
-        validateMaxNumOfChildren(DeviceExternalLinkChildren, 3);
+        validateMinNumOfChildren(DeviceExternalLinkChildren, 3, TREEVIEW_DeviceExternalLink);
+        validateMaxNumOfChildren(DeviceExternalLinkChildren, 3, TREEVIEW_DeviceExternalLink);
         // check first is 1 Order
         // check second is 1 select
         // check third is 1 action
@@ -1200,11 +1224,8 @@ public final class XMLTree {
     /*
      Save root xml to a file
      */
-    public String saveTree() {
+    public String saveTree(String sessionId) {
         try {
-            //DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-            //DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-
             // write the content into xml file
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
@@ -1214,15 +1235,15 @@ public final class XMLTree {
             Path currentRelativePath = Paths.get("");
             String relativePath = currentRelativePath.toAbsolutePath().toString();
 
-            StreamResult result = new StreamResult(new File(relativePath + "\\SimulatorExperiment.xml"));
+            StreamResult result = new StreamResult(new File(relativePath + FILES_SPLITTER + sessionId + ".xml"));
 
-            SimApi.setSimulatorScenarioXmlPath(relativePath + "\\SimulatorExperiment.xml");
+            SimApi.setSimulatorScenarioXmlPath(relativePath + FILES_SPLITTER + sessionId + ".xml");
 
             // Output to console for testing
             // StreamResult result = new StreamResult(System.out);
             transformer.transform(source, result);
 
-            return "File saved in " + relativePath + "\\SimulatorExperiment.xml";
+            return "File saved in " + relativePath + FILES_SPLITTER + sessionId + ".xml";
 
         } catch (Exception ex) {
             return "Sorry, cant save file. " + ex.getMessage();

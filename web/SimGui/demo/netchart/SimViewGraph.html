@@ -15,6 +15,7 @@
 </head>
 <body>
     <!--  graph layout  -->
+    <div id="slider"></div>
     <div id="chart" style="margin: 0 auto; clear:both;"></div>
 
     <div id="sidebar">
@@ -27,20 +28,20 @@
 
         $(document).ready(function() {
 
-            //var initGraph = function() {
-
             // get numver of nodes so that graph will expand all
             var request = new XMLHttpRequest();
             var numOfNodes = 0;
             request.open('GET', '/Simulator/SimServlet?request=getNodesCount', false);
             request.send(null);
-            //alert(request.status);
             if (request.status === 200) {
-                //alert(request.responseText);
-               // numOfNodes = parseInt(request.responseText);
+                numOfNodes = parseInt(request.responseText);
             }
-            //------------
 
+            // slider
+            $(function() {
+                parent.top.$("#sliderNodes").slider("option", "values", [1, numOfNodes]);
+                parent.top.$("#sliderNodesVal").text("Num Expanded Nodes: " + (Math.log(1) / Math.LN10));
+            });
 
             // get numver of nodes so that graph will expand all
             request = new XMLHttpRequest();
@@ -49,8 +50,8 @@
             request.send(null);
             if (request.status === 200) {
                 jsonFilePath = request.responseText;
-                jsonFilePath = jsonFilePath.replace("&#10;","");
-                //alert("jsonPath: " + jsonFilePath);
+                jsonFilePath = jsonFilePath.replace("&#10;", "");
+                alert("jsonPath: " + jsonFilePath);
             }
             //------------
 
@@ -61,11 +62,11 @@
                 navigation: {
                     mode: "focusnodes",
                     initialNodes: ["1"],
-                    focusNodeExpansionRadius: 5, //numOfNodes,
+                    focusNodeExpansionRadius: 1,
                     focusHistoryRelevanceCooldown: 0.4,
                     numberOfFocusNodes: 1
                 },
-                data: {url: "../../../../data/test.json"}, //jsonFilePath},
+                data: {url: "../../../Data/" + jsonFilePath},
                 style: {nodeRules: {
                         "radius": function(node) {
                             node.radius = Math.max(0.2, node.relevance);
@@ -140,7 +141,21 @@
             };
 
             chart = new NetChart(chartOptions);
-            //    }
+
+            // slider
+            parent.top.$("#sliderNodes").slider({
+                slide: function(event, ui) {
+                    parent.top.$("#sliderNodesVal").text("Num Expanded Nodes: " + (Math.log(ui.value) / Math.LN10));
+                }
+            });
+            parent.top.$("#sliderNodes").slider({
+                change: function(event, ui) {
+                    alert((Math.log(ui.value) / Math.LN10));
+                    chartOptions.navigation.focusNodeExpansionRadius = (Math.log(ui.value) / Math.LN10);
+                    chart = new NetChart(chartOptions);
+                }
+            });
+
         });
 
         function sendMessageList(result) {

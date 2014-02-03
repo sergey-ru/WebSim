@@ -33,6 +33,7 @@ $(document).ready(function() {
         var info = [];
         var elementIndex = 1; // always
         var i = 0;
+        $("#viewgui").attr("disabled", "disabled");
 
         // If it is a Init save, there is a select to save
         actionSelect = $("#ActionSelect option:selected").attr("id");

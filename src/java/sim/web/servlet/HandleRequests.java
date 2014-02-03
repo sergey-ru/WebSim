@@ -24,6 +24,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import static sim.web.utils.Constans.*;
+import static bgu.sim.Properties.StringsProperties.*;
 
 /**
  *
@@ -57,12 +58,17 @@ public class HandleRequests {
                     } else {
                         sessionId = session.getId();
                     }
-                    returnResponse(response, sessionId + "  path: " + Paths.get("").toAbsolutePath().toString());
+                    //String absPath = Paths.get("").toAbsolutePath().toString();
+                    //absPath = absPath.replace("C:\\", "");
+                    //absPath = absPath.replace("\\", "/");
+                    //returnResponse(response, sessionId + "  path: " + DATA_PATH + " abs path:" + Paths.get("").toAbsolutePath().toString());
 
                     break;
                 case "getJSONgraphData":
-
-                    returnResponse(response, Paths.get("").toAbsolutePath().toString() + "\\" + sessionId + ".json");
+                    //String absPath1 = Paths.get("").toAbsolutePath().toString();
+                    //absPath1 = absPath1.replace("C:\\", "");
+                    //absPath1 = absPath1.replace("\\", "/");
+                    returnResponse(response, sessionId + ".json");
 
                     break;
                 case "runBaseInit":
@@ -233,7 +239,8 @@ public class HandleRequests {
                     break;
                 case "getNodesCount":
 
-                    response.getWriter().write(SimApi.getNodesCount());
+                    int countNodes = SimApi.getNodesCount();
+                    response.getWriter().write(Integer.toString(countNodes));
 
                     break;
                 case "getShortestPath":

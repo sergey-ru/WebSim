@@ -173,6 +173,7 @@
                                     <td id="6td"><button type="button" id="runFullTime" class="btn btn-primary  doAction"><span class="glyphicon glyphicon-play"></span> Run Full With Time</button></td>
                                     <td id="7td"><button type="button" id="pause" class="btn btn-primary doAction" disabled="disabled"><span class="glyphicon glyphicon-pause"></span> Pause</button></td>
                                     <td id="ticksTd"><div id="sliderVal">Tick = 0 Seconds</div><div id="slider"></div></td>
+                                    <td id="openNodesTd"><div id="sliderNodesVal"></div><div id="sliderNodes"></div></td>
                                     <td id="simConsol"><div id="output"></div> <div id="output2"></div><div id="output3"></div><div id="output4"></div><div id="output5"></div></td>
                                 </tr>
                             </table>

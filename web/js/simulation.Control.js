@@ -64,22 +64,11 @@ $(document).ready(function() {
             }
         });
 
-
         // get messages
         runMessagesAnimation();
     });
 
     function runMessagesAnimation() {
-        // get messages
-//        $.get('SimServlet', {request: "getMessages"}, function(responseText) {
-//            if (responseText != "") {
-//                $("#output6").text(responseText);
-//                var result = responseText;
-//                var $f = $("#iframeID");
-//                $f[0].contentWindow.sendMessageList(result);  //works
-//            }
-//        });
-
 
         $.ajaxQueue({
             url: 'SimServlet',
@@ -253,6 +242,5 @@ $(document).ready(function() {
             }
         }
     };
-
 });
 

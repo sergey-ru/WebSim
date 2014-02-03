@@ -139,7 +139,7 @@ div.growlUI h2 {
     margin:5px 5px 5px 5px;
 }
 
-sliderNodes {
+#sliderNodes {
     float: top;
     clear: inherit;
     width: 90%;

@@ -58,16 +58,12 @@ public class HandleRequests {
                     } else {
                         sessionId = session.getId();
                     }
-                    //String absPath = Paths.get("").toAbsolutePath().toString();
-                    //absPath = absPath.replace("C:\\", "");
-                    //absPath = absPath.replace("\\", "/");
-                    //returnResponse(response, sessionId + "  path: " + DATA_PATH + " abs path:" + Paths.get("").toAbsolutePath().toString());
+
+                    returnResponse(response, sessionId + "  path: " + DATA_PATH + " abs path:" + Paths.get("").toAbsolutePath().toString());
 
                     break;
                 case "getJSONgraphData":
-                    //String absPath1 = Paths.get("").toAbsolutePath().toString();
-                    //absPath1 = absPath1.replace("C:\\", "");
-                    //absPath1 = absPath1.replace("\\", "/");
+
                     returnResponse(response, sessionId + ".json");
 
                     break;

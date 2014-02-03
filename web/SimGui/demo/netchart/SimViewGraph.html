@@ -26,6 +26,10 @@
 
         var chart;
 
+        function log(b, n) {
+            return Math.log(n) / Math.log(b);
+        }
+
         $(document).ready(function() {
 
             // get numver of nodes so that graph will expand all
@@ -39,8 +43,10 @@
 
             // slider
             $(function() {
-                parent.top.$("#sliderNodes").slider("option", "values", [1, numOfNodes]);
-                parent.top.$("#sliderNodesVal").text("Num Expanded Nodes: " + (Math.log(1) / Math.LN10));
+                alert(numOfNodes);
+                parent.top.$("#sliderNodes").slider("option", "min", 1);
+                parent.top.$("#sliderNodes").slider("option", "max", numOfNodes);
+                parent.top.$("#sliderNodesVal").text("Radius Expanded: " + log(2, 1));
             });
 
             // get numver of nodes so that graph will expand all
@@ -50,7 +56,7 @@
             request.send(null);
             if (request.status === 200) {
                 jsonFilePath = request.responseText;
-                jsonFilePath = jsonFilePath.replace("&#10;", "");
+                jsonFilePath = "../../../Data/" + jsonFilePath.replace("&#10;", "");
                 alert("jsonPath: " + jsonFilePath);
             }
             //------------
@@ -66,7 +72,7 @@
                     focusHistoryRelevanceCooldown: 0.4,
                     numberOfFocusNodes: 1
                 },
-                data: {url: "../../../Data/" + jsonFilePath},
+                data: {url: jsonFilePath},
                 style: {nodeRules: {
                         "radius": function(node) {
                             node.radius = Math.max(0.2, node.relevance);
@@ -78,17 +84,14 @@
                             var sliceSize = 239;
                             if (node.data.type == "pc")
                             {
-                                //image = "./node-icons-pc.png";
                                 image = "./pc.png";
                             }
                             else if (node.data.type == "switch")
                             {
-                                //image = "./node-icons-switch.png";
                                 image = "./switch.png";
                             }
                             else if (node.data.type == "router")
                             {
-                                //image = "./node-icons-router.png";
                                 image = "./router.png";
                             }
                             else if (node.data.type == "person")
@@ -116,13 +119,10 @@
                             var newTable = "<table class=\"table table-striped\">";
                             newTable += "<tr><td>ID</td><td>" + event.clickNode.id + "</td></tr>";
                             newTable += "<tr><td>Type</td><td>" + event.clickNode.data.type + "</td></tr>";
-//                            newTable += "<tr><td>x</td><td>" + event.clickNode.x + "</td></tr>";
-//                            newTable += "<tr><td>y</td><td>" + event.clickNode.y + "</td></tr>";
                             var request = new XMLHttpRequest();
                             request.open('GET', '/Simulator/SimServlet?request=getNodeInfo&node=' + event.clickNode.id, false); // `false` makes the request synchronous
                             request.send(null);
                             if (request.status === 200) {
-                                //alert(request.responseText);
                                 var res = request.responseText.split(",");
                                 var line;
                                 for (var i = 0; i < res.length; i++) {
@@ -145,24 +145,23 @@
             // slider
             parent.top.$("#sliderNodes").slider({
                 slide: function(event, ui) {
-                    parent.top.$("#sliderNodesVal").text("Num Expanded Nodes: " + (Math.log(ui.value) / Math.LN10));
+                    parent.top.$("#sliderNodesVal").text("Radius Expanded: " + log(2, ui.value));
                 }
             });
             parent.top.$("#sliderNodes").slider({
                 change: function(event, ui) {
-                    alert((Math.log(ui.value) / Math.LN10));
-                    chartOptions.navigation.focusNodeExpansionRadius = (Math.log(ui.value) / Math.LN10);
+                    alert(ui.value + " " + log(2, ui.value));
+                    chartOptions.navigation.focusNodeExpansionRadius = log(2, ui.value);
                     chart = new NetChart(chartOptions);
                 }
             });
-
+            //------
         });
 
         function sendMessageList(result) {
             $('#runOneStepInScenario', parent.document).attr("disabled", "disabled");
             $('#runFullScenario', parent.document).attr("disabled", "disabled");
-
-            //result = "20,3,,12,3,14";
+            
             var messagesList = result.split(",,");
 
             var ifStop = false;

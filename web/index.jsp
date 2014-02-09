@@ -198,7 +198,7 @@
         <!--MENU-->
         <div id="treeMenu">
 
-            <a href="downloadFileServlet" class="btn btn-default btn-sm">Download Experiment</a>
+            <a href="DownloadFileServlet" class="btn btn-default btn-sm">Download Experiment</a>
             <div id="errroDownload"></div>
             <p></p>
 

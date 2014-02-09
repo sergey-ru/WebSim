@@ -6,12 +6,10 @@
 package sim.web.servlet;
 
 import bgu.sim.api.*;
-import bgu.sim.core.Routing.DB.BinaryFile;
 import bgu.sim.data.Message;
 import bgu.sim.data.StatisticsDataStruct;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +60,7 @@ public class HandleRequests {
                     break;
                 case "getJSONgraphData":
 
-                    returnResponse(response, DATA_PATH + sessionId + ".json");
+                    returnResponse(response, FROM_JS_DATA_PATH + sessionId + ".json");
 
                     break;
                 case "runBaseInit":
@@ -113,10 +111,7 @@ public class HandleRequests {
                     break;
                 case "loadXmlTree":
 
-                    m = XMLTree.getInstance();
-                    boolean ifByPath = Boolean.parseBoolean(request.getParameter("ifByPath"));
-                    m.parse(ifByPath);
-                    response.getWriter().write(m.getResult().toString());
+                    loadXmlTree(request, response);
 
                     break;
                 case "SimulationProperty":
@@ -165,11 +160,7 @@ public class HandleRequests {
                     break;
                 case "GetPByActionValue":
 
-                    m = XMLTree.getInstance();
-                    String fullClassPath = request.getParameter("fullClassPath");
-                    int ElementIndex = Integer.parseInt(request.getParameter("index"));
-                    String result = m.getPValuesByActionValue(fullClassPath, ElementIndex);
-                    response.getWriter().write(result);
+                    getPByActionValue(request, response);
 
                     break;
                 case "AddScenarioNewRule":
@@ -189,13 +180,7 @@ public class HandleRequests {
                     break;
                 case "SaveProperties":
 
-                    m = XMLTree.getInstance();
-                    String elementTopic = request.getParameter("elementToSave");
-                    String indexString = request.getParameter("elementIndex");
-                    int elementIndex = Integer.parseInt(indexString);
-                    String Info = request.getParameter("info");
-                    String BackRequest = saveChanges(Info, elementTopic, m, elementIndex);
-                    response.getWriter().write(BackRequest);
+                    saveProperties(request, response);
 
                     break;
                 case "IfTreeIsValid":
@@ -215,28 +200,9 @@ public class HandleRequests {
                     response.getWriter().write(m.newTree());
 
                     break;
-                case "SaveTree":
-
-                    m = XMLTree.getInstance();
-                    String res = m.saveTree(sessionId);
-                    // create json file for the graph
-                    createJsonData createJsonData1 = new createJsonData(sessionId);
-                    response.getWriter().write(res);
-
-                    break;
                 case "validateAndInitTree":
 
-                    // save tree
-                    m = XMLTree.getInstance();
-                    String resultSaving = m.saveTree(sessionId);
-
-                    // init base ( Simulator class and read & parse netFile
-                    SimApi.initBaseSim();
-
-                    // create JSON 
-                    createJsonData createJsonData = new createJsonData(sessionId);
-
-                    response.getWriter().write("true");
+                    validateInitTree(response);
 
                     break;
                 case "getNodeInfo":
@@ -251,74 +217,105 @@ public class HandleRequests {
                     response.getWriter().write(Integer.toString(countNodes));
 
                     break;
-                case "getShortestPath":
-
-                    m = XMLTree.getInstance();
-                    ArrayList<Integer> path = new ArrayList<>();
-
-                    int source = Integer.parseInt(request.getParameter("source"));
-                    int target = Integer.parseInt(request.getParameter("target"));
-                    int numOfNodes = 1035;//SimApi.getNumberOfNodes();
-                    BinaryFile data = BinaryFile.getInstance(numOfNodes, m.getRoutingAlgorithmDataPath());
-                    int nextStep = data.readFromFile(source, target);
-                    path.add(nextStep);
-                    while (nextStep != target) {
-                        nextStep = data.readFromFile(nextStep, target);
-                        path.add(nextStep);
-                    }
-                    response.getWriter().write(path.toString());
-
-                    break;
                 case "getStatistics":
-                    String allRows = "";
-                    String tmpListAsString;
-
-                    Map<Integer, StatisticsDataStruct> stats = SimApi.getStatistics();
-                    int i = 0;
-                    for (i = 0; i < stats.size(); i++) {
-                        StatisticsDataStruct ListAndScenarioNumber = stats.get(i);
-                        List<String> list = ListAndScenarioNumber.newList;
-
-                        tmpListAsString = list.toString();
-
-                        if (tmpListAsString.contains("Scenario")) {
-                            tmpListAsString = tmpListAsString.replace("[", "");
-                            tmpListAsString = tmpListAsString.replace("]", "");
-                            if (allRows != "") {
-                                allRows = allRows.substring(0, allRows.length() - 1);
-                            }
-                            allRows += tmpListAsString;
-
-                        } else {
-                            tmpListAsString = list.toString() + ", " + ListAndScenarioNumber.ScenarioNumber;
-                            tmpListAsString = tmpListAsString.replace("[", "");
-                            tmpListAsString = tmpListAsString.replace("]", "");
-
-                            allRows += tmpListAsString + "\r\n";
-                        }
-                    }
-
-                    allRows = allRows.substring(0, allRows.length() - 1);
-                    response.getWriter().write(allRows);
+                    
+                    getStatistics(response);
 
                     break;
                 case "getMessages":
-
-                    String allPaths = "";
-
-                    for (Message me : SimApi.getMessages()) {
-                        allPaths += me.getRoute() + ",,";
-                    }
-                    if (allPaths != "") {
-                        allPaths = allPaths.substring(1, allPaths.length() - 2);
-                    }
-                    response.getWriter().write(allPaths);
+                    
+                    getMessages(response);
 
                     break;
             }
         } catch (Exception ex) {
             System.err.println("Error: " + ex.getMessage());
         }
+    }
+
+    private void getMessages(HttpServletResponse response) throws IOException {
+        String allPaths = "";
+        for (Message me : SimApi.getMessages()) {
+            allPaths += me.getRoute() + ",,";
+        }
+        if (allPaths != "") {
+            allPaths = allPaths.substring(1, allPaths.length() - 2);
+        }
+        response.getWriter().write(allPaths);
+        return;
+    }
+
+    private void getStatistics(HttpServletResponse response) throws IOException {
+        String allRows = "";
+        String tmpListAsString;
+
+        Map<Integer, StatisticsDataStruct> stats = SimApi.getStatistics();
+        int i = 0;
+        for (i = 0; i < stats.size(); i++) {
+            StatisticsDataStruct ListAndScenarioNumber = stats.get(i);
+            List<String> list = ListAndScenarioNumber.newList;
+
+            tmpListAsString = list.toString();
+
+            if (tmpListAsString.contains("Scenario")) {
+                tmpListAsString = tmpListAsString.replace("[", "");
+                tmpListAsString = tmpListAsString.replace("]", "");
+                if (allRows != "") {
+                    allRows = allRows.substring(0, allRows.length() - 1);
+                }
+                allRows += tmpListAsString;
+
+            } else {
+                tmpListAsString = list.toString() + ", " + ListAndScenarioNumber.ScenarioNumber;
+                tmpListAsString = tmpListAsString.replace("[", "");
+                tmpListAsString = tmpListAsString.replace("]", "");
+
+                allRows += tmpListAsString + "\r\n";
+            }
+        }
+
+        allRows = allRows.substring(0, allRows.length() - 1);
+        response.getWriter().write(allRows);
+    }
+
+    private void validateInitTree(HttpServletResponse response) throws IOException, Exception {
+        XMLTree m;
+        // save tree
+        m = XMLTree.getInstance();
+        String resultSaving = m.saveTree(sessionId);
+        // init base ( Simulator class and read & parse netFile
+        SimApi.initBaseSim();
+        // create JSON
+        createJsonData createJsonData = new createJsonData(sessionId);
+        response.getWriter().write("true");
+    }
+
+    private void saveProperties(HttpServletRequest request, HttpServletResponse response) throws IOException, NumberFormatException {
+        XMLTree m;
+        m = XMLTree.getInstance();
+        String elementTopic = request.getParameter("elementToSave");
+        String indexString = request.getParameter("elementIndex");
+        int elementIndex = Integer.parseInt(indexString);
+        String Info = request.getParameter("info");
+        String BackRequest = saveChanges(Info, elementTopic, m, elementIndex);
+        response.getWriter().write(BackRequest);
+    }
+
+    private void getPByActionValue(HttpServletRequest request, HttpServletResponse response) throws IOException, NumberFormatException {
+        XMLTree m;
+        m = XMLTree.getInstance();
+        String fullClassPath = request.getParameter("fullClassPath");
+        int ElementIndex = Integer.parseInt(request.getParameter("index"));
+        String result = m.getPValuesByActionValue(fullClassPath, ElementIndex);
+        response.getWriter().write(result);
+    }
+
+    private void loadXmlTree(HttpServletRequest request, HttpServletResponse response) throws Exception, IOException {
+        XMLTree m;
+        m = XMLTree.getInstance();
+        boolean ifByPath = Boolean.parseBoolean(request.getParameter("ifByPath"));
+        m.parse(ifByPath);
+        response.getWriter().write(m.getResult().toString());
     }
 
     public String loadNewXml(HttpServletRequest request, HttpServletResponse response) {

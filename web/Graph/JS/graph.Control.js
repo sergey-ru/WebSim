@@ -38,7 +38,6 @@ $('#viewgui', parent.document).click(function(event) {
         if (request.status === 200) {
             jsonFilePath = request.responseText;
             jsonFilePath = jsonFilePath.replace("&#10;", "");
-            alert(jsonFilePath);
         }
 
         chartOptions = {
@@ -61,15 +60,15 @@ $('#viewgui', parent.document).click(function(event) {
                         var image = null;
                         var sliceNo = 0;
                         var sliceSize = 239;
-                        if (node.data.type == "pc")
+                        if (node.data.type === "pc")
                         {
                             image = "./Images/pc.png";
                         }
-                        else if (node.data.type == "switch")
+                        else if (node.data.type === "switch")
                         {
                             image = "./Images/switch.png";
                         }
-                        else if (node.data.type == "router")
+                        else if (node.data.type === "router")
                         {
                             image = "./Images/router.png";
                         }
@@ -144,7 +143,7 @@ function sendMessageList(result) {
         for (var i = 0; i < messagesList.length; i++) {
             var allSourceAndTarget = messagesList[i].split(",");
             // go over nodes list
-            if (messagesList[i] == "e")
+            if (messagesList[i] === "e")
                 continue;
             var source = allSourceAndTarget[0];
             var target = allSourceAndTarget[1];
@@ -167,7 +166,7 @@ function sendMessageList(result) {
         }
         time = time + 1000;
         // if nobody has more nodes, stop.
-        if (oneHasMore == false) {
+        if (oneHasMore === false) {
             ifStop = true;
         }
     }

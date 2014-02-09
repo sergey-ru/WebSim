@@ -205,22 +205,20 @@ public final class XMLTree {
 
     // NEED TO BE CHECKED
     void updateRoutingAlgorithmProperties(String Element, String[] keyValArr) {
-        
-        
+
         String fullPathClass = Element.replace(XML_STATISTICLISTENER + " ", "");
-                        Node simulationNode = _root.getElementsByTagName(XML_SIMULATION).item(0);
-                NodeList simulationChildren = simulationNode.getChildNodes();
-                Node routingAlgorithmNode = null;
+        Node simulationNode = _root.getElementsByTagName(XML_SIMULATION).item(0);
+        NodeList simulationChildren = simulationNode.getChildNodes();
+        Node routingAlgorithmNode = null;
 
-                // find the currect statisticListener in tree so we can remove it
-                for (int i = 0; i < simulationChildren.getLength(); i++) {
-                    String tmp = simulationChildren.item(i).getAttributes().item(0).getNodeValue();
-                    if (tmp.equalsIgnoreCase(fullPathClass)) {
-                        routingAlgorithmNode = simulationChildren.item(i);
-                        break;
-                    }
-                }
-
+        // find the currect statisticListener in tree so we can remove it
+        for (int i = 0; i < simulationChildren.getLength(); i++) {
+            String tmp = simulationChildren.item(i).getAttributes().item(0).getNodeValue();
+            if (tmp.equalsIgnoreCase(fullPathClass)) {
+                routingAlgorithmNode = simulationChildren.item(i);
+                break;
+            }
+        }
 
         if (routingAlgorithmNode != null) {
             // remove properties
@@ -1317,6 +1315,16 @@ public final class XMLTree {
         Node simulation = li.item(0);
         Node ticksNode = simulation.getAttributes().getNamedItem(SIMULATION_PROPERTY_TICKS);
         return ticksNode.getNodeValue();
+    }
+
+    public String getTicksNumber() {
+        NamedNodeMap atts = _root.getElementsByTagName(XML_SIMULATION).item(0).getAttributes();
+        for (int i = 0; i < atts.getLength(); i++) {
+            if (atts.item(i).getNodeName().equalsIgnoreCase(SIMULATION_PROPERTY_TICKS)) {
+                return atts.item(i).getNodeValue();
+            }
+        }
+        return "0";
     }
 
     private static class XMLTreeHolder {

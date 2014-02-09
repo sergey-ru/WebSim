@@ -48,7 +48,7 @@ $(document).ready(function() {
         disableAllButtons();
 
         $.get('SimServlet', {request: "runOneStepInScenario"}, function(responseText) {
-            if (responseText.indexOf("false") != -1) {
+            if (responseText.indexOf("false") !== -1) {
                 $("#nextScenario").removeAttr("disabled");
             }
         });
@@ -71,14 +71,14 @@ $(document).ready(function() {
         disableAllButtons();
 
         $.get('SimServlet', {request: "getNextScenarioName"}, function(responseText) {
-            if (responseText != "")
+            if (responseText !== "")
                 $('#scenarioNumberInfo').text(responseText);
             else
                 $('#scenarioNumberInfo').text("No More Scenarios");
         });
 
         $.get('SimServlet', {request: "ifExistNextScenario"}, function(responseText) {
-            if (responseText.indexOf("false") != -1) {
+            if (responseText.indexOf("false") !== -1) {
                 $("#scenarioNumberInfo").text("No More Scenarios");
                 $("#runInitRules").attr("disabled", "disabled");
             }
@@ -110,7 +110,7 @@ $(document).ready(function() {
             type: 'GET',
             success: function(data) {
                 // check if there is a scenario
-                if (data.indexOf("true") != -1) {
+                if (data.indexOf("true") !== -1) {
 
                     // update scenario name
                     $.ajaxQueue({
@@ -164,7 +164,7 @@ $(document).ready(function() {
             type: 'GET',
             success: function(data) {
                 //$("#output6").text(data);
-                if (data != "") {
+                if (data !== "") {
                     var result = data;
                     var $f = $("#iframeID");
                     $f[0].contentWindow.sendMessageList(result);  //works
@@ -204,7 +204,6 @@ $(document).ready(function() {
                         count = parseInt(count);
                         count++;
                         $("#output").text(count);
-                        //$("#output2").text(response);
 
                         // animation
                         runMessagesAnimation();
@@ -216,7 +215,7 @@ $(document).ready(function() {
                     else if (ifPause) {
                         $("#pause").html("<span class=\"glyphicon glyphicon-repeat\"></span> Resume");
                     }
-                    else if (self.ticks == 0) {
+                    else if (self.ticks === 0) {
                         $("#runFullTime").removeAttr("disabled");
                     }
                 },

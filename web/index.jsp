@@ -15,17 +15,17 @@
         <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
 
         <!--  Layout -->
-        <script type="text/javascript" src="JS/jquery.layout-latest.js"></script> 
+        <script type="text/javascript" src="JS/Layout/jquery.layout-latest.js"></script> 
 
         <!--  Tree View -->
-        <link rel="stylesheet" href="Included/TreeView/jquery.treeview.css" />
-        <script src="Included/TreeView/jquery.cookie.js" type="text/javascript"></script>
-        <script src="Included/TreeView/jquery.treeview.js" type="text/javascript"></script>
-        <script type="text/javascript" src="Included/TreeView/demo.js"></script>
+        <link rel="stylesheet" href="JS/TreeView/jquery.treeview.css" />
+        <script src="JS/TreeView/jquery.cookie.js" type="text/javascript"></script>
+        <script src="JS/TreeView/jquery.treeview.js" type="text/javascript"></script>
+        <script type="text/javascript" src="JS/TreeView/demo.js"></script>
 
         <!-- ajax queue: call ajax calls in order -->
-        <script type="text/javascript" src="JS/jquery.ajaxQueue.js"></script>
-        <script type="text/javascript" src="JS/ajaxQueue.js"></script>
+        <script type="text/javascript" src="JS/Layout/jquery.ajaxQueue.js"></script>
+        <script type="text/javascript" src="JS/Layout/ajaxQueue.js"></script>
 
         <link rel="stylesheet" href="Style.css">
         <!-- init simulator -->

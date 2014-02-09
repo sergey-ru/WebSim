@@ -21,6 +21,7 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import static sim.web.utils.Constans.*;
 import static bgu.sim.Properties.StringsProperties.*;
+import org.josql.QueryExecutionException;
 
 /**
  *
@@ -88,6 +89,12 @@ public class HandleRequests {
 
                     SimApi.runFullScenario();
 
+                    break;
+                case "getTicksNumber":
+                    
+                    m = XMLTree.getInstance();
+                    response.getWriter().write(m.getTicksNumber());
+                    
                     break;
                 case "getNextScenarioName":
 
@@ -238,11 +245,10 @@ public class HandleRequests {
         for (Message me : SimApi.getMessages()) {
             allPaths += me.getRoute() + ",,";
         }
-        if (allPaths != "") {
+        if (!"".equals(allPaths)) {
             allPaths = allPaths.substring(1, allPaths.length() - 2);
         }
         response.getWriter().write(allPaths);
-        return;
     }
 
     private void getStatistics(HttpServletResponse response) throws IOException {
@@ -250,8 +256,7 @@ public class HandleRequests {
         String tmpListAsString;
 
         Map<Integer, StatisticsDataStruct> stats = SimApi.getStatistics();
-        int i = 0;
-        for (i = 0; i < stats.size(); i++) {
+        for (int i = 0; i < stats.size(); i++) {
             StatisticsDataStruct ListAndScenarioNumber = stats.get(i);
             List<String> list = ListAndScenarioNumber.newList;
 
@@ -260,7 +265,7 @@ public class HandleRequests {
             if (tmpListAsString.contains("Scenario")) {
                 tmpListAsString = tmpListAsString.replace("[", "");
                 tmpListAsString = tmpListAsString.replace("]", "");
-                if (allRows != "") {
+                if (!"".equals(allRows)) {
                     allRows = allRows.substring(0, allRows.length() - 1);
                 }
                 allRows += tmpListAsString;
@@ -483,10 +488,10 @@ public class HandleRequests {
                 returnResponse(response, timeForRunningFull);
             }
 
-        } catch (Exception e) {
+        } catch (IOException | ClassNotFoundException | InterruptedException | QueryExecutionException e) {
             // Simlation failed.
             returnResponse(response, "Error running the simulator.");
-            System.err.println("Error running the simulator.");
+            System.err.println("Error running the simulator. " + e.getMessage());
         }
         System.out.println("Done.");
     }
@@ -518,10 +523,10 @@ public class HandleRequests {
                 System.out.println("No More Scenarios.");
             }
 
-        } catch (Exception e) {
+        } catch (IOException | ClassNotFoundException | InterruptedException | QueryExecutionException e) {
             // Simlation failed.
             returnResponse(response, "Error running the simulator.");
-            System.err.println("Error running the simulator on one scenario.");
+            System.err.println("Error running the simulator on one scenario. " + e.getMessage());
         }
         System.out.println("Done.");
     }

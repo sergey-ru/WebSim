@@ -247,7 +247,7 @@ function LoadXmlMenuTree(ifByPath) {
         $('#red').html(responseText);
 
         $.ajax({
-            url: "Included/TreeView/demo.js",
+            url: "JS/TreeView/demo.js",
             dataType: "script"
         });
 

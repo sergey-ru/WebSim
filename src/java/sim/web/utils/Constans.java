@@ -25,6 +25,8 @@ public final class Constans {
     public static final String XML_EXTERNAL = "external";
     public static final String XML_LINK = "link";
     public static final String XML_INIT = "init";
+    public static final String XML_OFF = "Off";
+    public static final String XML_ON = "On";
     public static final String XML_STATISTICLISTENER = "StatisticListener";
     public static final String XML_ROUTINGALGORITHM = "RoutingAlgorithm";
     public static final String XML_STATISTICLISTENER_LOW = "statisticlistener";
@@ -47,6 +49,7 @@ public final class Constans {
     public static final String SIMULATION_PROPERTY_SYSTEMFOLDER = "systemFolder";
 
     public static final String XML_PARSER_ERROR_STATISTICLISTENER = "Simulation must have at least one statistic listener.";
+    public static final String XML_PARSER_ERROR_SIMULATION_ATTRIBUTES = "Simulation attribute # is empty";
     public static final String XML_PARSER_ERROR_GUILISTENER_IS_A_MUST = "Must set GUIListener on true.";
     public static final String XML_PARSER_ERROR_ROUTINGALGO = "Simulation can have only one routing algorithm.";
 

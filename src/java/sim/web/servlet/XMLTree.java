@@ -9,6 +9,7 @@ package sim.web.servlet;
  *
  * @author Keren Fruchter
  */
+import static bgu.sim.Properties.StringsProperties.DATA_PATH;
 import bgu.sim.api.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
@@ -18,8 +19,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -53,7 +52,7 @@ public final class XMLTree {
     private XMLTree() {
         parserErrorMessage = "";
         try {
-            parse(true);
+            //parse(true);
         } catch (Exception ex) {
             System.err.println(ERROR_PARSING_XML);
         }
@@ -75,11 +74,7 @@ public final class XMLTree {
      Get XML HTML Code
      */
     public StringBuilder getResult() {
-        if (ifSuccsessParsing()) {
-            return _result;
-        } else {
-            return new StringBuilder(ERROR_PARSING_XML);
-        }
+        return _result;
     }
 
     public static boolean ifSuccsessParsing() {
@@ -153,11 +148,27 @@ public final class XMLTree {
         ExperimentNode.appendChild(scenario);
     }
 
+    void DeleteScenario(int ScenarioDeleteIndex) {
+        Node scenarioNode = _root.getElementsByTagName(XML_SCENARIO).item(ScenarioDeleteIndex - 1);
+        _root.removeChild(scenarioNode);
+    }
+
     /*
      Given an array of properties and values, and add them to the statisticlistener
      */
-    void updateStatisticListenerProperties(int Index, String[] keyValArr) {
-        Node statisticListenerNode = _root.getElementsByTagName(XML_STATISTICLISTENER).item(Index - 1);
+    void updateStatisticListenerProperties(String Element, String[] keyValArr) {
+        String fullPathClass = Element.replace(XML_STATISTICLISTENER + " ", "");
+        NodeList simulationChildren = _root.getElementsByTagName(XML_SIMULATION).item(0).getChildNodes();
+        Node statisticListenerNode = null;
+
+        // find the currect statisticListener in tree so we can edit it
+        for (int i = 0; i < simulationChildren.getLength(); i++) {
+            String tmp = simulationChildren.item(i).getAttributes().item(0).getNodeValue();
+            if (tmp.equalsIgnoreCase(fullPathClass)) {
+                statisticListenerNode = simulationChildren.item(i);
+                break;
+            }
+        }
 
         if (statisticListenerNode != null) {
             // remove properties
@@ -184,14 +195,32 @@ public final class XMLTree {
                 p.setAttribute(ATTRIBUTE_VALUE, val);
 
                 // add new p to statisticlistener
-                statisticListenerNode.appendChild(p);
+                String tmp = statisticListenerNode.getAttributes().item(0).getNodeValue();
+                if (!tmp.contains("GUIListener")) { // do not add p attribute to GUIListener!
+                    statisticListenerNode.appendChild(p);
+                }
             }
         }
     }
 
     // NEED TO BE CHECKED
-    void updateRoutingAlgorithmProperties(int Index, String[] keyValArr) {
-        Node routingAlgorithmNode = _root.getElementsByTagName(XML_ROUTINGALGORITHM).item(Index - 1);
+    void updateRoutingAlgorithmProperties(String Element, String[] keyValArr) {
+        
+        
+        String fullPathClass = Element.replace(XML_STATISTICLISTENER + " ", "");
+                        Node simulationNode = _root.getElementsByTagName(XML_SIMULATION).item(0);
+                NodeList simulationChildren = simulationNode.getChildNodes();
+                Node routingAlgorithmNode = null;
+
+                // find the currect statisticListener in tree so we can remove it
+                for (int i = 0; i < simulationChildren.getLength(); i++) {
+                    String tmp = simulationChildren.item(i).getAttributes().item(0).getNodeValue();
+                    if (tmp.equalsIgnoreCase(fullPathClass)) {
+                        routingAlgorithmNode = simulationChildren.item(i);
+                        break;
+                    }
+                }
+
 
         if (routingAlgorithmNode != null) {
             // remove properties
@@ -231,21 +260,34 @@ public final class XMLTree {
 
         // handle on/off
         switch (Value) {
-            case "off": {
+            case XML_OFF: {
 
                 // delete the statisticlistener child
                 Node simulationNode = _root.getElementsByTagName(XML_SIMULATION).item(0);
-                Node statisticListenerNode = _root.getElementsByTagName(XML_STATISTICLISTENER).item(Index - 1);
+                NodeList simulationChildren = simulationNode.getChildNodes();
+                Node statisticListenerNode = null;
+
+                // find the currect statisticListener in tree so we can remove it
+                for (int i = 0; i < simulationChildren.getLength(); i++) {
+                    String tmp = simulationChildren.item(i).getAttributes().item(0).getNodeValue();
+                    if (tmp.equalsIgnoreCase(fullPathClass)) {
+                        statisticListenerNode = simulationChildren.item(i);
+                        break;
+                    }
+                }
+
+                // remove
                 if (statisticListenerNode != null) {
                     simulationNode.removeChild(statisticListenerNode);
                 }
+
                 // remove from the selected statisticlistener list
                 _StatisticListenerChosen.remove(fullPathClass);
 
                 // for vi sign
                 return "remove " + Element;
             }
-            case "on": {
+            case XML_ON: {
                 //check if it already on
                 if (!_StatisticListenerChosen.contains((fullPathClass))) {
                     // add new statisticlistener element
@@ -281,11 +323,22 @@ public final class XMLTree {
 
         // handle on/off
         switch (Value) {
-            case "off": {
+            case XML_OFF: {
 
                 // delete the routingalgorithm child
                 Node simulationNode = _root.getElementsByTagName(XML_SIMULATION).item(0);
-                Node routingAlgorithmNode = _root.getElementsByTagName(XML_ROUTINGALGORITHM).item(Index - 1);
+                NodeList simulationChildren = simulationNode.getChildNodes();
+                Node routingAlgorithmNode = null;
+
+                // find the currect statisticListener in tree so we can remove it
+                for (int i = 0; i < simulationChildren.getLength(); i++) {
+                    String tmp = simulationChildren.item(i).getAttributes().item(0).getNodeValue();
+                    if (tmp.equalsIgnoreCase(fullPathClass)) {
+                        routingAlgorithmNode = simulationChildren.item(i);
+                        break;
+                    }
+                }
+
                 if (routingAlgorithmNode != null) {
                     simulationNode.removeChild(routingAlgorithmNode);
                 }
@@ -295,7 +348,7 @@ public final class XMLTree {
                 // for vi sign
                 return "remove " + Element;
             }
-            case "on": {
+            case XML_ON: {
                 //check if it already on
                 if (!_RoutingAlgoChosen.contains((fullPathClass))) {
                     // add new routingalgorithm element
@@ -415,16 +468,23 @@ public final class XMLTree {
     /*
      Create new XML template and insert to root
      */
-    String newTree() {
+    String newTree() throws ParserConfigurationException {
         // remove all children
-        NodeList rootChildren = _root.getChildNodes();
-        System.out.println(rootChildren.getLength());
-        for (int i = 0; i <= rootChildren.getLength(); i++) {
-            System.out.println(rootChildren.item(i).getNodeName());
-            _root.removeChild(rootChildren.item(i));
-        }
-        if (_root.getLastChild() != null) {
-            _root.removeChild(_root.getLastChild());
+        if (_root != null) {
+            NodeList rootChildren = _root.getChildNodes();
+            System.out.println(rootChildren.getLength());
+            for (int i = 0; i < rootChildren.getLength(); i++) {
+                System.out.println(rootChildren.item(i).getNodeName());
+                _root.removeChild(rootChildren.item(i));
+            }
+            if (_root.getLastChild() != null) {
+                _root.removeChild(_root.getLastChild());
+            }
+        } else {
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            _doc = docBuilder.newDocument();
+            _root = _doc.createElement(XML_EXPERIMENT);
         }
 
         // create simulation
@@ -432,13 +492,7 @@ public final class XMLTree {
         simulation.setAttribute(SIMULATION_PROPERTY_TICKS, "");
         simulation.setAttribute(SIMULATION_PROPERTY_SEED, "");
         simulation.setAttribute(SIMULATION_PROPERTY_NETFILEPATH, "");
-        simulation.setAttribute(SIMULATION_PROPERTY_SYSTEMFOLDER, "");
 
-        // create StatisticListener - NOOOOO VERYYY BADDDDDD
-        //Element StatisticListener = doc.createElement(XML_STATISTICLISTENER);
-        //StatisticListener.setAttribute(ATTRIBUTE_VALUE, "");
-        // add StatisticListener ti simulation
-        //simulation.appendChild(StatisticListener);
         // create scenario
         Element Scenario = _doc.createElement(XML_SCENARIO);
         Scenario.setAttribute(ATTRIBUTE_NAME, "");
@@ -915,7 +969,8 @@ public final class XMLTree {
     private Element initParseByXmlFile() throws SAXException, ParserConfigurationException, IOException {
         // by path
         Element experiment;
-        File fXmlFile = new File(SimApi.getSimulatorScenarioXmlPath());
+        String simXmlPath = SimApi.getSimulatorScenarioXmlPath();
+        File fXmlFile = new File(simXmlPath);
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         _doc = dBuilder.parse(fXmlFile);
@@ -1087,6 +1142,18 @@ public final class XMLTree {
             Element simulation = (Element) experiment.getFirstChild();
             validateName(simulation, XML_SIMULATION);
 
+            // validate simulation attributes
+            NamedNodeMap simulationAtts = simulation.getAttributes();
+            for (int i = 0; i < simulationAtts.getLength(); i++) {
+                String key = (simulationAtts.item(i).getNodeName());
+                String val = (simulationAtts.item(i).getNodeValue());
+                if (val == null || val == "") {
+                    _ifSuccsessParsing = false;
+                    parserErrorMessage = XML_PARSER_ERROR_SIMULATION_ATTRIBUTES.replace("#", key);
+                    return _ifSuccsessParsing;
+                }
+            }
+
             // validate simulation childrens
             NodeList simulationChildren = simulation.getChildNodes();
             validateMinNumOfChildren(simulationChildren, 1, TREEVIEW_SIMULATION);
@@ -1231,23 +1298,25 @@ public final class XMLTree {
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource source = new DOMSource(_root);
 
-            // relative path
-            Path currentRelativePath = Paths.get("");
-            String relativePath = currentRelativePath.toAbsolutePath().toString();
+            StreamResult result = new StreamResult(new File(DATA_PATH + sessionId + ".xml"));
 
-            StreamResult result = new StreamResult(new File(relativePath + FILES_SPLITTER + sessionId + ".xml"));
-
-            SimApi.setSimulatorScenarioXmlPath(relativePath + FILES_SPLITTER + sessionId + ".xml");
+            // set simulator its xml
+            SimApi.setSimulatorScenarioXmlPath(DATA_PATH + sessionId + ".xml");
 
             // Output to console for testing
-            // StreamResult result = new StreamResult(System.out);
             transformer.transform(source, result);
 
-            return "File saved in " + relativePath + FILES_SPLITTER + sessionId + ".xml";
-
+            return "File saved in " + DATA_PATH + sessionId + ".xml";
         } catch (Exception ex) {
             return "Sorry, cant save file. " + ex.getMessage();
         }
+    }
+
+    public String getTicks() {
+        NodeList li = _root.getElementsByTagName(XML_SIMULATION);
+        Node simulation = li.item(0);
+        Node ticksNode = simulation.getAttributes().getNamedItem(SIMULATION_PROPERTY_TICKS);
+        return ticksNode.getNodeValue();
     }
 
     private static class XMLTreeHolder {
@@ -1269,6 +1338,17 @@ public final class XMLTree {
             }
         }
         return "";
+    }
+
+    public void setNetFilePath(String netFileName) {
+        Node simulationNode = _root.getElementsByTagName(XML_SIMULATION).item(0);
+        NamedNodeMap sim_attributrs = simulationNode.getAttributes();
+        for (int i = 0; i < sim_attributrs.getLength(); i++) {
+            String key = (sim_attributrs.item(i).getNodeName());
+            if (key.equalsIgnoreCase(SIMULATION_PROPERTY_NETFILEPATH)) {
+                sim_attributrs.item(i).setNodeValue(DATA_PATH + netFileName);
+            }
+        }
     }
 
     public String getRoutingAlgorithmDataPath() {

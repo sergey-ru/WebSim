@@ -14,13 +14,22 @@
         <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
         <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
 
+        <!--  Layout -->
+        <script type="text/javascript" src="JS/jquery.layout-latest.js"></script> 
+
         <!--  Tree View -->
         <link rel="stylesheet" href="Included/TreeView/jquery.treeview.css" />
         <script src="Included/TreeView/jquery.cookie.js" type="text/javascript"></script>
         <script src="Included/TreeView/jquery.treeview.js" type="text/javascript"></script>
         <script type="text/javascript" src="Included/TreeView/demo.js"></script>
 
+        <!-- ajax queue: call ajax calls in order -->
+        <script type="text/javascript" src="JS/jquery.ajaxQueue.js"></script>
+        <script type="text/javascript" src="JS/ajaxQueue.js"></script>
+
         <link rel="stylesheet" href="Style.css">
+        <!-- init simulator -->
+        <script type="text/javascript" src="JS/initialization.js"></script>  
         <!-- tree and tabs control -->
         <script type="text/javascript" src="JS/gui.Control.js"></script>
         <!-- simulation methods -->
@@ -28,60 +37,18 @@
         <!-- tree methods -->
         <script type="text/javascript" src="JS/tree.Control.js"></script>
 
-
-        <!-- ajax queue: call ajax calls in order -->
-        <script type="text/javascript" src="JS/jquery.ajaxQueue.js"></script>
-        <script type="text/javascript" src="JS/ajaxQueue.js"></script>
-
-        <!-- <script type="text/javascript" src="js/jquery.blockUI.js"></script>-->
-
+        <!-- jansy bootstrap for more style (file upload) -->
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.0.1-p7/css/bootstrap.min.css">
+        <!-- original bootstrap for styling -->
         <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
 
     </head>
     <body>
 
+        <div class="ui-layout-center">
 
-        <!-- HEADER -->
-        <div>
-            <h1><p>Simulator</p></h1>
-            <div id="sessionId"></div>
-            <hr/>
-        </div>
+            <!--CONTENT-->
 
-        <!--MENU-->
-        <div id="treeMenu">
-
-            <button type="button" id="saveTree" class="btn btn-default btn-sm">Save Experiment</button>
-            <p></p>
-
-            <div id="loadingmessage">
-                <img id="loadingmessageSrc" src="Images/ajax-loader.gif"/>
-            </div>
-
-            <!-- For expanding the xml tree-->
-            <div id="treecontrol">
-                <a href="#" id="collapTree">a</a>
-                <a href="#" id="expandTree">b</a>
-                <a href="#">c</a>
-            </div>
-
-            <ul id="red" class="treeview-gray">
-                <%
-                    XMLTree m = XMLTree.getInstance();
-                    out.println(m.getResult());
-                %>
-            </ul>
-
-            <div id="TreeValidation">
-                <div id="ifTreeValidDiv" class="alert alert-success">The Tree Is Valid</div>
-            </div>
-        </div>
-
-        <!--space between menu and content-->
-        <div id="spaceMenuContent"></div>
-
-        <!--CONTENT-->
-        <div id="content">
             <!--Tab menu by bootstrap-->
             <div id="myTabs">   
                 <ul class="nav nav-tabs" id="myTab">
@@ -97,13 +64,22 @@
                 <div class="tab-pane fade in active" id="home">
                     <p>
                     <div id="RunSimDiv">
+
                         <h3> Step 1.a: </h3>
                         Select XML Simulator Scenario File To Simulate or create a new:
                         <br/><br/>
 
                         <table border="0">
                             <tr>
-                                <td><input type="file" name="sampleFile" id="sampleFile"></td>
+                                <td style="width: 200px; margin-top: 10px;">
+                                    <div class="fileinput fileinput-new" data-provides="fileinput">
+                                        <span class="btn btn-primary btn-file"><span class="fileinput-new">Select file</span><span class="fileinput-exists">Change</span>
+                                            <input type="file" name="sampleFile" id="sampleFile">
+                                        </span>
+                                        <span class="fileinput-filename"></span>
+                                        <a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
+                                    </div>
+                                </td>
                                 <td><button type="button" id="UploadFileButton" onclick="uploadNewXmlTree();" class ="btn btn-primary" accept=".xml">Upload</button></td>
                             </tr>
                         </table>
@@ -149,8 +125,11 @@
 
                             <br/>
                             <div class="row">
-                                <div class="col-md-4">
+                                <div class="col-md-1">
                                     <button type="submit" id="SavePropertyChanges" class="btn btn-primary">Save</button>
+                                </div>
+                                <div class="col-md-2">
+                                    <div id="saveResult"></div>
                                 </div>
                             </div>
                         </form>
@@ -173,12 +152,12 @@
                                 <td id="7td"><button type="button" id="pause" class="btn btn-primary doAction" disabled="disabled"><span class="glyphicon glyphicon-pause"></span> Pause</button></td>
                                 <td id="ticksTd"><div id="sliderVal">Tick = 0 Seconds</div><div id="slider"></div></td>
                                 <td id="nodesTd"><div id="sliderNodesVal"></div><div id="sliderNodes"></div></td>
-                                <td id="simConsol"><div id="output"></div> <div id="output2"></div><div id="output3"></div><div id="output4"></div><div id="output5"></div></td>
+                                <td id="simConsol"><div id="output"></div></div></td>
                             </tr>
                         </table>
 
                         <!-- Graph -->
-                        <iframe id="iframeID" src="SimGui/demo/netchart/SimViewGraph.html" height="740" width="99%" frameborder="0"></iframe>
+                        <iframe id="iframeID" src="Graph/SimViewGraph.html" height="740" width="99%" frameborder="0"></iframe>
                         <div id="output6"></div>
                     </div>
                 </div>
@@ -191,47 +170,61 @@
                             </center>
                         </div>
                     </div>  
-
-                    <div class="tab-pane fade" id="view">
-                        <div id="ViewSimulatorDiv">
-
-                            <!-- Graph Control -->
-                            <table border="0" style="width: 100%;">
-                                <tr>
-                                    <td id="scenarioNameTd"><span id="scenarioNumberInfo"></span></td>
-                                    <td id="1td"><button type="button" id="runInitRules" class="btn btn-primary doAction"><span class="glyphicon glyphicon-play"></span> Run Init</button></td>
-                                    <td id="2td"><button type="button" id="runOneStepInScenario" class="btn btn-primary  doAction" disabled="disabled"><span class="glyphicon glyphicon-step-forward"></span> Run One Step</button></td>
-                                    <td id="3td"><button type="button" id="runFullScenario" class="btn btn-primary doAction" disabled="disabled"><span class="glyphicon glyphicon-play"></span> Run Full Scenario</button></td>
-                                    <td id="4td"><button type="button" id="nextScenario" class="btn btn-primary doAction" disabled="disabled"><span class="glyphicon glyphicon-chevron-right"></span> Next Scenario</button></td>
-                                    <td id="5td"><button type="button" id="restart" class="btn btn-primary doAction"><span class="glyphicon glyphicon-repeat"></span> Restart</button></td>
-                                    <td id="6td"><button type="button" id="runFullTime" class="btn btn-primary  doAction"><span class="glyphicon glyphicon-play"></span> Run Full With Time</button></td>
-                                    <td id="7td"><button type="button" id="pause" class="btn btn-primary doAction" disabled="disabled"><span class="glyphicon glyphicon-pause"></span> Pause</button></td>
-                                    <td id="ticksTd"><div id="sliderVal">Tick = 0 Seconds</div><div id="slider"></div></td>
-                                    <td id="openNodesTd"><div id="sliderNodesVal"></div><div id="sliderNodes"></div></td>
-                                    <td id="simConsol"><div id="output"></div> <div id="output2"></div><div id="output3"></div><div id="output4"></div><div id="output5"></div></td>
-                                </tr>
-                            </table>
-
-                            <!-- Graph -->
-                            <iframe id="iframeID" src="SimGui/demo/netchart/SimViewGraph.html" height="740" width="99%" frameborder="0"></iframe>
-                            <div id="output6"></div>
-                        </div>
-                    </div>
-
-                    <div class="tab-pane fade" id="stat">
-                        <div id="StatisticsDiv">
-                            <div class="center">
-                                <center>
-                                    <iframe id="iframeStat" src="" height="740" width="99%" frameborder="0"></iframe>
-                                </center>
-                            </div>
-                        </div>  
-                    </div>
-
                 </div>
-
             </div>
         </div>
+    </div>
+
+    <div class="ui-layout-north">
+
+        <!-- HEADER -->
+        <h2>Simulator</h2>
+        <div id="sessionId"></div>
+    </div>
+
+    <div class="ui-layout-east">
+
+        <div class="ui-layout-center">
+            <span id="state"></span>
+        </div>
+        <div class="ui-layout-south">
+            <iframe id="iframeStat" src="Chart/Chart.html" height="740" width="99%" frameborder="0"></iframe>
+        </div>
+
+    </div>
+
+    <div class="ui-layout-west">
+
+        <!--MENU-->
+        <div id="treeMenu">
+
+            <a href="downloadFileServlet" class="btn btn-default btn-sm">Download Experiment</a>
+            <div id="errroDownload"></div>
+            <p></p>
+
+            <div id="loadingmessage">
+                <img id="loadingmessageSrc" src="Images/ajax-loader.gif"/>
+            </div>
+
+            <!-- For expanding the xml tree-->
+            <div id="treecontrol">
+                <a href="#" id="collapTree">a</a>
+                <a href="#" id="expandTree">b</a>
+                <a href="#">c</a>
+            </div>
+
+            <ul id="red" class="treeview-gray">
+                <%
+                    XMLTree m = XMLTree.getInstance();
+                    out.println(m.getResult());
+                %>
+            </ul>
+
+            <div id="TreeValidation">
+                <div id="ifTreeValidDiv" class="alert alert-success">The Tree Is Valid</div>
+            </div>
+        </div>
+
     </div>
 
 
@@ -255,6 +248,8 @@
     </div><!-- /.modal --> 
 
 </body>
-<!-- Include all compiled plugins (below), or include individual files as needed -->
-<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+<!-- original bootstrap js -->
+<!--<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>-->
+<!-- jansy bootstrap js -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.0.1-p7/js/bootstrap.min.js"></script>
 </html>

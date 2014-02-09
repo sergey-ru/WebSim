@@ -5,7 +5,7 @@
     Author     : Keren Fruchter
 */
 body, html {
-    padding:0px 0px 5px 0px;
+    padding:0px 0px 0px 0px;
     margin:0px 0px 0px 0px;
 }
 
@@ -16,6 +16,18 @@ td, th {
     white-space: nowrap;
 }
 
+.success {
+    margin-top: 5px;
+    font-size: small;
+    color: green;
+}
+
+.danger {
+    margin-top: 5px;
+    font-size: small;
+    color: red;
+}
+
 #menu {
     height:800px;
     width:20%;
@@ -23,9 +35,21 @@ td, th {
 }
 #content {
     height:800px;
-    width:80%;
-    float:left;
 }
+
+#RunSimDiv {
+    width:80%;
+}
+
+#waitToLoad {
+    height: 5px;
+    margin-top: 3px;
+}
+
+#netFileDiv {
+    height: 5px;
+}
+
 p {
     margin: 20px 20px 20px 20px;
 }
@@ -68,8 +92,7 @@ div.growlUI h2 {
 }
 
 #treeMenu {
-    float: left; 
-    width: 12%;
+   
 }
 
 #loadingmessage {
@@ -113,7 +136,7 @@ div.growlUI h2 {
 }
 
 #scenarioNameTd {
-    width: 15%;
+    width: 10%;
     text-align: center;
     font-size: large;
     font-weight: bold;
@@ -127,16 +150,16 @@ div.growlUI h2 {
     text-align: center;
 }
 
-#openNodesTd {
-    width: 10%; 
-    text-align: center;
-}
-
 #slider {
     float: top;
     clear: inherit;
     width: 90%;
     margin:5px 5px 5px 5px;
+}
+
+#nodesTd {
+    width: 10%; 
+    text-align: center;
 }
 
 #sliderNodes {
@@ -147,7 +170,7 @@ div.growlUI h2 {
 }
 
 #simConsol {
-    width: 10%; 
+    width: 3%; 
     text-align: center;
 }
 
@@ -177,4 +200,8 @@ div.growlUI h2 {
 
 #7td {
 
+}
+
+.table{
+    width: 100%;
 }

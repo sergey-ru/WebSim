@@ -36,6 +36,11 @@ public class SimServlet extends HttpServlet {
     @Override
     // load xml file sim scenario
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        _requests.loadNewXml(request, response);
+        String theRequest = request.getParameter("request");
+        if (theRequest.equalsIgnoreCase("netFile")) {
+            _requests.returnResponse(response, _requests.loadNetFile(request, response));
+        } else {
+            _requests.returnResponse(response, _requests.loadNewXml(request, response));
+        }
     }
 }

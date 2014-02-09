@@ -6,10 +6,21 @@ $(document).ready(function() {
 
     // load the edited tree menu to the simulator
     $('#loadTreeToSim').click(function(event) {
-        $.get('SimServlet', {request: "SaveTree"}, function(responseText) {
+        $('#waitToLoad').text("Please wait...");
+
+        $.get('SimServlet', {request: "validateAndInitTree"}, function(responseText) {
             // only if tree is valid
+            $('#waitToLoad').text("");
             $("#viewgui").removeAttr("disabled");
+            $("#viewTab").removeAttr("disabled");
         });
+
+//        $.get('SimServlet', {request: "SaveTree"}, function(responseText) {
+//            // only if tree is valid
+//            $('#waitToLoad').text("");
+//            $("#viewgui").removeAttr("disabled");
+//            $("#viewTab").removeAttr("disabled");
+//        });
     });
 
     // new tree
@@ -23,8 +34,17 @@ $(document).ready(function() {
         saveTree();
     });
 
+
     // Save Changes in XML Tree
     $('#SavePropertyChanges').click(function(event) {
+        /*
+         * Do not use "serialize" bacause there are objects
+         * such "file" that you dont want to save here,
+         * but only after "upload" button, and serialize will take 
+         * it anyways and will update it.
+         */
+
+
         // prevent from the page to refresh after click
         event.preventDefault();
         var elementToSave;
@@ -33,7 +53,6 @@ $(document).ready(function() {
         var info = [];
         var elementIndex = 1; // always
         var i = 0;
-        $("#viewgui").attr("disabled", "disabled");
 
         // If it is a Init save, there is a select to save
         actionSelect = $("#ActionSelect option:selected").attr("id");
@@ -67,11 +86,10 @@ $(document).ready(function() {
         }
 
         // all text input
-        $("#form1 input[type=text]").each(function() {;
+        $("#form1 input[type=text]").each(function() {
             info[i] = this.id + "::" + this.value;
             i++;
         });
-
 
         var parseInfo = "";
         for (var i = 0; i < info.length; i++) {
@@ -136,7 +154,7 @@ $(document).ready(function() {
 
 function ifTreeIsValid() {
     $.get('SimServlet', {request: "IfTreeIsValid"}, function(responseText) {
-        alert(responseText);
+        //alert(responseText);
         if (responseText == "true") {
             $("#ifTreeValidDiv").attr("class", "alert alert-success");
             $("#ifTreeValidDiv").text("The Tree Is Valid");
@@ -145,7 +163,7 @@ function ifTreeIsValid() {
             $("#viewgui").attr("disabled", "disabled");
             $("#ifTreeValidDiv").attr("class", "alert alert-danger");
             $.get('SimServlet', {request: "getParserTreeErrorMessage"}, function(responseText) {
-               $("#ifTreeValidDiv").html("Tree Is Not Valid!<br/><div style=\"font-size: 10px;\">" + responseText + "</div>"); 
+                $("#ifTreeValidDiv").html("Tree Is Not Valid!<br/><div style=\"font-size: 10px;\">" + responseText + "</div>");
             });
         }
         $('#expandTree').trigger("click");
@@ -153,18 +171,36 @@ function ifTreeIsValid() {
 }
 
 // upload new xml file
-function upl() {
+function uploadNewXmlTree() {
     $(document).ready(function() {
         $("#viewgui").attr("disabled", "disabled");
         var sampleFile = document.getElementById("sampleFile").files[0];
         var formdata = new FormData();
         formdata.append("sampleFile", sampleFile);
         var xhr = new XMLHttpRequest();
-        xhr.open("POST", "SimServlet", true);
+        xhr.open("POST", "SimServlet?request=newxmlTree", true);
         xhr.send(formdata);
         xhr.onload = function(e) {
             if (this.status == 200) {
                 LoadXmlMenuTree("true");
+            }
+        };
+    });
+}
+
+// upload new net file
+function uploadNetFile() {
+    $(document).ready(function() {
+        $("#viewgui").attr("disabled", "disabled");
+        var sampleFile = document.getElementById("NetFilePath").files[0];
+        var formdata = new FormData();
+        formdata.append("sampleFile", sampleFile);
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "SimServlet?request=netFile", true);
+        xhr.send(formdata);
+        xhr.onload = function(e) {
+            if (this.status == 200) {
+                $("#netFileDiv").text("Net file uploaded successfully.");
             }
         };
     });
@@ -294,7 +330,7 @@ function editSimulationProperty() {
     // ask about the Simulation property
     $.get('SimServlet', {request: "SimulationProperty", element: "simulation"}, function(responseText) {
         var res = responseText.split(",,");
-        for (var i = 0; i < 4; i++) {
+        for (var i = 0; i < res.length - 1; i++) {
             v0 = res[i].split("::");
             var input1 = '<div class="row">' +
                     '<div class="col-md-2">' +
@@ -304,18 +340,32 @@ function editSimulationProperty() {
                     v0[0] +
                     '</label>' +
                     '</div>' +
-                    '<div class="col-md-10">' +
-                    '<input type="text" class="form-control input-sm" ' +
-                    'id="' + v0[0] + '" value="' +
-                    v0[1] +
-                    '">' +
-                    '</div>' +
-                    '</div><p></p>';
+                    '<div class="col-md-10">';
+
+            if (v0[0] == "NetFilePath") {
+                input1 += '<input type="file" ' +
+                        'id="' + v0[0] + '" ' +
+                        'name="' + v0[0] + '" ' +
+                        'value="' + v0[1] + '">' +
+                        '<button type="button" onclick="uploadNetFile();" class="btn btn-primary">Upload</button>' + 
+                        '<div id="netFileDiv"></div>' + 
+                        '</div>' +
+                        '</div><p></p>';
+            }
+            else
+            {
+                input1 += '<input type="text" class="form-control input-sm" ' +
+                        'id="' + v0[0] + '" ' +
+                        'name="' + v0[0] + '" ' +
+                        'value="' + v0[1] + '">' +
+                        '</div>' +
+                        '</div><p></p>';
+            }
             htmlcode = htmlcode + input1;
         }
 
         // add the code
-        htmlcode = htmlcode + '<input id="name" type="hidden" value="' + node + '" name="name">';
+        htmlcode = htmlcode + '<input id="name" type="hidden" value="' + "simulation" + '" name="name">';
         $('#AllFormDynamicInputs').html(htmlcode);
         $('#EditNodeDivLoading').hide();
         $('#EditNodeDivShow').show();
@@ -374,9 +424,9 @@ function editStatisticListenerProperty(node) {
                     '</div>' +
                     '<div class="col-md-10">' +
                     '<input type="text" class="form-control input-sm" ' +
-                    'id="' + pList[0] + '" value="' +
-                    pList[1] +
-                    '">' +
+                    'id="' + pList[0] + '" ' +
+                    'name="' + pList[0] + '" ' +
+                    'value="' + pList[1] + '">' +
                     '</div>' +
                     '</div><p></p>';
         }
@@ -405,6 +455,7 @@ function edirRoutingProperty(node) {
                 '</label>' +
                 '</div>' +
                 '<div class="col-md-10">';
+
         if (choosen[1] == 'true') {
             htmlcode += '<div class="btn-group" data-toggle="buttons">' +
                     '<label class="btn btn-default active">' +
@@ -441,8 +492,9 @@ function edirRoutingProperty(node) {
                     '</div>' +
                     '<div class="col-md-10">' +
                     '<input type="text" class="form-control input-sm" ' +
-                    'id="' + pList[0] + '" value="' +
-                    pList[1] +
+                    'id="' + pList[0] + '" ' +
+                    'name="' + pList[0] + '" ' +
+                    'value="' + pList[1] + '">' +
                     '">' +
                     '</div>' +
                     '</div><p></p>';
@@ -474,9 +526,9 @@ function editScenarioProperty(node) {
                 '</div>' +
                 '<div class="col-md-10">' +
                 '<input type="text" class="form-control input-sm" ' +
-                'id="Name" value="' +
-                v0[1] +
-                '">' +
+                'id="Name" ' +
+                'name="Name" ' +
+                'value="' + v0[1] + '">' +
                 '</div>' +
                 '</div><p></p>';
         // add code on/off
@@ -506,7 +558,7 @@ function editInitProperty(node) {
                 '</div>' +
                 '<div class="col-md-10">' +
                 '<input type="text" class="form-control input-sm" ' +
-                'id="Name" value="' +
+                'id="Name" name="Name" value="' +
                 InitNamKeyVal[1] +
                 '">' +
                 '</div>' +
@@ -565,7 +617,7 @@ function edirExDevLinkProperty(node) {
     tmpNode = tmpNode.replace("link", "");
     index = tmpNode;
     // find type
-    
+
     type1 = node.replace(index, "");
     $.get('SimServlet', {request: "DeviceExLinkProperty", index: index, type: type1}, function(responseText) {
 
@@ -575,7 +627,7 @@ function edirExDevLinkProperty(node) {
         selectedFullPathClass = selectedFullPathClass[1];
         var orderVal;
         var selectVal;
-        
+
         // find order and select
         for (var i = 1; i < res.length - 1; i++) {
             var tmpOrderSelect = res[i].split("::");
@@ -597,7 +649,7 @@ function edirExDevLinkProperty(node) {
                 '</div>' +
                 '<div class="col-md-10">' +
                 '<input type="text" class="form-control input-sm" ' +
-                'id="Name" value="' +
+                'id="Name" name="Name" value="' +
                 DevNamKeyVal[1] +
                 '">' +
                 '</div>' +
@@ -613,7 +665,7 @@ function edirExDevLinkProperty(node) {
                 '</div>' +
                 '<div class="col-md-10">' +
                 '<input type="text" class="form-control input-sm" ' +
-                'id="Order" value="' +
+                'id="Order" name="Order" value="' +
                 orderVal +
                 '">' +
                 '</div>' +
@@ -629,11 +681,12 @@ function edirExDevLinkProperty(node) {
                 '</div>' +
                 '<div class="col-md-10">' +
                 '<input type="text" class="form-control input-sm" ' +
-                'id="Select" value="' +
+                'id="Select" name="Select" value="' +
                 selectVal +
                 '">' +
                 '</div>' +
                 '</div><p></p>';
+
         htmlcode += '<div class="row">' +
                 '<div class="col-md-2">' +
                 '<label id="NameLabel" ' +
@@ -644,6 +697,7 @@ function edirExDevLinkProperty(node) {
                 '</div>' +
                 '<div class="col-md-10">' +
                 '<select class="form-control" id="ActionSelect">';
+
         for (var i = 1; i < res.length - 1; i++) {
             //alert("res: " + res[i]);
             var listofclass = res[i].split("::");

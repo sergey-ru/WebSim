@@ -3,18 +3,25 @@ $(function() {
 });
 
 $(document).ready(function() {
+    /*
+     * Initialization
+     */
+
     // hide edit properties
     $('#EditNodeDivShow').hide();
     $('#EditNodeDivHide').show();
     $('#ViewSimulatorDiv').hide();
     $('#expandTree').trigger("click");
     $("#viewgui").attr("disabled", "disabled");
+    $('#viewTab').attr("disabled", "disabled");
 
+    // create new tree 
+     newTree();
 
-    // SIMULATOR INIT
-    $.get('SimServlet', {request: "runBaseInit"}, function(responseText) {
-    });
-    
+    // simulation init
+    //$.get('SimServlet', {request: "runBaseInit"}, function(responseText) {
+    //});
+
     // init session id
     $.get('SimServlet', {request: "initSession"}, function(responseText) {
         $("#sessionId").text(responseText);
@@ -36,8 +43,12 @@ $(document).ready(function() {
         }
     });
 
-    // ----- CLICK EVENT HANDLE -------
-    // hide manu tab
+    /*
+     * End Initialization
+     */
+
+    // ----- click event handle -------
+
     $('#simTab').click(function(event) {
         $('#EditNodeDivShow').hide();
         $('#ViewSimulatorDiv').hide();
@@ -74,14 +85,8 @@ $(document).ready(function() {
 
         $('#ViewSimulatorDiv').show();
 
-        /////////// INIT /////////////
-        // run the base init of the simulator (reading net and init simenvironment)
-        //$.get('SimServlet', {request: "runBaseInit"}, function(responseText) {
-        // nothing.
         $.get('SimServlet', {request: "getNextScenarioName"}, function(responseText) {
-            //alert(responseText);
             $('#scenarioNumberInfo').text(responseText);
         });
-        // });
     });
 });  

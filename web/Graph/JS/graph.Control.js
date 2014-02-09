@@ -38,6 +38,7 @@ $('#viewgui', parent.document).click(function(event) {
         if (request.status === 200) {
             jsonFilePath = request.responseText;
             jsonFilePath = jsonFilePath.replace("&#10;", "");
+            alert(jsonFilePath);
         }
 
         chartOptions = {

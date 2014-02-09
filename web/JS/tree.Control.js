@@ -193,7 +193,7 @@ function uploadNetFile() {
         xhr.send(formdata);
         xhr.onload = function(e) {
             if (this.status == 200) {
-                if (xhr.responseText == "true")
+                if (xhr.responseText == "true&#10;")
                     $("#netFileDiv").html("<div class=\"success\">Net file uploaded successfully.</div>");
                 else
                     $("#netFileDiv").html("<div class=\"danger\">Net file were not uploaded. Please try another net file.</div>");

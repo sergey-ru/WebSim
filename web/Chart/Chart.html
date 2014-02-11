@@ -10,24 +10,25 @@
         <script type="text/javascript" src="JS/jquery.flot.js"></script>
         <script type="text/javascript">
 
-            $(function() {
+            parent.top.$('#runOneStepInScenario, #runFullScenario, #runFullTime').click(function(event) {
+                // data source fetched from the server
 
-                // We use an inline data source in the example, usually data would
-                // be fetched from a server
+                var data1 = [], data2 = [], data3 = [], data4 = [], data5 = [];
+                var data = new Array([]);
+                var totalPoints = 300;
+                var countRow = 0;
 
-                var data = [],
-                        totalPoints = 300;
 
-                function getRandomData() {
+                function getRandomData1() {
 
-                    if (data.length > 0)
-                        data = data.slice(1);
+                    if (data1.length > 0)
+                        data1 = data1.slice(1);
 
                     // Do a random walk
 
-                    while (data.length < totalPoints) {
+                    while (data1.length < totalPoints) {
 
-                        var prev = data.length > 0 ? data[data.length - 1] : 50,
+                        var prev = data1.length > 0 ? data1[data1.length - 1] : 50,
                                 y = prev + Math.random() * 10 - 5;
 
                         if (y < 0) {
@@ -36,17 +37,85 @@
                             y = 100;
                         }
 
-                        data.push(y);
+                        data1.push(y);
                     }
 
                     // Zip the generated y values with the x values
 
                     var res = [];
-                    for (var i = 0; i < data.length; ++i) {
-                        res.push([i, data[i]])
+                    for (var i = 0; i < data1.length; ++i) {
+                        res.push([i, data1[i]]);
                     }
 
                     return res;
+                }
+
+                function getData() {
+                    var request = new XMLHttpRequest();
+                    request.open('GET', '/Simulator/SimServlet?request=getChartStatistics', false);
+                    request.send(null);
+                    if (request.status === 200) {
+
+                        var tags = $.parseJSON(request.responseText);
+
+                        alert("request.responseText: " + request.responseText);
+                        alert("tags: " + tags);
+
+                        var countColumn = 0;
+
+                        // init only first for checking
+                        if (!data[0]) {
+                            data[0] = new Array();
+                        }
+
+
+                        // cut one so we can add new one for the running chart
+                        if (data[0].length >= totalPoints) {
+//                            for (var i = 0; i < tags[headline].length; i++) {
+//                                data[i] = data[i].slice(1);
+//                            }
+                            return;
+                        }
+
+                        countColumn = 0;
+                        for (var headline in tags) {
+
+                            alert("tags[headline].length: " + tags[headline].length);
+                            for (var i = 0; i < tags[headline].length; i++) {
+
+                                //if (needInit) {
+                                //data.push([]);
+                                //}
+                                //alert("inserting: " + tags[headline][i]);
+                                //alert("to: " + data[countColumn]);
+
+                                if (!data[countColumn]) {
+                                    data[countColumn] = new Array([]);
+                                    //alert("to2: " + data[countColumn]);
+                                }
+
+                                data[countColumn].push([countRow, tags[headline][i]]);
+                                alert("inserting to data[" + countColumn + "] = [" + countRow + "," + tags[headline][i] + "]");
+
+                                countColumn++;
+                            }
+                        }
+                        countRow++;
+
+                        // debug
+                        var k = 0;
+                        for (var headline in tags) {
+                            alert(k + ": " + data[k]);
+                            k++;
+                        }
+
+
+                        //data = data.replace("[", "");
+
+                        //for (var i = 0; i < data2.length; ++i) {
+                        //    res.push([i, data2[i]]);
+                        // }
+                    }
                 }
 
                 // Set up the control widget
@@ -65,7 +134,7 @@
                     }
                 });
 
-                var plot = $.plot("#placeholder", [getRandomData()], {
+                var plot = $.plot("#placeholder", [{data: data[1], label: "1"}, {data: data[2], label: "2"}], {
                     series: {
                         shadowSize: 0	// Drawing is faster without shadows
                     },
@@ -79,25 +148,20 @@
                 });
 
                 function update() {
-
-                    plot.setData([getRandomData()]);
+                    getData();
+                    plot.setData([{data: data[1], label: "1"}, {data: data[2], label: "2"}]);
 
                     // Since the axes don't change, we don't need to call plot.setupGrid()
-
                     plot.draw();
                     setTimeout(update, updateInterval);
                 }
 
                 update();
-
-                // Add the Flot version string to the footer
-
             });
 
         </script>
     </head>
     <body>
-
 
         <div id="content">
             <div class="demo-container">

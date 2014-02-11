@@ -1,3 +1,7 @@
+/* 
+ * Control Simulation Functions
+ */
+
 $(document).ready(function() {
     var ifPause = false;
     var ticks = 0;
@@ -27,6 +31,7 @@ $(document).ready(function() {
             $("#runFullTime").removeAttr("disabled");
             $.get('SimServlet', {request: "getNextScenarioName"}, function(responseText) {
                 $('#scenarioNumberInfo').text(responseText);
+                $("#output").text(0); // ticks
             });
         });
     });
@@ -228,11 +233,6 @@ $(document).ready(function() {
         // handle errors
         errorHandler: function() {
             if (++this.failed < 10) {
-
-                // give the server some breathing room by
-                // increasing the interval
-                //this.interval += 1000;
-
                 // recurse
                 this.init();
             }

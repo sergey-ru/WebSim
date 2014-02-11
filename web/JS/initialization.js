@@ -40,7 +40,7 @@ $(document).ready(function() {
         }
     });
 
-//
+    // Layout
     $('body').layout({
         applyDemoStyles: true
         , minSize: 100	// ALL panes

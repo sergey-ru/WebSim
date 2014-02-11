@@ -22,6 +22,8 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import static sim.web.utils.Constans.*;
 import static bgu.sim.Properties.StringsProperties.*;
 import org.josql.QueryExecutionException;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 /**
  *
@@ -91,10 +93,10 @@ public class HandleRequests {
 
                     break;
                 case "getTicksNumber":
-                    
+
                     m = XMLTree.getInstance();
                     response.getWriter().write(m.getTicksNumber());
-                    
+
                     break;
                 case "getNextScenarioName":
 
@@ -225,12 +227,17 @@ public class HandleRequests {
 
                     break;
                 case "getStatistics":
-                    
+
                     getStatistics(response);
 
                     break;
+                case "getChartStatistics":
+
+                    getChartStatistics(response);
+
+                    break;
                 case "getMessages":
-                    
+
                     getMessages(response);
 
                     break;
@@ -281,6 +288,49 @@ public class HandleRequests {
 
         allRows = allRows.substring(0, allRows.length() - 1);
         response.getWriter().write(allRows);
+    }
+
+    private void getChartStatistics(HttpServletResponse response) throws IOException {
+        String allRows = "";
+        JSONObject obj = new JSONObject();
+
+        JSONArray list1 = new JSONArray();
+        JSONArray list2 = new JSONArray();
+        JSONArray list3 = new JSONArray();
+        JSONArray list4 = new JSONArray();
+        JSONArray list5 = new JSONArray();
+
+        Map<Integer, StatisticsDataStruct> stats = SimApi.getStatistics();
+
+        for (int i = 2; i < stats.size(); i++) {
+            StatisticsDataStruct ListAndScenarioNumber = stats.get(i);
+            List<String> list = ListAndScenarioNumber.newList;
+
+            allRows += list.toString() + ",";
+
+            //-------------------------
+
+            list1.add(list.get(0));
+            list2.add(list.get(1));
+            list3.add(list.get(2));
+            list4.add(list.get(3));
+            //list3.add(list.get(4));
+
+        }
+
+        if (stats.size() > 1) {
+            StatisticsDataStruct ListAndScenarioNumber = stats.get(1);
+            List<String> list = ListAndScenarioNumber.newList;
+
+            obj.put(list.get(0), list1);
+            obj.put(list.get(1), list2);
+            obj.put(list.get(2), list3);
+            obj.put(list.get(3), list4);
+           // obj.put(list.get(4), list5);
+        }
+
+        allRows = allRows.substring(0, allRows.length() - 1);
+        response.getWriter().write(obj.toJSONString());
     }
 
     private void validateInitTree(HttpServletResponse response) throws IOException, Exception {

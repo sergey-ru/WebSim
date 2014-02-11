@@ -1,3 +1,7 @@
+/* 
+ * GUI Methods
+ */
+
 $(document).ready(function() {
     // ----- click event handle -------
 

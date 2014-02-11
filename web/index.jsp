@@ -24,8 +24,8 @@
         <script type="text/javascript" src="JS/TreeView/demo.js"></script>
 
         <!-- ajax queue: call ajax calls in order -->
-        <script type="text/javascript" src="JS/Layout/jquery.ajaxQueue.js"></script>
-        <script type="text/javascript" src="JS/Layout/ajaxQueue.js"></script>
+        <script type="text/javascript" src="JS/ajaxQueue/jquery.ajaxQueue.js"></script>
+        <script type="text/javascript" src="JS/ajaxQueue/ajaxQueue.js"></script>
 
         <link rel="stylesheet" href="Style.css">
         <!-- init simulator -->
@@ -152,12 +152,12 @@
                                 <td id="7td"><button type="button" id="pause" class="btn btn-primary doAction" disabled="disabled"><span class="glyphicon glyphicon-pause"></span> Pause</button></td>
                                 <td id="ticksTd"><div id="sliderVal">Tick = 0 Seconds</div><div id="slider"></div></td>
                                 <td id="nodesTd"><div id="sliderNodesVal"></div><div id="sliderNodes"></div></td>
-                                <td id="simConsol"><div id="output"></div></div></td>
+                                <td id="simConsol">Tick: <div id="output"></div></div></td>
                             </tr>
                         </table>
 
                         <!-- Graph -->
-                        <iframe id="iframeID" src="Graph/SimViewGraph.html" height="740" width="99%" frameborder="0"></iframe>
+                        <iframe id="iframeID" src="Graph/SimViewGraph.html" height="780" width="99%" frameborder="0"></iframe>
                         <div id="output6"></div>
                     </div>
                 </div>

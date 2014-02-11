@@ -3,7 +3,6 @@
  */
 
 $(document).ready(function() {
-    var html = "";
 
     // load the edited tree menu to the simulator
     $('#loadTreeToSim').click(function(event) {
@@ -11,7 +10,7 @@ $(document).ready(function() {
 
         $.get('SimServlet', {request: "validateAndInitTree"}, function(responseText) {
             // only if tree is valid
-            if (responseText == "true") {
+            if (responseText === "true") {
                 $('#waitToLoad').html("<div class=\"success\"><b>Well done!</b> You successfully loaded the simulation.</div>");
                 $("#viewgui").removeAttr("disabled");
                 $("#viewTab").removeAttr("disabled");
@@ -50,7 +49,7 @@ $(document).ready(function() {
         actionSelect = $("#ActionSelect option:selected").attr("id");
 
         // action
-        if (actionSelect != "" && actionSelect) {
+        if (actionSelect !== "" && actionSelect) {
             info[i] = "Action" + "::" + actionSelect;
             i++;
         }
@@ -60,7 +59,7 @@ $(document).ready(function() {
             elementToSave = this.value;
             var patt1 = /\d+/g;
             var matches = elementToSave.match(patt1);
-            if (matches != null) {
+            if (matches !== null) {
                 elementIndex = matches[0];
                 elementToSave = elementToSave.replace(elementIndex, "");
             }
@@ -71,7 +70,7 @@ $(document).ready(function() {
             radioCheckVal = this.value;
         });
 
-        if (radioCheckVal != "") {
+        if (radioCheckVal !== "") {
             info[i] = "Radio" + "::" + radioCheckVal;
             i++;
         }
@@ -87,14 +86,13 @@ $(document).ready(function() {
             parseInfo = parseInfo + info[i] + ",,";
         }
 
-        //alert(parseInfo);
         $.get('SimServlet', {request: "SaveProperties", elementToSave: elementToSave, elementIndex: elementIndex, info: parseInfo}, function(responseText) {
-            if (responseText.indexOf("remove") != -1) {
+            if (responseText.indexOf("remove") !== -1) {
                 responseText = responseText.replace("remove ", "");
                 var tmp = responseText.split(".");
                 $('span[id^="' + responseText + '"] a').text(tmp[tmp.length - 1]);
             }
-            else if (responseText.indexOf("add") != -1) {
+            else if (responseText.indexOf("add") !== -1) {
                 responseText = responseText.replace("add ", "");
                 var tmp = $('span[id^="' + responseText + '"] a').text();
                 $('span[id^="' + responseText + '"] a').html(tmp + "&#10004;");
@@ -112,8 +110,6 @@ $(document).ready(function() {
         var ScenarioIndex = 1;
         var doModalaction = $('input[name="ModalAction"]').val();
 
-        //alert(doModalaction);
-
         if (doModalaction === "add_to_experiment") {
             $.get('SimServlet', {request: "AddNewScenario"}, function(responseText) {
                 LoadXmlMenuTree("false");
@@ -125,7 +121,7 @@ $(document).ready(function() {
             var patt1 = /\d+/g;
             var matches = ScenarioIndexString.match(patt1);
 
-            if (matches != null) {
+            if (matches !== null) {
                 ScenarioIndex = matches[0];
             }
 
@@ -135,7 +131,7 @@ $(document).ready(function() {
             });
         }
 
-        else if (doModalaction.indexOf("delete_scenario") != -1) {
+        else if (doModalaction.indexOf("delete_scenario") !== -1) {
             // get scenario index
             ScenarioIndex = doModalaction.replace("delete_scenario", "");
             $.get('SimServlet', {request: "DeleteScenario", index: ScenarioIndex}, function(responseText) {
@@ -147,8 +143,8 @@ $(document).ready(function() {
 
 function ifTreeIsValid() {
     $.get('SimServlet', {request: "IfTreeIsValid"}, function(responseText) {
-        //alert(responseText);
-        if (responseText == "true") {
+
+        if (responseText === "true") {
             $("#ifTreeValidDiv").attr("class", "alert alert-success");
             $("#ifTreeValidDiv").text("The Tree Is Valid");
         }
@@ -174,7 +170,7 @@ function uploadNewXmlTree() {
         xhr.open("POST", "SimServlet?request=newxmlTree", true);
         xhr.send(formdata);
         xhr.onload = function(e) {
-            if (this.status == 200) {
+            if (this.status === 200) {
                 LoadXmlMenuTree("true");
             }
         };
@@ -192,8 +188,8 @@ function uploadNetFile() {
         xhr.open("POST", "SimServlet?request=netFile", true);
         xhr.send(formdata);
         xhr.onload = function(e) {
-            if (this.status == 200) {
-                if (xhr.responseText == "true&#10;")
+            if (this.status === 200) {
+                if (xhr.responseText === "true&#10;")
                     $("#netFileDiv").html("<div class=\"success\">Net file uploaded successfully.</div>");
                 else
                     $("#netFileDiv").html("<div class=\"danger\">Net file were not uploaded. Please try another net file.</div>");
@@ -242,6 +238,7 @@ function LoadXmlMenuTree(ifByPath) {
     // Show the loading message
     $('#loadingmessage').show();
     $('#red').hide();
+
     // Load the new xml and parse it to a tree and replace the old tree.
     $.get('SimServlet', {request: "loadXmlTree", ifByPath: ifByPath}, function(responseText) {
         $('#red').html(responseText);
@@ -268,25 +265,16 @@ function createPvaluesByActionPath(fullClassPath, index) {
 
         for (var i = 0; i < pListRes.length - 1; i++) {
             var pList = pListRes[i].split("::");
-            htmlcode = '<div class="row">' +
-                    '<div class="col-md-2">' +
-                    '<label id="Labelp" ' +
-                    'for="' + pList[0] + '" ' +
-                    'class="col-sm-2 control-label">' +
-                    pList[0] +
-                    '</label>' +
-                    '</div>' +
-                    '<div class="col-md-10">' +
-                    '<input type="text" class="form-control input-sm" ' +
-                    'id="' + pList[0] + '" value="' +
-                    pList[1] +
-                    '">' +
-                    '</div>' +
-                    '</div><p></p>';
+
+            htmlBuilder.addRow();
+            htmlBuilder.addLabel(pList[0]);
+            htmlBuilder.addInput(pList[0], pList[1]);
+            htmlBuilder.addEndRow();
         }
 
         // add p and if no p, clean content
-        $('#pValues').html(htmlcode);
+        $('#pValues').html(htmlBuilder.html);
+        htmlBuilder.clear();
     });
 }
 
@@ -306,7 +294,7 @@ function initGuiForEditProperty() {
     $('#home').removeClass("active");
     $('#view').removeClass("active");
     $('#profile').attr("Class", "in active");
-    $('#EditNodeDivHide').hide(); // always hide
+    $('#EditNodeDivHide').hide();
     $('#EditNodeDivShow').hide();
     $('#ViewSimulatorDiv').hide();
     $('#EditNodeDivLoading').show();
@@ -350,7 +338,7 @@ function editStatisticListenerProperty(node) {
         htmlBuilder.addRow();
         htmlBuilder.addLabel("Active");
         htmlBuilder.addStartRadio();
-        
+
         if (choosen[1] === 'true') {
             htmlBuilder.addActiveRadio("On");
             htmlBuilder.addNotActiveRadio("Off");
@@ -359,7 +347,7 @@ function editStatisticListenerProperty(node) {
             htmlBuilder.addNotActiveRadio("On");
             htmlBuilder.addActiveRadio("Off");
         }
-        
+
         htmlBuilder.addEndRadio();
         htmlBuilder.addEndRow();
 
@@ -380,7 +368,7 @@ function editStatisticListenerProperty(node) {
     });
 }
 
-function edirRoutingProperty(node) {
+function editRoutingProperty(node) {
 
     $.get('SimServlet', {request: "RoutingAlgProperties", element: node}, function(responseText) {
 
@@ -390,7 +378,7 @@ function edirRoutingProperty(node) {
         htmlBuilder.addRow();
         htmlBuilder.addLabel("Active");
         htmlBuilder.addStartRadio();
-        
+
         if (choosen[1] === 'true') {
             htmlBuilder.addActiveRadio("On");
             htmlBuilder.addNotActiveRadio("Off");
@@ -399,7 +387,7 @@ function edirRoutingProperty(node) {
             htmlBuilder.addNotActiveRadio("On");
             htmlBuilder.addActiveRadio("Off");
         }
-        
+
         htmlBuilder.addEndRadio();
         htmlBuilder.addEndRow();
 
@@ -421,91 +409,65 @@ function edirRoutingProperty(node) {
 }
 
 function editScenarioProperty(node) {
-    var htmlcode = "";
 
     var index = node.replace("scenario", "");
-    //alert(index);
+
     $.get('SimServlet', {request: "ScenarioProperty", index: index}, function(responseText) {
-        //alert("responseText:" + responseText);
+
         var v0 = responseText.split("::");
-        htmlcode = '<div class="row">' +
-                '<div class="col-md-2">' +
-                '<label id="NameLabel" ' +
-                'for="Name" ' +
-                'class="col-sm-2 control-label">' +
-                v0[0] +
-                '</label>' +
-                '</div>' +
-                '<div class="col-md-10">' +
-                '<input type="text" class="form-control input-sm" ' +
-                'id="Name" ' +
-                'name="Name" ' +
-                'value="' + v0[1] + '">' +
-                '</div>' +
-                '</div><p></p>';
-        // add code on/off
-        htmlcode = htmlcode + '<input id="scenarioname" type="hidden" value="' + node + '" name="scenarioname">';
-        $('#AllFormDynamicInputs').html(htmlcode);
+
+        htmlBuilder.addRow();
+        htmlBuilder.addLabel(v0[0]);
+        htmlBuilder.addInput("Name", v0[1]);
+        htmlBuilder.addEndRow();
+        htmlBuilder.addEnd(node);
+        htmlBuilder.Flush();
+
         $('#EditNodeDivLoading').hide();
         $('#EditNodeDivShow').show();
     });
 }
 
 function editInitProperty(node) {
-    var htmlcode = "";
     var index = node.replace("init", "");
 
     $.get('SimServlet', {request: "InitProperty", index: index}, function(responseText) {
+
         var res = responseText.split(",,");
         var InitNamKeyVal = res[0].split("::");
+
         var selectedFullPathClass = res[res.length - 1].split("::");
         selectedFullPathClass = selectedFullPathClass[1];
-        htmlcode = '<div class="row">' +
-                '<div class="col-md-2">' +
-                '<label id="NameLabel" ' +
-                'for="Name" ' +
-                'class="col-sm-2 control-label">' +
-                InitNamKeyVal[0] +
-                '</label>' +
-                '</div>' +
-                '<div class="col-md-10">' +
-                '<input type="text" class="form-control input-sm" ' +
-                'id="Name" name="Name" value="' +
-                InitNamKeyVal[1] +
-                '">' +
-                '</div>' +
-                '</div><p></p>' +
-                '<div class="row">' +
-                '<div class="col-md-2">' +
-                '<label id="NameLabel" ' +
-                'for="Name" ' +
-                'class="col-sm-2 control-label">' +
-                'Actions' +
-                '</label>' +
-                '</div>' +
-                '<div class="col-md-10">' +
-                '<select class="form-control" id="ActionSelect">';
+
+        htmlBuilder.addRow();
+        htmlBuilder.addLabel(InitNamKeyVal[0]);
+        htmlBuilder.addInput("Name", InitNamKeyVal[1]);
+        htmlBuilder.addEndRow();
+
+        htmlBuilder.addRow();
+        htmlBuilder.addLabel("Actions");
+        htmlBuilder.addStartSelect();
+
         for (var i = 1; i < res.length - 1; i++) {
             var listofclass = res[i].split("::");
             var listAfterDots = listofclass[1].split(".");
 
-            if (listofclass[0] == "ActionList") {
-                if (selectedFullPathClass != listofclass[1]) {
-                    htmlcode += "<option id='" + listofclass[1] + "'>" + listAfterDots[listAfterDots.length - 1] + "</option>";
+            if (listofclass[0] === "ActionList") {
+                if (selectedFullPathClass !== listofclass[1]) {
+                    htmlBuilder.addOption(listofclass[1], listAfterDots[listAfterDots.length - 1], false);
                 }
                 else {
-                    htmlcode += "<option id='" + listofclass[1] + "' selected>" + listAfterDots[listAfterDots.length - 1] + "</option>";
+                    htmlBuilder.addOption(listofclass[1], listAfterDots[listAfterDots.length - 1], true);
                 }
             }
         }
-        htmlcode += '</select></div></div>';
-        htmlcode += '<p></p>';
-        // div for all the p's
-        htmlcode += '<div id="pValues"></div><p></p>';
-        // hidden input for the saving
-        htmlcode += '<input id="initname" type="hidden" value="' + node + '" name="initname">';
-        // add all
-        $('#AllFormDynamicInputs').html(htmlcode);
+
+        htmlBuilder.addEndSelect();
+        htmlBuilder.addEndRow();
+        htmlBuilder.addPValues();
+        htmlBuilder.addEnd(node);
+        htmlBuilder.Flush();
+
         // p in the xml (0..1)
         createPvaluesByActionPath(selectedFullPathClass, index);
         // add method if select chenge, replace the p values
@@ -518,9 +480,7 @@ function editInitProperty(node) {
     });
 }
 
-function edirExDevLinkProperty(node) {
-    var htmlcode = "";
-
+function editExDevLinkProperty(node) {
     var tmpNode = node;
     var type1;
     var index;
@@ -528,8 +488,8 @@ function edirExDevLinkProperty(node) {
     tmpNode = tmpNode.replace("external", "");
     tmpNode = tmpNode.replace("link", "");
     index = tmpNode;
-    // find type
 
+    // find type
     type1 = node.replace(index, "");
     $.get('SimServlet', {request: "DeviceExLinkProperty", index: index, type: type1}, function(responseText) {
 
@@ -543,94 +503,56 @@ function edirExDevLinkProperty(node) {
         // find order and select
         for (var i = 1; i < res.length - 1; i++) {
             var tmpOrderSelect = res[i].split("::");
-            if (tmpOrderSelect[0] == "Order") {
+            if (tmpOrderSelect[0] === "Order") {
                 orderVal = tmpOrderSelect[1];
             }
-            else if (tmpOrderSelect[0] == "Select") {
+            else if (tmpOrderSelect[0] === "Select") {
                 selectVal = tmpOrderSelect[1];
             }
         }
 
-        htmlcode = '<div class="row">' +
-                '<div class="col-md-2">' +
-                '<label id="NameLabel" ' +
-                'for="Name" ' +
-                'class="col-sm-2 control-label">' +
-                DevNamKeyVal[0] +
-                '</label>' +
-                '</div>' +
-                '<div class="col-md-10">' +
-                '<input type="text" class="form-control input-sm" ' +
-                'id="Name" name="Name" value="' +
-                DevNamKeyVal[1] +
-                '">' +
-                '</div>' +
-                '</div><p></p>';
-        // Order
-        htmlcode += '<div class="row">' +
-                '<div class="col-md-2">' +
-                '<label id="OrderLabel" ' +
-                'for="Order" ' +
-                'class="col-sm-2 control-label">' +
-                "Order" +
-                '</label>' +
-                '</div>' +
-                '<div class="col-md-10">' +
-                '<input type="text" class="form-control input-sm" ' +
-                'id="Order" name="Order" value="' +
-                orderVal +
-                '">' +
-                '</div>' +
-                '</div><p></p>';
-        // Select
-        htmlcode += '<div class="row">' +
-                '<div class="col-md-2">' +
-                '<label id="SelectLabel" ' +
-                'for="Select" ' +
-                'class="col-sm-2 control-label">' +
-                "Select" +
-                '</label>' +
-                '</div>' +
-                '<div class="col-md-10">' +
-                '<input type="text" class="form-control input-sm" ' +
-                'id="Select" name="Select" value="' +
-                selectVal +
-                '">' +
-                '</div>' +
-                '</div><p></p>';
+        htmlBuilder.addRow();
+        htmlBuilder.addLabel(DevNamKeyVal[0]);
+        htmlBuilder.addInput("Name", DevNamKeyVal[1]);
+        htmlBuilder.addEndRow();
 
-        htmlcode += '<div class="row">' +
-                '<div class="col-md-2">' +
-                '<label id="NameLabel" ' +
-                'for="Name" ' +
-                'class="col-sm-2 control-label">' +
-                'Actions' +
-                '</label>' +
-                '</div>' +
-                '<div class="col-md-10">' +
-                '<select class="form-control" id="ActionSelect">';
+        //Order
+        htmlBuilder.addRow();
+        htmlBuilder.addLabel("Order");
+        htmlBuilder.addInput("Order", orderVal);
+        htmlBuilder.addEndRow();
+
+        // Select
+        htmlBuilder.addRow();
+        htmlBuilder.addLabel("Select");
+        htmlBuilder.addInput("Select", selectVal);
+        htmlBuilder.addEndRow();
+
+        // Action
+        htmlBuilder.addRow();
+        htmlBuilder.addLabel("Actions");
+        htmlBuilder.addStartSelect();
 
         for (var i = 1; i < res.length - 1; i++) {
-            //alert("res: " + res[i]);
             var listofclass = res[i].split("::");
             var listAfterDots = listofclass[1].split(".");
-            if (listofclass[0] == "ActionList") {
-                if (selectedFullPathClass != listofclass[1]) {
-                    htmlcode += "<option id='" + listofclass[1] + "'>" + listAfterDots[listAfterDots.length - 1] + "</option>";
+
+            if (listofclass[0] === "ActionList") {
+                if (selectedFullPathClass !== listofclass[1]) {
+                    htmlBuilder.addOption(listofclass[1], listAfterDots[listAfterDots.length - 1], false);
                 }
                 else {
-                    htmlcode += "<option id='" + listofclass[1] + "' selected>" + listAfterDots[listAfterDots.length - 1] + "</option>";
+                    htmlBuilder.addOption(listofclass[1], listAfterDots[listAfterDots.length - 1], true);
                 }
             }
         }
-        htmlcode += '</select></div></div>';
-        htmlcode += '<p></p>';
-        // div for all the p's
-        htmlcode += '<div id="pValues"></div><p></p>';
-        // hidden input for the saving
-        htmlcode += '<input id="initname" type="hidden" value="' + node + '" name="initname">';
-        // add all
-        $('#AllFormDynamicInputs').html(htmlcode);
+
+        htmlBuilder.addEndSelect();
+        htmlBuilder.addEndRow();
+        htmlBuilder.addPValues();
+        htmlBuilder.addEnd(node);
+        htmlBuilder.Flush();
+
         // p in the xml (0..1)
         createPvaluesByActionPath(selectedFullPathClass);
         // add method if select chenge, replace the p values
@@ -653,38 +575,39 @@ function EditPropertyJS(node) {
             editSimulationProperty(node);
         }
 
-        else if (node.indexOf("StatisticListener") != -1) {
+        else if (node.indexOf("StatisticListener") !== -1) {
             editStatisticListenerProperty(node);
         }
 
-        else if (node.indexOf("RoutingAlgorithm") != -1) {
-            edirRoutingProperty(node);
+        else if (node.indexOf("RoutingAlgorithm") !== -1) {
+            editRoutingProperty(node);
         }
 
-        else if (node.indexOf("scenario") != -1) {
+        else if (node.indexOf("scenario") !== -1) {
             editScenarioProperty(node);
         }
 
-        else if (node.indexOf("init") != -1) {
+        else if (node.indexOf("init") !== -1) {
             editInitProperty(node);
         }
 
-        else if ((node.indexOf("device") != -1) || (node.indexOf("external") != -1) || (node.indexOf("link") != -1)) {
-            edirExDevLinkProperty(node);
+        else if ((node.indexOf("device") !== -1) || (node.indexOf("external") !== -1) || (node.indexOf("link") !== -1)) {
+            editExDevLinkProperty(node);
         }
 
-        else if (node.indexOf("experiment") != -1) {
+        else if (node.indexOf("experiment") !== -1) {
             // nothing. dont show #EditNodeDivShow div.
             $('#EditNodeDivLoading').hide();
         }
 
         else {
-            var htmlcode = '<label id="Key" for="Value" class="col-sm-2 control-label">' + node + '</label>' +
-                    '<div class="col-sm-10">' +
-                    '<input type="text" class="form-control" id="Value" placeholder="">' +
-                    '</div>';
-            htmlcode = htmlcode + '<input id="name" type="hidden" value="' + node + '" name="name">';
-            $('#AllFormDynamicInputs').html(htmlcode);
+
+            htmlBuilder.addLabel(node);
+            htmlBuilder.addInput("Value", "");
+            htmlBuilder.addEnd(node);
+            htmlBuilder.Flush();
+
+            // $('#AllFormDynamicInputs').html(htmlcode);
             $('#EditNodeDivLoading').hide();
             $('#EditNodeDivShow').show();
         }
@@ -743,6 +666,22 @@ var htmlBuilder = {
     addEndRow: function() {
         this.html += '</div><p></p>';
     },
+    addStartSelect: function() {
+        this.html += '<div class="col-md-10">' +
+                '<select class="form-control" id="ActionSelect">';
+    },
+    addEndSelect: function() {
+        this.html += '</select></div>';
+    },
+    addPValues: function() {
+        this.html += '<div id="pValues"></div><p></p>';
+    },
+    addOption: function(id, value, selected) {
+        if (!selected)
+            this.html += '<option id="' + id + '">' + value + '</option>';
+        else
+            this.html += '<option id="' + id + '" selected>' + value + '</option>';
+    },
     addEnd: function(node) {
         this.html += '<input id="name" type="hidden" value="' + node + '" name="name" />';
     },
@@ -763,7 +702,6 @@ var htmlBuilder = {
         this.html += '</div></div><p></p>';
     },
     Flush: function() {
-        //alert(this.html);
         $('#AllFormDynamicInputs').html(this.html);
         $('#EditNodeDivLoading').hide();
         $('#EditNodeDivShow').show();

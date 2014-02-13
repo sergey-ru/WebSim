@@ -23,6 +23,9 @@ public class SimServlet extends HttpServlet {
     }
 
     @Override
+    /* 
+     handle all the requests
+     */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             String theRequest = request.getParameter("request");
@@ -34,7 +37,9 @@ public class SimServlet extends HttpServlet {
     }
 
     @Override
-    // load xml file sim scenario
+    /* 
+     load xml file sim scenario 
+     */
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String theRequest = request.getParameter("request");
         if (theRequest.equalsIgnoreCase("netFile")) {

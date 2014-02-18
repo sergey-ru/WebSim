@@ -11,12 +11,12 @@ $(document).ready(function() {
         $.get('SimServlet', {request: "validateAndInitTree"}, function(responseText) {
             // only if tree is valid
             if (responseText === "true") {
-                $('#waitToLoad').html("<div class=\"success\"><b>Well done!</b> You successfully loaded the simulation.</div>");
+                $('#waitToLoad').html("<div class=\"success\"><b>Well done!</b> You successfully loaded the simulator.</div>");
                 $("#viewgui").removeAttr("disabled");
                 $("#viewTab").removeAttr("disabled");
             }
             else {
-                $('#waitToLoad').html("<div class=\"danger\">Please load the net file under 'Simulation' and make sure the tree is valid.</div>");
+                $('#waitToLoad').html("<div class=\"danger\">" + responseText + "</div>");
             }
         });
     });

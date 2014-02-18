@@ -21,9 +21,8 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import static sim.web.utils.Constans.*;
 import static bgu.sim.Properties.StringsProperties.*;
+import java.text.ParseException;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.josql.QueryExecutionException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -365,17 +364,25 @@ public class HandleRequests {
 
     private void validateInitTree(HttpServletResponse response) throws IOException {
         try {
-            XMLTree m;
             // save tree
+            XMLTree m;
             m = XMLTree.getInstance();
             m.saveTree(sessionId);
 
-            // init base ( Simulator class and read & parse netFile
+            String ifTreeValid = m.validate();
+            if (ifTreeValid=="false") {
+                throw new Exception("The tree must be valid.");
+            }
+
+            // init base (Simulator class, read & parse netFile)
             SimApi.initBaseSim();
+
             // create JSON
-            createJsonData createJsonData = new createJsonData(sessionId);
+            new createJsonData(sessionId);
             response.getWriter().write("true");
 
+        } catch (ParseException | IOException ex) {
+            response.getWriter().write("Please upload a valid Net file, under 'Simulation'.");
         } catch (Exception ex) {
             response.getWriter().write(ex.getMessage());
         }

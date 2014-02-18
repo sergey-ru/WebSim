@@ -1,0 +1,114 @@
+<!--
+ 
+Shunting-yard algorithm that converts expression to Reverse Polish notation
+in Javascript
+ 
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+    </head>
+    <script>
+        function pushgo()
+        {
+            document.getElementById("reslt").innerHTML = shuntcalc(document.getElementById("toks").value);
+        }
+
+        // s is array for stack, sp is stack pointer, t is operator
+        function calcstacknum(s, sp, t)
+        {
+            if (t == '+')
+            {
+                s[sp - 2] = Number(s[sp - 2]) + Number(s[sp - 1]);
+            }
+            else if (t == '-')
+            {
+                s[sp - 2] = Number(s[sp - 2]) - Number(s[sp - 1]);
+            }
+            else if (t == '*')
+            {
+                s[sp - 2] = Number(s[sp - 2]) * Number(s[sp - 1]);
+            }
+            else if (t == '/')
+            {
+                s[sp - 2] = Number(s[sp - 2]) / Number(s[sp - 1]);
+            }
+            // all operations, pop 2 items from stack then operate then push result back to stack
+
+            return sp - 1;
+        }
+
+        function shuntcalc(inp)
+        {
+            var ops = "";
+            var i;
+            var stack_oper = Array(); //stack for operators
+            var stack_oper_p = 0;
+
+            var stack_num = Array();
+            var stack_num_p = 0;
+
+
+            var t = inp.split(" "); // now t is array that contains tokens
+
+            for (i = 0; i < t.length; i)
+            {
+                if (t[i] == '(') // push ( to stack for operators
+                {
+                    stack_oper[stack_oper_p  ] = t[i];
+                }
+                else if (t[i] == ')') // pop stack for operators until found ( but not show (
+                {
+                    while (stack_oper_p > 0)
+                    {
+                        if (stack_oper[--stack_oper_p] != '(')
+                        {
+                            stack_num_p = calcstacknum(stack_num, stack_num_p, stack_oper[stack_oper_p]);
+                        }
+                    }
+                }
+                else if (t[i] == ' ' || t[i] == '-' || t[i] == '*' || t[i] == '/')
+                {
+                    if (stack_oper_p > 0)
+                    {
+                        if ((t[i] == ' ' || t[i] == '-') && (stack_oper[ stack_oper_p - 1 ] != '('))
+                        {
+                            --stack_oper_p;
+                            stack_num_p = calcstacknum(stack_num, stack_num_p, stack_oper[stack_oper_p]);
+
+                        }
+                    }
+                    // push that operator to stack for operators
+                    stack_oper[stack_oper_p  ] = t[i];
+                }
+                else // assume number, take it to output
+                {
+                    stack_num[stack_num_p  ] = t[i];
+                }
+            }
+
+
+            // pop all in stack for operators
+            while (stack_oper_p > 0)
+            {
+                --stack_oper_p;
+                stack_num_p = calcstacknum(stack_num, stack_num_p, stack_oper[stack_oper_p]);
+            }
+
+
+            return stack_num[0];
+
+        }
+
+
+    </script>
+
+    <body>
+        <form>
+
+            <input id="toks" type="text" value="a" />
+            <button type="button" onclick="pushgo()">Go</button>
+            <p id="reslt"></p>
+        </form>
+    </body>
+</html>

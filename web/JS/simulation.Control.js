@@ -145,10 +145,11 @@ $(document).ready(function() {
                     $("#pause").attr("disabled", "disabled");
                     $('#scenarioNumberInfo').text("No More Scenarios");
                 }
+                //$("#runFullTime").removeAttr("disabled"); // ?? here?
             }
         });
 
-        $("#runFullTime").removeAttr("disabled");
+
     });
 
     function disableAllButtons() {

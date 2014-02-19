@@ -219,7 +219,13 @@ public class HandleRequests {
                 case "getNodeInfo":
 
                     int nodeId = Integer.parseInt(request.getParameter("node"));
-                    response.getWriter().write(SimApi.getNodeInfo(nodeId));
+                    String nodeProp = request.getParameter("prop");
+
+                    if (nodeProp==null) {
+                        response.getWriter().write(SimApi.getNodeInfo(nodeId));
+                    } else {
+                        response.getWriter().write(SimApi.getNodeInfo(nodeId, nodeProp));
+                    }
 
                     break;
                 case "getNodesCount":
@@ -266,7 +272,7 @@ public class HandleRequests {
     }
 
     private void getStatistics(HttpServletResponse response) throws IOException {
-        String allRows = "";
+        String newTableOfStat = "<table id=\"statTable\">";
         String tmpListAsString;
         Map<Integer, StatisticsDataStruct> stats = SimApi.getStatistics();
 
@@ -275,28 +281,32 @@ public class HandleRequests {
             List<String> list = ListAndScenarioNumber.newList;
 
             tmpListAsString = list.toString();
-            allRows = createStatisticsStringForCSV(tmpListAsString, allRows, list, ListAndScenarioNumber);
+            newTableOfStat = createStatisticsStringHtmlTable(tmpListAsString, newTableOfStat, list, ListAndScenarioNumber);
         }
 
-        allRows = allRows.substring(0, allRows.length() - 1);
-        response.getWriter().write(allRows);
+        //newTableOfStat = newTableOfStat.substring(0, newTableOfStat.length() - 1);
+        newTableOfStat+="</table>";
+        response.getWriter().write(newTableOfStat);
     }
 
-    private String createStatisticsStringForCSV(String tmpListAsString, String allRows, List<String> list, StatisticsDataStruct ListAndScenarioNumber) {
+    private String createStatisticsStringHtmlTable(String tmpListAsString, String allRows, List<String> list, StatisticsDataStruct ListAndScenarioNumber) {
         if (tmpListAsString.contains("Scenario")) {
-            tmpListAsString = tmpListAsString.replace("[", "");
-            tmpListAsString = tmpListAsString.replace("]", "");
-            if (!"".equals(allRows)) {
-                allRows = allRows.substring(0, allRows.length() - 1);
-            }
-            allRows += tmpListAsString;
+//            tmpListAsString = tmpListAsString.replace("[", "");
+//            tmpListAsString = tmpListAsString.replace("]", "");
+//            if (!"".equals(allRows)) {
+//                allRows = allRows.substring(0, allRows.length() - 1);
+//            }
+//            allRows += tmpListAsString;
 
         } else {
-            tmpListAsString = list.toString() + ", " + ListAndScenarioNumber.ScenarioNumber;
+            allRows += "<tr><td>";
+            
+            tmpListAsString = list.toString();
+            tmpListAsString = tmpListAsString.replace(",", "</td><td>");
             tmpListAsString = tmpListAsString.replace("[", "");
             tmpListAsString = tmpListAsString.replace("]", "");
 
-            allRows += tmpListAsString + "\r\n";
+            allRows += tmpListAsString + "</td></tr>";
         }
 
         return allRows;
@@ -370,7 +380,7 @@ public class HandleRequests {
             m.saveTree(sessionId);
 
             String ifTreeValid = m.validate();
-            if (ifTreeValid=="false") {
+            if (ifTreeValid == "false") {
                 throw new Exception("The tree must be valid.");
             }
 
@@ -403,7 +413,8 @@ public class HandleRequests {
         XMLTree m;
         m = XMLTree.getInstance();
         String fullClassPath = request.getParameter("fullClassPath");
-        int ElementIndex = Integer.parseInt(request.getParameter("index"));
+        String indexStr = request.getParameter("index");
+        int ElementIndex = Integer.parseInt(indexStr);
         String result = m.getPValuesByActionValue(fullClassPath, ElementIndex);
         response.getWriter().write(result);
     }

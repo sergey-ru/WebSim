@@ -23,7 +23,7 @@ td, th {
 }
 
 #saveResult {
-    position: fixed;
+    position: absolute;
 }
 
 #netFileDiv {
@@ -144,7 +144,6 @@ div.growlUI h2 {
 }
 
 #scenarioNameTd {
-    width: 10%;
     text-align: center;
     font-size: large;
     font-weight: bold;
@@ -154,7 +153,6 @@ div.growlUI h2 {
 }
 
 #ticksTd {
-    width: 10%; 
     text-align: center;
 }
 
@@ -165,8 +163,7 @@ div.growlUI h2 {
     margin:5px 5px 5px 5px;
 }
 
-#nodesTd {
-    width: 10%; 
+#nodesTd { 
     text-align: center;
 }
 
@@ -177,8 +174,7 @@ div.growlUI h2 {
     margin:5px 5px 5px 5px;
 }
 
-#simConsol {
-    width: 5%; 
+#simConsolTd {
     text-align: center;
 }
 
@@ -212,4 +208,19 @@ div.growlUI h2 {
 
 .table{
     width: 100%;
+}
+
+#state {
+    width: 100%;
+}
+
+#nodeInfoTable {
+    width: 70%;
+    font-size: medium;
+}
+
+#nodeInfoTable td {
+    height: 30px;
+    border-bottom:1px solid #fff;
+    border-top:1px solid #fff;
 }

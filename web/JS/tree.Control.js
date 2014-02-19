@@ -259,8 +259,8 @@ function LoadXmlMenuTree(ifByPath) {
 
 function createPvaluesByActionPath(fullClassPath, index) {
     htmlcode = "";
-    $.get('SimServlet', {request: "GetPByActionValue", fullClassPath: fullClassPath, index: index}, function(responseText) {
 
+    $.get('SimServlet', {request: "GetPByActionValue", fullClassPath: fullClassPath, index: index}, function(responseText) {
         var pListRes = responseText.split(",,");
 
         for (var i = 0; i < pListRes.length - 1; i++) {
@@ -554,11 +554,11 @@ function editExDevLinkProperty(node) {
         htmlBuilder.Flush();
 
         // p in the xml (0..1)
-        createPvaluesByActionPath(selectedFullPathClass);
+        createPvaluesByActionPath(selectedFullPathClass, index);
         // add method if select chenge, replace the p values
         $('#ActionSelect').change(function() {
             var selectedFullPathClass = $('#ActionSelect option:selected').attr('id');
-            createPvaluesByActionPath(selectedFullPathClass);
+            createPvaluesByActionPath(selectedFullPathClass, index);
         });
         $('#EditNodeDivLoading').hide();
         $('#EditNodeDivShow').show();
@@ -645,10 +645,10 @@ var htmlBuilder = {
                 '</span>' +
                 '<a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Remove</a>' +
                 '</div>' +
-                '<div class="col-md-1">' +
+                '<div class="col-md-2">' +
                 '<button type="button" onclick="uploadNetFile();" class="btn btn-primary">Upload</button>' +
                 '</div>' +
-                '<div class="col-md-3">' +
+                '<div class="col-md-2" style="position:relative;">' +
                 '<div id="netFileDiv">' +
                 '</div>' +
                 '</div>' +

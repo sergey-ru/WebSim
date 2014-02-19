@@ -10,9 +10,9 @@
 
         <!-- Main jQuery -->
         <script type="text/javascript" src="JS/jquery-2.0.3.min.js"></script>
-        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
-        <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-        <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+        <link rel="stylesheet" href="JS/jqueryAndBootstrap/jquery-ui.css">
+        <script src="JS/jqueryAndBootstrap/jquery-1.9.1.js"></script>
+        <script src="JS/jqueryAndBootstrap/jquery-ui.js"></script>
 
         <!--  Layout -->
         <script type="text/javascript" src="JS/Layout/jquery.layout-latest.js"></script> 
@@ -38,9 +38,9 @@
         <script type="text/javascript" src="JS/tree.Control.js"></script>
 
         <!-- jansy bootstrap for more style (file upload) -->
-        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.0.1-p7/css/bootstrap.min.css">
+        <link rel="stylesheet" href="JS/jqueryAndBootstrap/bootstrapJ.min.css">
         <!-- original bootstrap for styling -->
-        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+        <link rel="stylesheet" href="JS/jqueryAndBootstrap/bootstrap.min.css">
 
     </head>
     <body>
@@ -125,10 +125,10 @@
 
                             <br/>
                             <div class="row">
-                                <div class="col-md-1">
+                                <div class="col-md-2">
                                     <button type="submit" id="SavePropertyChanges" class="btn btn-primary">Save</button>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-10">
                                     <div id="saveResult"></div>
                                 </div>
                             </div>
@@ -140,7 +140,7 @@
                     <div id="ViewSimulatorDiv">
 
                         <!-- Graph Control -->
-                        <table border="0" style="width: 100%;">
+                        <table border="0" style="width: 100%; position: absolute;">
                             <tr>
                                 <td id="scenarioNameTd"><span id="scenarioNumberInfo"></span></td>
                                 <td id="1td"><button type="button" id="runInitRules" class="btn btn-primary doAction"><span class="glyphicon glyphicon-play"></span> Run Init</button></td>
@@ -150,9 +150,9 @@
                                 <td id="5td"><button type="button" id="restart" class="btn btn-primary doAction"><span class="glyphicon glyphicon-repeat"></span> Restart</button></td>
                                 <td id="6td"><button type="button" id="runFullTime" class="btn btn-primary  doAction"><span class="glyphicon glyphicon-play"></span> Run Full With Time</button></td>
                                 <td id="7td"><button type="button" id="pause" class="btn btn-primary doAction" disabled="disabled"><span class="glyphicon glyphicon-pause"></span> Pause</button></td>
-                                <td id="ticksTd"><div id="sliderVal">Tick = 0 Seconds</div><div id="slider"></div></td>
+                                <td id="ticksTd"><div id="sliderVal">Tick = 0 Milli</div><div id="slider"></div></td>
                                 <td id="nodesTd"><div id="sliderNodesVal"></div><div id="sliderNodes"></div></td>
-                                <td id="simConsol">Tick: <div id="output"></div></div></td>
+                                <td id="simConsolTd">Tick: <div id="output"></div></div></td>
                             </tr>
                         </table>
 
@@ -166,7 +166,7 @@
                     <div id="StatisticsDiv">
                         <div class="center">
                             <center>
-                                <iframe id="iframeStat" src="" height="740" width="99%" frameborder="0"></iframe>
+                                <iframe id="iframeStat" src="Statistics/statistics.html" height="740" width="99%" frameborder="0"></iframe>
                             </center>
                         </div>
                     </div>  
@@ -185,7 +185,9 @@
     <div class="ui-layout-east">
 
         <div class="ui-layout-center">
-            <span id="state"></span>
+            <form id="nodePropertyCheckboxesForm">
+                <div id="state"></div>
+            </form>
         </div>
         <div class="ui-layout-south">
             <iframe id="iframeStat" src="Chart/Chart.html" height="740" width="99%" frameborder="0"></iframe>
@@ -251,5 +253,5 @@
 <!-- original bootstrap js -->
 <!--<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>-->
 <!-- jansy bootstrap js -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.0.1-p7/js/bootstrap.min.js"></script>
+<script src="JS/jqueryAndBootstrap/bootstrapj.min.js"></script>
 </html>

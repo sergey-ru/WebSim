@@ -199,7 +199,7 @@ var owenge = function() {
             ans = recurse(s);
             var indexFinalData = ns.equation.headlines.indexOf(String(ans));
             ans = ns.equation.Data[indexFinalData];
-            
+
             //if (isNaN(ans)) {
             //    throw ex.isNan;
             //}
@@ -249,7 +249,7 @@ var owenge = function() {
             {
                 data1 = n1;
             }
-            
+
 
             if (typeof n2 === 'string') {
                 var indexdata2 = ns.equation.headlines.indexOf(n2);
@@ -316,7 +316,7 @@ var owenge = function() {
                 }
             }
             ns.equation.Data.push(newData);
-            
+
             var newDataName = "Line" + ns.equation.Data.length + "";
             ns.equation.headlines.push(newDataName);
 

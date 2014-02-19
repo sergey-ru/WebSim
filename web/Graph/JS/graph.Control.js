@@ -8,7 +8,8 @@
 var chart;
 
 function log(b, n) {
-    return Math.log(n) / Math.log(b);
+
+    return (Math.log(n) / Math.log(b)).toFixed(2);
 }
 
 function createNodesSlider(numOfNodes) {
@@ -83,13 +84,18 @@ $('#viewgui', parent.document).click(function(event) {
                         node.imageSlicing = [0, sliceNo * sliceSize, sliceSize, sliceSize];
                     }
                 }},
+            /*
+             * make a table with the selected node info
+             */
             events: {onClick: function(event) {
                     if (event.clickNode) {
+
                         chart.addFocusNode(event.clickNode.id);
-                        var newTable = "<table class=\"table table-striped\">";
-                        newTable += "<tr><td>ID</td><td>" + event.clickNode.id + "</td></tr>";
-                        newTable += "<tr><td>Type</td><td>" + event.clickNode.data.type + "</td></tr>";
-                        
+
+                        var newTable = "<table id=\"nodeInfoTable\">";
+                        newTable += "<tr><td style=\"width:10%\"></td><td style=\"width:30%\">Id</td><td style=\"width:60%\"><div id=\"nodeInfoId\">" + event.clickNode.id + "<div></td></tr>";
+                        newTable += "<tr><td style=\"width:10%\"></td><td style=\"width:30%\">Type</td><td style=\"width:60%\">" + makeFirstLetterUpper(event.clickNode.data.type) + "</td></tr>";
+
                         // get node info from servlet
                         var request = new XMLHttpRequest();
                         request.open('GET', '/Simulator/SimServlet?request=getNodeInfo&node=' + event.clickNode.id, false); // `false` makes the request synchronous
@@ -99,13 +105,18 @@ $('#viewgui', parent.document).click(function(event) {
                             var res = request.responseText.split(",");
                             var line;
                             for (var i = 0; i < res.length; i++) {
+
                                 res[i] = res[i].replace("{", "");
                                 res[i] = res[i].replace("}", "");
                                 line = res[i].split("=");
-                                newTable += "<tr><td>" + line[0] + "</td><td>" + line[1] + "</td></tr>";
+
+                                newTable += "<tr><td style=\"width:10%\"><input type=\"checkbox\" id=\"" + makeFirstLetterUpper(line[0]) + "\" value\"" + makeFirstLetterUpper(line[1]) + "\"></td><td style=\"width:30%\">" + makeFirstLetterUpper(line[0]) + "</td><td style=\"width:60%\">" + makeFirstLetterUpper(line[1]) + "</td></tr>";
                             }
                             newTable += "</table>";
-                            parent.top.$("#state")[0].innerHTML = newTable;
+
+                            parent.top.$("#state").html(newTable);
+                            //parent.top.$("#nodeInfoTable").addClass("table");
+                            //parent.top.$("#nodeInfoTable").addClass("table-striped");
                         }
 
                     }
@@ -129,6 +140,11 @@ $('#viewgui', parent.document).click(function(event) {
         // end slider handle
     });
 });
+
+function makeFirstLetterUpper(word) {
+    word = $.trim(word);
+    return word.substring(0, 1).toUpperCase() + word.substring(1);
+}
 
 function sendMessageList(result) {
     $('#runOneStepInScenario', parent.document).attr("disabled", "disabled");

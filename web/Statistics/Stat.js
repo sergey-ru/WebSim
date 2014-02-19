@@ -35,7 +35,7 @@ $(document).ready(function() {
                 .split(tmpColDelim).join(colDelim) + '"',
                 // Data URI
                 csvData = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csv);
-        alert(csv);
+
         $(this)
                 .attr({
                     'download': filename,
@@ -46,10 +46,16 @@ $(document).ready(function() {
 
     // This must be a hyperlink
     $(".export").on('click', function(event) {
-        // CSV
-        exportTableToCSV.apply(this, [$('#dvData>table'), 'export.csv']);
+        exportTableToCSV.apply(this, [$('#statTableDiv>table'), 'export.csv']);
+    });
 
-        // IF CSV, don't do event.preventDefault() or return false
-        // We actually need this to be a typical hyperlink
+    parent.top.$('#statTab').click(function(event) {
+        var request = new XMLHttpRequest();
+        request.open('GET', '/Simulator/SimServlet?request=getStatistics', false);
+        request.send(null);
+        if (request.status === 200) {
+            $("#statTableDiv").html(request.responseText);
+            $("#statTable").addClass("table table-condensed");
+        }
     });
 });

@@ -31,12 +31,12 @@ $(document).ready(function() {
 
     // slider
     $(function() {
-        $("#slider").slider({max: 2000});
+        $("#slider").slider({max: 10000});
     });
 
     $("#slider").slider({
         slide: function(event, ui) {
-            $("#sliderVal").text("Tick = " + ui.value + " Seconds");
+            $("#sliderVal").text("Tick = " + ui.value + " Milli");
         }
     });
 

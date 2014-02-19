@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <title>Flot Examples: Real-time updates</title>
+        <title>Real-time updates</title>
 
         <link href="examples.css" rel="stylesheet" type="text/css">
 
@@ -28,7 +28,6 @@
             var intervalUpdate;
             var scenario = 0;
             var ticks = 0;
-            var headlines;
             var separators = ['\\\+', '-', '\\*', '/', '\\\(', '\\\)'];
             var separatorsForAutoComplete = ['+', '-', '*', '/', '(', ')'];
 
@@ -38,11 +37,10 @@
 
             parent.top.$('#restart').click(function(event) {
                 scenario = 0;
+                clearTimeout(intervalUpdate);
             });
 
             parent.top.$('#runOneStepInScenario, #runFullScenario, #runFullTime').click(function(event) {
-                // data source fetched from the server
-
                 // if exist next scenario
                 var request = new XMLHttpRequest();
                 request.open('GET', '/Simulator/SimServlet?request=ifExistNextScenario', false);
@@ -62,8 +60,8 @@
                 var updateInterval = 8;
                 var needInit = true;
                 ifInitWrireFunction = false;
-                headlines = [];
-
+                var headlines = new Array();
+                parent.top.$('input:checkbox').removeAttr('checked');
                 scenario++;
                 if (plot) {
                     plot.setData([]);
@@ -87,6 +85,7 @@
                     if (request.status === 200) {
 
                         var tags = $.parseJSON(request.responseText);
+
                         var countColumn = 0;
                         for (var headline in tags) {
                             // save headers
@@ -110,11 +109,42 @@
                         }
 
 
+                        /*
+                         * if the user wants to see one of the nodes property on the chart
+                         */
+                        if (ifUpdated) {
+                            parent.top.$("#nodePropertyCheckboxesForm input:checkbox:checked").each(function() {
+                                var nodeId = parent.top.$("#nodeInfoId").text();
+                                var nodeProp = $(this).attr('id');
+
+                                //alert("id: " + nodeId + " prop: " + nodeProp);
+                                var request = new XMLHttpRequest();
+                                request.open('GET', '/Simulator/SimServlet?request=getNodeInfo&node=' + nodeId + "&prop=" + nodeProp, false); // `false` makes the request synchronous
+                                request.send(null);
+                                if (request.status === 200) {
+                                    
+                                    // validate data as a number
+                                    var newPoint = parseFloat(request.responseText);
+
+                                    if (isNaN(newPoint))
+                                        newPoint = 0;
+                                        
+                                    if (headlines.indexOf(nodeProp + " " + "Node" + nodeId) === -1)
+                                        headlines.push(nodeProp + " " + "Node" + nodeId);
+
+                                    if (!data[countColumn]) 
+                                        data[countColumn] = [];
+
+                                    data[countColumn].push([countRow, newPoint]);
+                                    countColumn++;
+                                }
+                            });
+                        }
+
                         if (ifUpdated) {
                             countRow++;
                             ifUpdated = false;
                             needInit = false;
-
                             if (!ifInitWrireFunction) {
                                 initWriteFunction();
                                 ifInitWrireFunction = true;
@@ -165,17 +195,28 @@
                             + " &ndash; " + axes.yaxis.max.toFixed(2));
                 });
 
+                /*
+                 * Makes a Json text for the chart (data and labels)
+                 * @type @exp;headlines@call;concat
+                 */
                 function createJSONwithAllDatas() {
                     var outer = [];
                     for (var i = 0; i < headlines.length; i++) {
                         if (data[i])
                             outer.push({data: data[i], label: headlines[i]});
                     }
+                   // $("#debug").text(headlines + "      last data: " + data[0]);
 
                     return outer;
                 }
 
+                /*
+                 * The function that updates every tick tht chart with the new data
+                 * @param {type} event
+                 * @returns {undefined}
+                 */
                 function update() {
+
                     // draw new data
                     getData();
                     if (plot) {
@@ -200,7 +241,6 @@
 
                     //var availableOperators = ['+', '-', '/', '*'];
                     var availableTags = headlines.concat(separatorsForAutoComplete);
-
                     function split(val) {
                         return val.split(/\s*/);
                     }
@@ -229,7 +269,6 @@
                                 },
                                 select: function(event, ui) {
                                     var terms = split(this.value);
-
                                     // remove the current input
                                     var lastChar = terms.pop();
                                     while (separatorsForAutoComplete.indexOf(lastChar) === -1 && terms.length > 0) {
@@ -246,32 +285,12 @@
                                 }
                             });
 
-
                     $('#calcButton').click(function() {
 
-                        $('#parseResult').text("");
-                        var funcToParse = $('#functionToParse').val();
-                        var tokens = funcToParse.split(new RegExp(separators.join('|'), 'g'));
-                        var ifSuccseed;
-
-                        // Validate the written function
-                        for (var i = 0; i < tokens.length; i++) {
-                            ifSuccseed = false;
-
-                            // empty places because the split
-                            if (tokens[i] === "")
-                                continue;
-
-                            for (var j = 0; j < headlines.length; j++) {
-                                if (tokens[i] === headlines[j] || IsNumeric(tokens[i]))
-                                    ifSuccseed = true;
-                            }
-
-                            if (!ifSuccseed) {
-                                $('#formOfFunction').addClass("has-error");
-                                $('#parseResult').text("Function is not valid. Pls use the help of the auto-complete.");
-                                return;
-                            }
+                        // Validate function
+                        var ifValid = validateFunction();
+                        if (!ifValid) {
+                            return;
                         }
 
                         // set data
@@ -280,7 +299,7 @@
                             copyOfData.push(data[i]);
                         }
                         owenge.equation.setDataArrays(copyOfData);
-                        
+
                         // set headlines
                         var copyOfHeadlines = new Array();
                         for (i = 0; i < headlines.length; i++) {
@@ -289,6 +308,7 @@
                         owenge.equation.setHeadLines(copyOfHeadlines);
 
                         // Parsing the function
+                        var funcToParse = $('#functionToParse').val();
                         var newDataResult = owenge.equation.parse(funcToParse);
                         data.push(newDataResult.answer);
                         headlines.push(funcToParse);
@@ -303,13 +323,65 @@
                         plot.setData(oldData);
                         plot.setupGrid();
                         plot.draw();
-
                         $('#formOfFunction').removeClass("has-error");
                         $('#formOfFunction').addClass("has-success");
-                    }
-                    );
+                    });
                 }
-            });</script>
+
+                /*
+                 * Validating that the function has valid headers and
+                 * that not all params are numbers
+                 */
+                function validateFunction() {
+
+                    $('#parseResult').text("");
+                    var funcToParse = $('#functionToParse').val();
+                    var tokens = funcToParse.split(new RegExp(separators.join('|'), 'g'));
+                    var ifSuccseed;
+                    var ifNotAllNumbers = false;
+
+                    // Validate the written function
+                    for (var i = 0; i < tokens.length; i++) {
+
+                        ifSuccseed = false;
+
+                        // empty places because the split
+                        if (tokens[i] === "")
+                            continue;
+
+                        for (var j = 0; j < headlines.length; j++) {
+
+                            // if one of the headers
+                            if (tokens[i] === headlines[j]) {
+                                ifSuccseed = true;
+                                ifNotAllNumbers = true;
+                            }
+
+                            // if is a number
+                            else if (IsNumeric(tokens[i])) {
+                                ifSuccseed = true;
+                            }
+                        }
+
+                        if (!ifSuccseed) {
+                            $('#formOfFunction').addClass("has-error");
+                            $('#parseResult').text("Function is not valid. Pls use the help of the auto-complete.");
+                            return false;
+                        }
+                    }
+
+                    // validate that not all of the parameters in function are numbers
+                    if (!ifNotAllNumbers) {
+                        $('#formOfFunction').addClass("has-error");
+                        $('#parseResult').text("Function is not valid. Pls use the help of the auto-complete.");
+                        return false;
+                    }
+
+                    // Success
+                    return true;
+                }
+            });
+        </script>
     </head>
     <body>
 
@@ -321,8 +393,9 @@
                     <label class="control-label" for="inputSuccess4">Write Function </label>
                     <input type="text" class="form-control" id="functionToParse">
                     <button type="button" id="calcButton" class="btn btn-default">Calculate</button>
-                    <span id="parseResult"></span>
-                    <span class="help-block">Write a function using the operators +, -, /, * using the names of the chart's lines. You can use the help of the auto-complete.</span>
+                    <div id="debug"></div>
+                    <span class="help-block" id="parseResult"></span>
+                    <span class="help-block" style="color: #BBB;">Write a function using the operators +, -, /, * using the names of the chart's lines. You can use the help of the auto-complete.</span>
                 </div>
 
             </div>

@@ -284,21 +284,12 @@ public class HandleRequests {
             newTableOfStat = createStatisticsStringHtmlTable(tmpListAsString, newTableOfStat, list, ListAndScenarioNumber);
         }
 
-        //newTableOfStat = newTableOfStat.substring(0, newTableOfStat.length() - 1);
         newTableOfStat += "</table>";
         response.getWriter().write(newTableOfStat);
     }
 
     private String createStatisticsStringHtmlTable(String tmpListAsString, String allRows, List<String> list, StatisticsDataStruct ListAndScenarioNumber) {
-        if (tmpListAsString.contains("Scenario")) {
-//            tmpListAsString = tmpListAsString.replace("[", "");
-//            tmpListAsString = tmpListAsString.replace("]", "");
-//            if (!"".equals(allRows)) {
-//                allRows = allRows.substring(0, allRows.length() - 1);
-//            }
-//            allRows += tmpListAsString;
-
-        } else {
+        if (!tmpListAsString.contains("Scenario")) {
             allRows += "<tr><td>";
 
             tmpListAsString = list.toString();
@@ -323,10 +314,6 @@ public class HandleRequests {
             return;
         }
 
-        // if (stats.size() <= index) {
-        //     response.getWriter().write(obj.toJSONString());
-        //     return;
-        // }
         if (index > 0) {
             for (int i = 0; i < listOfStatistics.size(); i++) {
                 JSONArray listJ = new JSONArray();
@@ -344,31 +331,7 @@ public class HandleRequests {
                 obj.put(listOfHeaders.get(i), new JSONArray());
             }
         }
-//
-//        if (stats.size() > 1 && index > 1) {
-//            StatisticsDataStruct ListAndScenarioNumber = stats.get(index);
-//            List<String> list = ListAndScenarioNumber.newList;
-//
-//            for (int i = 0; i < list.size(); i++) {
-//                JSONArray listJ = new JSONArray();
-//                listJ.add(list.get(i));
-//                jsonArays.put(i, listJ);
-//            }
-//
-//        }
 
-//        if (stats.size() > 1) {
-//            StatisticsDataStruct ListAndScenarioNumber = stats.get(1);
-//            List<String> list = ListAndScenarioNumber.newList;
-//
-//            for (int i = 0; i < list.size(); i++) {
-//                if (jsonArays.size() > 0) {
-//                    obj.put(list.get(i), jsonArays.get(i));
-//                } else {
-//                    obj.put(list.get(i), new JSONArray());
-//                }
-//            }
-//        }
         response.getWriter().write(obj.toJSONString());
     }
 

@@ -140,12 +140,12 @@
                     <div id="ViewSimulatorDiv">
 
                         <!-- Graph Control -->
-                        <table id="graphControlTable1" border="0" cellpadding="2" cellspacing="5">
+                        <table id="graphControlTable1" border="0" cellpadding="6" cellspacing="6">
                             <tr>
                                 <td id="scenarioNameTd" width="90px"><span id="scenarioNumberInfo"></span></td>
                                 <td id="ticksTd"><div id="sliderVal">Tick = 0 Milli</div><div id="slider"></div></td>
                                 <td id="nodesTd"><div id="sliderNodesVal"></div><div id="sliderNodes"></div></td>
-                                <td id="simConsolTd" width="90px">Tick: <div id="output"></div></div></td>
+                                <td id="simConsolTd" width="190px">Tick: <div id="output"></div></td>
                             </tr>
                         </table>
                         <table id="graphControlTable2" border="0">      

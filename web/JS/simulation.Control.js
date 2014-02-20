@@ -65,10 +65,20 @@ $(document).ready(function() {
     // run one and next step in the current scenario
     $('#runOneStepInScenario').click(function(event) {
         disableAllButtons();
+        $("#runFullScenario").removeAttr("disabled");
 
         $.get('SimServlet', {request: "runOneStepInScenario"}, function(responseText) {
             if (responseText.indexOf("false") !== -1) {
                 $("#nextScenario").removeAttr("disabled");
+            }
+            else
+            {
+                $("#runOneStepInScenario").removeAttr("disabled");
+                // increase tick display
+                var count = $("#output").text();
+                count = parseInt(count);
+                count++;
+                $("#output").text(count);
             }
         });
 
@@ -159,11 +169,8 @@ $(document).ready(function() {
                     $("#pause").attr("disabled", "disabled");
                     $('#scenarioNumberInfo').text("No More Scenarios");
                 }
-                //$("#runFullTime").removeAttr("disabled"); // ?? here?
             }
         });
-
-
     });
 
     function disableAllButtons() {

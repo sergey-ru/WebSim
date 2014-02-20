@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -89,7 +90,7 @@ public final class XMLTree {
         try {
             Node ElementNode = _root.getElementsByTagName(Element.toLowerCase()).item(Index - 1);
             ElementNode.getAttributes().getNamedItem(lowerCaseFirstLetter(Property)).setNodeValue(Value);
-        } catch (Exception ex) {
+        } catch (DOMException ex) {
             System.err.println("Cant find " + Element + ". " + ex.getMessage());
         }
     }
@@ -664,7 +665,7 @@ public final class XMLTree {
                 res += pVal;
                 res += PARAMETERS_SPLITTER; // only one property
             }
-        } catch (Exception ex) {
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException ex) {
             return ERROR_PARSING_XML;
         }
         return res;
@@ -1120,11 +1121,15 @@ public final class XMLTree {
         return Character.toLowerCase(userIdea.charAt(0)) + userIdea.substring(1);
     }
 
-    String validate() {
+    public String validate() {
         if (ifRootIsValid()) {
             return "true";
         }
         return "false";
+    }
+
+    public Boolean validateBool() {
+        return ifRootIsValid();
     }
 
     private boolean ifRootIsValid() {
@@ -1145,7 +1150,7 @@ public final class XMLTree {
             for (int i = 0; i < simulationAtts.getLength(); i++) {
                 String key = (simulationAtts.item(i).getNodeName());
                 String val = (simulationAtts.item(i).getNodeValue());
-                if (val == null || val == "") {
+                if (val == null || "".equals(val)) {
                     _ifSuccsessParsing = false;
                     parserErrorMessage = XML_PARSER_ERROR_SIMULATION_ATTRIBUTES.replace("#", key);
                     return _ifSuccsessParsing;
@@ -1234,7 +1239,7 @@ public final class XMLTree {
         List<Class> m = SimApi.getStatisticListenersList();
 
         boolean ifIsExist = true;
-        boolean tmp = false;
+        boolean tmp;
         for (String chosenClass : _StatisticListenerChosen) {
             tmp = false;
             for (Class class1 : m) {
@@ -1305,7 +1310,7 @@ public final class XMLTree {
             transformer.transform(source, result);
 
             return "File saved in " + DATA_PATH + sessionId + ".xml";
-        } catch (Exception ex) {
+        } catch (TransformerException ex) {
             return "Sorry, cant save file. " + ex.getMessage();
         }
     }

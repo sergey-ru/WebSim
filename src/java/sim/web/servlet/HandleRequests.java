@@ -83,9 +83,9 @@ public class HandleRequests {
 
                     if (SimApi.ifNextTick()) {
                         SimApi.nextTick();
-                        returnResponse(response, "true");
+                        response.getWriter().write("true");
                     } else {
-                        returnResponse(response, "false");
+                        response.getWriter().write("false");
                     }
 
                     break;
@@ -221,7 +221,7 @@ public class HandleRequests {
                     int nodeId = Integer.parseInt(request.getParameter("node"));
                     String nodeProp = request.getParameter("prop");
 
-                    if (nodeProp==null) {
+                    if (nodeProp == null) {
                         response.getWriter().write(SimApi.getNodeInfo(nodeId));
                     } else {
                         response.getWriter().write(SimApi.getNodeInfo(nodeId, nodeProp));
@@ -285,7 +285,7 @@ public class HandleRequests {
         }
 
         //newTableOfStat = newTableOfStat.substring(0, newTableOfStat.length() - 1);
-        newTableOfStat+="</table>";
+        newTableOfStat += "</table>";
         response.getWriter().write(newTableOfStat);
     }
 
@@ -300,7 +300,7 @@ public class HandleRequests {
 
         } else {
             allRows += "<tr><td>";
-            
+
             tmpListAsString = list.toString();
             tmpListAsString = tmpListAsString.replace(",", "</td><td>");
             tmpListAsString = tmpListAsString.replace("[", "");
@@ -373,29 +373,42 @@ public class HandleRequests {
     }
 
     private void validateInitTree(HttpServletResponse response) throws IOException {
+        // save xml file at server
         try {
-            // save tree
-            XMLTree m;
-            m = XMLTree.getInstance();
-            m.saveTree(sessionId);
-
-            String ifTreeValid = m.validate();
-            if (ifTreeValid == "false") {
-                throw new Exception("The tree must be valid.");
-            }
-
-            // init base (Simulator class, read & parse netFile)
-            SimApi.initBaseSim();
-
-            // create JSON
-            new createJsonData(sessionId);
-            response.getWriter().write("true");
-
-        } catch (ParseException | IOException ex) {
-            response.getWriter().write("Please upload a valid Net file, under 'Simulation'.");
+            XMLTree.getInstance().saveTree(sessionId);
         } catch (Exception ex) {
-            response.getWriter().write(ex.getMessage());
+            response.getWriter().write("Can't save tree. " + ex.getMessage());
+            return;
         }
+        
+        // Validate the tree
+        try {
+            if (!XMLTree.getInstance().validateBool()) {
+                response.getWriter().write("The tree must be valid.");
+                return;
+            }
+        } catch (IOException ex) {
+            response.getWriter().write("Error validating the tree. " + ex.getMessage());
+        }
+        
+        // init base (Simulator class, read & parse netFile)
+        try {    
+            SimApi.initBaseSim();
+        } catch (Exception ex) {
+            response.getWriter().write("Error initialize the simulator. " + ex.getMessage());
+            return;
+        }
+
+        // create JSON
+        try {
+            new createJsonData(sessionId);
+        } catch (Exception ex) {
+            response.getWriter().write("Error creating the JsonData. " + ex.getMessage());
+            return;
+        }
+
+        // validate succeed
+        response.getWriter().write("true");
     }
 
     private void saveProperties(HttpServletRequest request, HttpServletResponse response) throws IOException, NumberFormatException {

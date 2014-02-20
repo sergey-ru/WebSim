@@ -41,6 +41,7 @@
             });
 
             parent.top.$('#runOneStepInScenario, #runFullScenario, #runFullTime').click(function(event) {
+                alert(event.target.id);
                 // if exist next scenario
                 var request = new XMLHttpRequest();
                 request.open('GET', '/Simulator/SimServlet?request=ifExistNextScenario', false);
@@ -122,17 +123,17 @@
                                 request.open('GET', '/Simulator/SimServlet?request=getNodeInfo&node=' + nodeId + "&prop=" + nodeProp, false); // `false` makes the request synchronous
                                 request.send(null);
                                 if (request.status === 200) {
-                                    
+
                                     // validate data as a number
                                     var newPoint = parseFloat(request.responseText);
 
                                     if (isNaN(newPoint))
                                         newPoint = 0;
-                                        
+
                                     if (headlines.indexOf(nodeProp + " " + "Node" + nodeId) === -1)
                                         headlines.push(nodeProp + " " + "Node" + nodeId);
 
-                                    if (!data[countColumn]) 
+                                    if (!data[countColumn])
                                         data[countColumn] = [];
 
                                     data[countColumn].push([countRow, newPoint]);
@@ -223,8 +224,11 @@
                         plot.setupGrid();
                         plot.draw();
                     }
-
-                    intervalUpdate = setTimeout(update, updateInterval);
+                    
+                    // one step will NOT make many ajax calls. only one.
+                    if (event.target.id !== "runOneStepInScenario")
+                        intervalUpdate = setTimeout(update, updateInterval);
+                    
                     if (countRow > ticks) {
                         clearTimeout(intervalUpdate);
                     }

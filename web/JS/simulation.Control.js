@@ -14,6 +14,20 @@ $(document).ready(function() {
         });
     });
 
+    // display first scenarios name
+    $('#viewgui').click(function(event) {
+        disableAllButtons();
+        $.get('SimServlet', {request: "restart"}, function(responseText) {
+            // enable run
+            $("#runInitRules").removeAttr("disabled");
+            $("#runFullTime").removeAttr("disabled");
+            $.get('SimServlet', {request: "getNextScenarioName"}, function(responseText) {
+                $('#scenarioNumberInfo').text(responseText);
+                $("#output").text(0); // ticks
+            });
+        });
+    });
+
     // run the init rules of the current scenario
     $('#runInitRules').click(function(event) {
         disableAllButtons();

@@ -50,7 +50,15 @@ $(document).ready(function() {
             applyDemoStyles: true
             , minSize: 50	// ALL panes
             , south__size: 100
+        }, north_childOptions: {
+            applyDemoStyles: true
+            , minSize: 50	// ALL panes
+            , south__size: 100
         }
+    });
+
+    $(function() {
+        $('.doAction').tooltip();
     });
 });
 

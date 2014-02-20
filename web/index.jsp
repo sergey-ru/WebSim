@@ -140,19 +140,23 @@
                     <div id="ViewSimulatorDiv">
 
                         <!-- Graph Control -->
-                        <table border="0" style="width: 100%; position: absolute;">
+                        <table id="graphControlTable1" border="0" cellpadding="2" cellspacing="5">
                             <tr>
-                                <td id="scenarioNameTd"><span id="scenarioNumberInfo"></span></td>
-                                <td id="1td"><button type="button" id="runInitRules" class="btn btn-primary doAction"><span class="glyphicon glyphicon-play"></span> Run Init</button></td>
-                                <td id="2td"><button type="button" id="runOneStepInScenario" class="btn btn-primary  doAction" disabled="disabled"><span class="glyphicon glyphicon-step-forward"></span> Run One Step</button></td>
-                                <td id="3td"><button type="button" id="runFullScenario" class="btn btn-primary doAction" disabled="disabled"><span class="glyphicon glyphicon-play"></span> Run Full Scenario</button></td>
-                                <td id="4td"><button type="button" id="nextScenario" class="btn btn-primary doAction" disabled="disabled"><span class="glyphicon glyphicon-chevron-right"></span> Next Scenario</button></td>
-                                <td id="5td"><button type="button" id="restart" class="btn btn-primary doAction"><span class="glyphicon glyphicon-repeat"></span> Restart</button></td>
-                                <td id="6td"><button type="button" id="runFullTime" class="btn btn-primary  doAction"><span class="glyphicon glyphicon-play"></span> Run Full With Time</button></td>
-                                <td id="7td"><button type="button" id="pause" class="btn btn-primary doAction" disabled="disabled"><span class="glyphicon glyphicon-pause"></span> Pause</button></td>
+                                <td id="scenarioNameTd" width="90px"><span id="scenarioNumberInfo"></span></td>
                                 <td id="ticksTd"><div id="sliderVal">Tick = 0 Milli</div><div id="slider"></div></td>
                                 <td id="nodesTd"><div id="sliderNodesVal"></div><div id="sliderNodes"></div></td>
-                                <td id="simConsolTd">Tick: <div id="output"></div></div></td>
+                                <td id="simConsolTd" width="90px">Tick: <div id="output"></div></div></td>
+                            </tr>
+                        </table>
+                        <table id="graphControlTable2" border="0">      
+                            <tr>
+                                <td id="1td"><button type="button" id="runInitRules" class="btn btn-primary doAction" title="Run Init rules for currect scenario"><span class="glyphicon glyphicon-play"></span> Run Init</button></td>
+                                <td id="2td"><button type="button" id="runOneStepInScenario" class="btn btn-primary  doAction" disabled="disabled" title="Run one step in currect scenario"><span class="glyphicon glyphicon-step-forward"></span> One Step</button></td>
+                                <td id="3td"><button type="button" id="runFullScenario" class="btn btn-primary doAction" disabled="disabled" title="Run Full Scenario"><span class="glyphicon glyphicon-play"></span> Full Scenario</button></td>
+                                <td id="4td"><button type="button" id="nextScenario" class="btn btn-primary doAction" disabled="disabled" title="Move to the next scenario"><span class="glyphicon glyphicon-chevron-right"></span> Next Scenario</button></td>
+                                <td id="5td"><button type="button" id="restart" class="btn btn-primary doAction" title="Restart the simulation"><span class="glyphicon glyphicon-repeat"></span> Restart</button></td>
+                                <td id="6td"><button type="button" id="runFullTime" class="btn btn-primary doAction" title="Run full scenario with the tick control"><span class="glyphicon glyphicon-play"></span> Full With Time</button></td>
+                                <td id="7td"><button type="button" id="pause" class="btn btn-primary doAction" disabled="disabled" title="Pause running"><span class="glyphicon glyphicon-pause"></span> Pause</button></td>
                             </tr>
                         </table>
 
@@ -180,6 +184,7 @@
         <!-- HEADER -->
         <h2>Simulator</h2>
         <div id="sessionId"></div>
+
     </div>
 
     <div class="ui-layout-east">

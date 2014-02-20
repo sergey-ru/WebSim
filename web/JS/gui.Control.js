@@ -40,9 +40,5 @@ $(document).ready(function() {
         $('#view').attr("Class", "in active");
 
         $('#ViewSimulatorDiv').show();
-
-        $.get('SimServlet', {request: "getNextScenarioName"}, function(responseText) {
-            $('#scenarioNumberInfo').text(responseText);
-        });
     });
 });  

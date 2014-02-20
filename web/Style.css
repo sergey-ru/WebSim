@@ -224,3 +224,8 @@ div.growlUI h2 {
     border-bottom:1px solid #fff;
     border-top:1px solid #fff;
 }
+
+#graphControlTable1 {
+    width: 100%; 
+    position: relative
+}

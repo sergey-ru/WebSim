@@ -18,6 +18,8 @@ public class DownloadFileServlet extends HttpServlet {
      download the xml tree as a file to the client
      */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        int read;
+        ServletContext ctx = getServletContext();
         HttpSession session = request.getSession();
         String fileName = session.getId() + ".xml";
 
@@ -31,24 +33,20 @@ public class DownloadFileServlet extends HttpServlet {
         }
 
         // get file and set the header
-        ServletContext ctx = getServletContext();
-        InputStream fis = new FileInputStream(file);
         String mimeType = ctx.getMimeType(file.getAbsolutePath());
         response.setContentType(mimeType != null ? mimeType : "application/octet-stream");
         response.setContentLength((int) file.length());
         response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 
-        // write the filr to the response
-        ServletOutputStream os = response.getOutputStream();
+        // write the file to the response
         byte[] bufferData = new byte[1024];
-        int read;
-        while ((read = fis.read(bufferData)) != -1) {
-            os.write(bufferData, 0, read);
-        }
+        try (InputStream fis = new FileInputStream(file); ServletOutputStream os = response.getOutputStream()) {
 
-        os.flush();
-        os.close();
-        fis.close();
-        System.out.println("File downloaded at client successfully");
+            while ((read = fis.read(bufferData)) != -1) {
+                os.write(bufferData, 0, read);
+            }
+
+            os.flush();
+        }
     }
 }

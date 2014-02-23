@@ -10,22 +10,20 @@ import bgu.sim.data.Message;
 import bgu.sim.data.StatisticsDataStruct;
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Iterator;
+import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import static sim.web.utils.Constans.*;
-import static bgu.sim.Properties.StringsProperties.*;
-import java.text.ParseException;
-import java.util.HashMap;
-import org.josql.QueryExecutionException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import static sim.web.utils.Constans.*;
+import static bgu.sim.Properties.StringsProperties.*;
 
 /**
  *
@@ -33,16 +31,10 @@ import org.json.simple.JSONObject;
  */
 public class HandleRequests {
 
-    private int _nextScenarioIndex;
-    private int _nextTickIndex;
-    private boolean _ifInitSim;
-    private String sessionId;
+    private String _sessionId;
     private ServletFileUpload _uploader;
 
     public HandleRequests() {
-        _nextTickIndex = 0;
-        _nextScenarioIndex = 0;
-        _ifInitSim = false;
         _uploader = null;
     }
 
@@ -54,18 +46,16 @@ public class HandleRequests {
 
                     // create  new seassion for user
                     HttpSession session = request.getSession();
-                    if (session == null) {
-                        // Session is not created.
-                    } else {
-                        sessionId = session.getId();
+                    if (session != null) {
+                        _sessionId = session.getId();
                     }
 
-                    returnResponse(response, sessionId);
+                    returnResponse(response, _sessionId);
 
                     break;
                 case "getJSONgraphData":
 
-                    returnResponse(response, FROM_JS_DATA_PATH + sessionId + ".json");
+                    returnResponse(response, FROM_JS_DATA_PATH + _sessionId + ".json");
 
                     break;
                 case "runBaseInit":
@@ -265,6 +255,9 @@ public class HandleRequests {
         }
     }
 
+    /*
+     Get the messages created by the simulator
+     */
     private void getMessages(HttpServletResponse response) throws IOException {
         String allPaths = "";
 
@@ -272,35 +265,40 @@ public class HandleRequests {
             allPaths += me.getRoute() + ",,";
         }
 
-        if (!"".equals(allPaths)) {
+        if (!allPaths.equals("")) {
             allPaths = allPaths.substring(1, allPaths.length() - 2);
         }
 
         response.getWriter().write(allPaths);
     }
 
+    /*
+     Create an HTML table with the statistic data.
+     */
     private void getStatistics(HttpServletResponse response) throws IOException {
-        String newTableOfStat = "<table id=\"statTable\">";
-        String tmpListAsString;
         Map<Integer, StatisticsDataStruct> stats = SimApi.getStatistics();
+        String newTableOfStat = "<table id=\"statTable\">";
 
         for (int i = 0; i < stats.size(); i++) {
             StatisticsDataStruct ListAndScenarioNumber = stats.get(i);
             List<String> list = ListAndScenarioNumber.newList;
 
-            tmpListAsString = list.toString();
-            newTableOfStat = createStatisticsStringHtmlTable(tmpListAsString, newTableOfStat, list, ListAndScenarioNumber);
+            newTableOfStat = createStatisticsStringHtmlTable(newTableOfStat, list);
         }
 
         newTableOfStat += "</table>";
         response.getWriter().write(newTableOfStat);
     }
 
-    private String createStatisticsStringHtmlTable(String tmpListAsString, String allRows, List<String> list, StatisticsDataStruct ListAndScenarioNumber) {
+    /*
+     Creates a row in the HTML statistic's table.
+     */
+    private String createStatisticsStringHtmlTable(String allRows, List<String> list) {
+        String tmpListAsString = list.toString();
+
         if (!tmpListAsString.contains("Scenario")) {
             allRows += "<tr><td>";
 
-            tmpListAsString = list.toString();
             tmpListAsString = tmpListAsString.replace(",", "</td><td>");
             tmpListAsString = tmpListAsString.replace("[", "");
             tmpListAsString = tmpListAsString.replace("]", "");
@@ -311,12 +309,15 @@ public class HandleRequests {
         return allRows;
     }
 
+    /*
+     Create a JSON format of the statistics data for showing on a chart.
+     */
     private void getChartStatistics(HttpServletResponse response, int scenario, int index) throws IOException {
         JSONObject obj = new JSONObject();
         Map<Integer, JSONArray> jsonArays = new HashMap<>();
-        // Map<Integer, StatisticsDataStruct> stats = SimApi.getStatistics();
 
         List<String> listOfStatistics = SimApi.getChartStatistics(scenario, index);
+
         if (listOfStatistics == null) {
             response.getWriter().write(obj.toJSONString());
             return;
@@ -343,10 +344,13 @@ public class HandleRequests {
         response.getWriter().write(obj.toJSONString());
     }
 
+    /*
+     A final validator for the tree, just before running the simulator.
+     */
     private void validateInitTree(HttpServletResponse response) throws IOException {
         // save xml file at server
         try {
-            XMLTree.getInstance().saveTree(sessionId);
+            XMLTree.getInstance().saveTree(_sessionId);
         } catch (Exception ex) {
             response.getWriter().write("Can't save tree. " + ex.getMessage());
             return;
@@ -372,7 +376,7 @@ public class HandleRequests {
 
         // create JSON
         try {
-            new createJsonData(sessionId);
+            new createJsonData(_sessionId);
         } catch (Exception ex) {
             response.getWriter().write("Error creating the JsonData. " + ex.getMessage());
             return;
@@ -382,35 +386,46 @@ public class HandleRequests {
         response.getWriter().write("true");
     }
 
+    /*
+     Saving the properties of an element that were updated in the GUI.
+     */
     private void saveProperties(HttpServletRequest request, HttpServletResponse response) throws IOException, NumberFormatException {
-        XMLTree m;
-        m = XMLTree.getInstance();
         String elementTopic = request.getParameter("elementToSave");
         String indexString = request.getParameter("elementIndex");
-        int elementIndex = Integer.parseInt(indexString);
         String Info = request.getParameter("info");
-        String BackRequest = saveChanges(Info, elementTopic, m, elementIndex);
+        int elementIndex = Integer.parseInt(indexString);
+
+        String BackRequest = saveChanges(Info, elementTopic, XMLTree.getInstance(), elementIndex);
         response.getWriter().write(BackRequest);
     }
 
+    /*
+     Get the p values of an requested class
+     */
     private void getPByActionValue(HttpServletRequest request, HttpServletResponse response) throws IOException, NumberFormatException {
-        XMLTree m;
-        m = XMLTree.getInstance();
         String fullClassPath = request.getParameter("fullClassPath");
         String indexStr = request.getParameter("index");
         int ElementIndex = Integer.parseInt(indexStr);
-        String result = m.getPValuesByActionValue(fullClassPath, ElementIndex);
+
+        String result = XMLTree.getInstance().getPValuesByActionValue(fullClassPath, ElementIndex);
         response.getWriter().write(result);
     }
 
+    /*
+     Loading the xml tree by its saved path, or by the root itself.
+     */
     private void loadXmlTree(HttpServletRequest request, HttpServletResponse response) throws Exception, IOException {
-        XMLTree m;
-        m = XMLTree.getInstance();
         boolean ifByPath = Boolean.parseBoolean(request.getParameter("ifByPath"));
+        XMLTree m;
+
+        m = XMLTree.getInstance();
         m.parse(ifByPath);
         response.getWriter().write(m.getResult().toString());
     }
 
+    /*
+     Loading file. an xml or a net file.
+     */
     public String loadFile(HttpServletRequest request, HttpServletResponse response, String fileType) {
         try {
             List<FileItem> fileItemsList = _uploader.parseRequest(request);
@@ -426,11 +441,14 @@ public class HandleRequests {
         return "true";
     }
 
+    /*
+     Saving the file on the server, by the user's session id.
+     */
     private void saveFileOnServer(Iterator<FileItem> fileItemsIterator, String fileType) throws Exception {
         FileItem fileItem = fileItemsIterator.next();
 
         // save file
-        String newFileName = sessionId;
+        String newFileName = _sessionId;
         if (fileType.equalsIgnoreCase("netFile")) {
             newFileName += ".net";
             XMLTree m = XMLTree.getInstance();
@@ -460,6 +478,9 @@ public class HandleRequests {
         System.out.println("Absolute Path at server = " + file.getAbsolutePath());
     }
 
+    /*
+     Initialization for the file enviroment.
+     */
     public void initLoadingFileEnviroment() {
         // file init
         try {
@@ -473,22 +494,22 @@ public class HandleRequests {
         }
     }
 
+    /*
+     The actual saving changes. By giving the element name, its index, and its new information.
+     */
     private String saveChanges(String Info, String elementTopic, XMLTree m, int elementIndex) {
         String[] parsedInfo = Info.split(PARAMETERS_SPLITTER);
         String BackRequest = "";
 
-        // init rule
-        if (elementTopic.equalsIgnoreCase(XML_INIT)) {
+        if (elementTopic.equalsIgnoreCase(XML_INIT)) {  // init rule
             m.updateInitProperties(elementTopic, elementIndex, parsedInfo);
-        } // device/external/link rule
-        else if (elementTopic.equalsIgnoreCase(XML_DEVICE)
+        } else if (elementTopic.equalsIgnoreCase(XML_DEVICE) // device/external/link rule
                 || (elementTopic.equalsIgnoreCase(XML_EXTERNAL))
                 || (elementTopic.equalsIgnoreCase(XML_LINK))) {
 
             m.updateDevExLinkProperties(elementTopic, elementIndex, parsedInfo);
 
-        } // statisticlistener
-        else if (elementTopic.indexOf(XML_STATISTICLISTENER) != -1) {
+        } else if (elementTopic.indexOf(XML_STATISTICLISTENER) != -1) { // statisticlistener
             for (String parsedInfo1 : parsedInfo) {
                 String[] keyval = parsedInfo1.split(KEY_VAL_SPLITTER);
 
@@ -499,7 +520,7 @@ public class HandleRequests {
                 }
 
             }
-        } else if (elementTopic.indexOf(XML_ROUTINGALGORITHM) != -1) {
+        } else if (elementTopic.indexOf(XML_ROUTINGALGORITHM) != -1) { // routingalgorithm
 
             for (String parsedInfo1 : parsedInfo) {
                 String[] keyval = parsedInfo1.split(KEY_VAL_SPLITTER);
@@ -525,6 +546,9 @@ public class HandleRequests {
         return BackRequest;
     }
 
+    /*
+     Return a response as UTF-8.
+     */
     public void returnResponse(HttpServletResponse response, String res) {
         response.setContentType("text/plain");
         response.setCharacterEncoding("UTF-8");

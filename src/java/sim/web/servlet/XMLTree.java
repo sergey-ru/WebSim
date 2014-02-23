@@ -9,30 +9,30 @@ package sim.web.servlet;
  *
  * @author Keren Fruchter
  */
-import static bgu.sim.Properties.StringsProperties.DATA_PATH;
 import bgu.sim.api.*;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
+import org.w3c.dom.Node;
+import org.w3c.dom.Text;
+import org.w3c.dom.Element;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
-import org.w3c.dom.Element;
-import java.io.File;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Text;
+import java.io.File;
+import java.io.IOException;
+import java.util.Set;
+import java.util.List;
+import java.util.HashSet;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.TransformerException;
 import org.xml.sax.SAXException;
 import static sim.web.utils.Constans.*;
+import static bgu.sim.Properties.StringsProperties.DATA_PATH;
 
 public final class XMLTree {
 
@@ -42,21 +42,24 @@ public final class XMLTree {
     private static boolean _ifSuccsessParsing;
     private static String parserErrorMessage;
 
-    private Set<String> _RoutingAlgoChosen = new HashSet<>();
-    private Set<String> _StatisticListenerChosen = new HashSet<>();
+    private final Set<String> _RoutingAlgoChosen = new HashSet<>();
+    private final Set<String> _StatisticListenerChosen = new HashSet<>();
 
-    int initIndex;
-    int deviceIndex;
-    int externalIndex;
-    int linkIndex;
+    int _initIndex;
+    int _deviceIndex;
+    int _externalIndex;
+    int _linkIndex;
 
     private XMLTree() {
         parserErrorMessage = "";
-        try {
-            //parse(true);
-        } catch (Exception ex) {
-            System.err.println(ERROR_PARSING_XML);
-        }
+    }
+
+    /*
+    Instance of the class.
+    */
+    private static class XMLTreeHolder {
+
+        private static final XMLTree INSTANCE = new XMLTree();
     }
 
     public static String getParserErrorMessage() {
@@ -67,12 +70,8 @@ public final class XMLTree {
         return XMLTree.XMLTreeHolder.INSTANCE;
     }
 
-    public Element getRoot() {
-        return _root;
-    }
-
     /*
-     Get XML HTML Code
+     Get the HTML code of the parsed xml tree.
      */
     public StringBuilder getResult() {
         return _result;
@@ -356,14 +355,7 @@ public final class XMLTree {
                     Element newRoutingAlgorithmNode = _doc.createElement(XML_ROUTINGALGORITHM);
                     newRoutingAlgorithmNode.setAttribute(ATTRIBUTE_VALUE, fullPathClass);
 
-                    // add routingalgorithm to simulation.
-                    // MUST BE AFTER STATISTICLISTENER
-                    //NodeList routhingAlgoNodes = _root.getElementsByTagName(XML_ROUTINGALGORITHM);
-                    //if (routhingAlgoNodes.getLength() > 0) {
-                    //    SimulationNode.insertBefore(newRoutingAlgorithmNode, routhingAlgoNodes.item(0));
-                    //} else {
                     SimulationNode.appendChild(newRoutingAlgorithmNode);
-                    //}
 
                     // add to the selected statisticlistener list
                     _RoutingAlgoChosen.add(fullPathClass);
@@ -854,8 +846,8 @@ public final class XMLTree {
                 Node scenarioChild = ScenarioNodeChildren.item(j);
                 // check Init (0..*)
                 if (scenarioChild.getNodeName().equalsIgnoreCase(XML_INIT)) {
-                    parseInit(scenarioChild, initIndex);
-                    initIndex++;
+                    parseInit(scenarioChild, _initIndex);
+                    _initIndex++;
                 }
                 // check Device/External/Link (0..*)
                 if (scenarioChild.getNodeName().equalsIgnoreCase(XML_DEVICE)
@@ -889,16 +881,16 @@ public final class XMLTree {
     private boolean parseDevExtLink(Node scenarioChild) throws Exception {
         switch (scenarioChild.getNodeName()) {
             case XML_EXTERNAL:
-                addHtmlNode(TREEVIEW_EXTERNAL, scenarioChild.getNodeName() + externalIndex, false);
-                externalIndex++;
+                addHtmlNode(TREEVIEW_EXTERNAL, scenarioChild.getNodeName() + _externalIndex, false);
+                _externalIndex++;
                 break;
             case XML_DEVICE:
-                addHtmlNode(TREEVIEW_DEVICE, scenarioChild.getNodeName() + deviceIndex, false);
-                deviceIndex++;
+                addHtmlNode(TREEVIEW_DEVICE, scenarioChild.getNodeName() + _deviceIndex, false);
+                _deviceIndex++;
                 break;
             case XML_LINK:
-                addHtmlNode(TREEVIEW_LINK, scenarioChild.getNodeName() + linkIndex, false);
-                linkIndex++;
+                addHtmlNode(TREEVIEW_LINK, scenarioChild.getNodeName() + _linkIndex, false);
+                _linkIndex++;
                 break;
         }
         NodeList DeviceExternalLinkChildren = scenarioChild.getChildNodes();
@@ -985,10 +977,10 @@ public final class XMLTree {
         _StatisticListenerChosen.clear();
         _RoutingAlgoChosen.clear();
 
-        initIndex = 1;
-        deviceIndex = 1;
-        externalIndex = 1;
-        linkIndex = 1;
+        _initIndex = 1;
+        _deviceIndex = 1;
+        _externalIndex = 1;
+        _linkIndex = 1;
     }
 
     // --- HELPERS -------------
@@ -1330,11 +1322,6 @@ public final class XMLTree {
             }
         }
         return "0";
-    }
-
-    private static class XMLTreeHolder {
-
-        private static final XMLTree INSTANCE = new XMLTree();
     }
 
     public String upperFirstLetter(String userIdea) {

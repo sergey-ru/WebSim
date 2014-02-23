@@ -10,21 +10,18 @@ import javax.servlet.http.*;
  */
 public class SimServlet extends HttpServlet {
 
-    private static final long _serialVersionUID = 1L;
     private HandleRequests _requests;
+    private static final long _serialVersionUID = 1L;
 
     @Override
-    // Called when user press Upload.
     public void init() throws ServletException {
         _requests = new HandleRequests();
-
-        // init file environment
         _requests.initLoadingFileEnviroment();
     }
 
     @Override
     /* 
-     handle all the requests
+     Handle all the requests from the client.
      */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
@@ -38,11 +35,10 @@ public class SimServlet extends HttpServlet {
 
     @Override
     /* 
-     load xml file sim scenario 
+     Load a new file (xml or net) and save it on the server.
      */
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String theRequest = request.getParameter("request");
         _requests.returnResponse(response, _requests.loadFile(request, response, theRequest));
-
     }
 }

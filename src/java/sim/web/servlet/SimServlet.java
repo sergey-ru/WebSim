@@ -42,10 +42,7 @@ public class SimServlet extends HttpServlet {
      */
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String theRequest = request.getParameter("request");
-        if (theRequest.equalsIgnoreCase("netFile")) {
-            _requests.returnResponse(response, _requests.loadNetFile(request, response));
-        } else {
-            _requests.returnResponse(response, _requests.loadNewXml(request, response));
-        }
+        _requests.returnResponse(response, _requests.loadFile(request, response, theRequest));
+
     }
 }

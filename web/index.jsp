@@ -6,7 +6,7 @@
     <head>
         <title>Simulator</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-        <link rel="shortcut icon" href="favicon.ico" /> 
+        <link rel="shortcut icon" href="Images/favicon.ico" /> 
 
         <!-- Main jQuery -->
         <script type="text/javascript" src="JS/jquery-2.0.3.min.js"></script>
@@ -142,10 +142,10 @@
                         <!-- Graph Control -->
                         <table id="graphControlTable1" border="0" cellpadding="6" cellspacing="6">
                             <tr>
-                                <td id="scenarioNameTd" width="90px"><span id="scenarioNumberInfo"></span></td>
-                                <td id="ticksTd"><div id="sliderVal">Tick = 0 Milli</div><div id="slider"></div></td>
-                                <td id="nodesTd"><div id="sliderNodesVal"></div><div id="sliderNodes"></div></td>
-                                <td id="simConsolTd" width="190px">Tick: <div id="output"></div></td>
+                                <td id="scenarioNameTd" width="40%"><span id="scenarioNumberInfo"></span></td>
+                                <td id="ticksTd" width="20%"><div id="sliderVal">Tick = 0 Milli</div><div id="slider"></div></td>
+                                <td id="nodesTd" width="20%"><div id="sliderNodesVal"></div><div id="sliderNodes"></div></td>
+                                <td id="simConsolTd" width="20%"><div class="inrow">Tick: </div><div id="output" class="inrow"></div></td>
                             </tr>
                         </table>
                         <table id="graphControlTable2" border="0">      
@@ -196,6 +196,7 @@
         </div>
         <div class="ui-layout-south">
             <iframe id="iframeStat" src="Chart/Chart.html" height="740" width="99%" frameborder="0"></iframe>
+            <div id="output6"></div>
         </div>
 
     </div>

@@ -112,7 +112,7 @@ public class HandleRequests {
                     break;
                 case "ifExistNextScenario":
 
-                    returnResponse(response, Boolean.toString(SimApi.ifNextScenario()));
+                    response.getWriter().write(Boolean.toString(SimApi.ifNextScenario()));
 
                     break;
                 case "restart":
@@ -181,6 +181,14 @@ public class HandleRequests {
 
                     tree = XMLTree.getInstance();
                     tree.AddNewRuleToScenario(ScenarioIndex, Rule);
+
+                    break;
+                case "DeleteScenario":
+
+                    int ScenarioIndexToDelete = Integer.parseInt(request.getParameter("index"));
+
+                    tree = XMLTree.getInstance();
+                    tree.DeleteScenario(ScenarioIndexToDelete);
 
                     break;
                 case "AddNewScenario":
@@ -343,7 +351,7 @@ public class HandleRequests {
             response.getWriter().write("Can't save tree. " + ex.getMessage());
             return;
         }
-        
+
         // Validate the tree
         try {
             if (!XMLTree.getInstance().validateBool()) {
@@ -353,9 +361,9 @@ public class HandleRequests {
         } catch (IOException ex) {
             response.getWriter().write("Error validating the tree. " + ex.getMessage());
         }
-        
+
         // init base (Simulator class, read & parse netFile)
-        try {    
+        try {
             SimApi.initBaseSim();
         } catch (Exception ex) {
             response.getWriter().write("Error initialize the simulator. " + ex.getMessage());
@@ -403,13 +411,13 @@ public class HandleRequests {
         response.getWriter().write(m.getResult().toString());
     }
 
-    public String loadNewXml(HttpServletRequest request, HttpServletResponse response) {
+    public String loadFile(HttpServletRequest request, HttpServletResponse response, String fileType) {
         try {
             List<FileItem> fileItemsList = _uploader.parseRequest(request);
             Iterator<FileItem> fileItemsIterator = fileItemsList.iterator();
 
             if (fileItemsIterator.hasNext()) {
-                saveXMLFileOnServer(fileItemsIterator);
+                saveFileOnServer(fileItemsIterator, fileType);
             }
         } catch (Exception e) {
             System.out.println("Exception in uploading file. " + e.getMessage());
@@ -418,49 +426,34 @@ public class HandleRequests {
         return "true";
     }
 
-    private void saveXMLFileOnServer(Iterator<FileItem> fileItemsIterator) throws Exception {
+    private void saveFileOnServer(Iterator<FileItem> fileItemsIterator, String fileType) throws Exception {
         FileItem fileItem = fileItemsIterator.next();
 
         // save file
-        String newFileName = sessionId + ".xml";
-        File file = new File(DATA_PATH + newFileName);
-        fileItem.write(file);
-
-        SimApi.setSimulatorScenarioXmlPath(file.getAbsolutePath());
-        XMLTree m = XMLTree.getInstance();
-        m.parse(true);
-
-        // file info
-        System.out.println("FileName = " + fileItem.getName());
-        System.out.println("Absolute Path at server = " + file.getAbsolutePath());
-    }
-
-    public String loadNetFile(HttpServletRequest request, HttpServletResponse response) {
-        try {
-            List<FileItem> fileItemsList = _uploader.parseRequest(request);
-            Iterator<FileItem> fileItemsIterator = fileItemsList.iterator();
-
-            if (fileItemsIterator.hasNext()) {
-                saveNETFileOnServer(fileItemsIterator);
-
-            }
-        } catch (Exception e) {
-            System.out.println("Exception in uploading file. " + e.getMessage());
-            return "false";
+        String newFileName = sessionId;
+        if (fileType.equalsIgnoreCase("netFile")) {
+            newFileName += ".net";
+            XMLTree m = XMLTree.getInstance();
+            m.setNetFilePath(newFileName);
+        } else {
+            newFileName += ".xml";
         }
-        return "true";
-    }
 
-    private void saveNETFileOnServer(Iterator<FileItem> fileItemsIterator) throws Exception {
-        FileItem fileItem = fileItemsIterator.next();
-
-        // save file
-        String newFileName = sessionId + ".net";
         File file = new File(DATA_PATH + newFileName);
         fileItem.write(file);
 
-        XMLTree m = XMLTree.getInstance();
-        m.setNetFilePath(newFileName);
+        // if the file is xml, validate it
+        if (!fileType.equalsIgnoreCase("netFile")) {
+            SimApi.setSimulatorScenarioXmlPath(file.getAbsolutePath());
+            XMLTree m = XMLTree.getInstance();
+            m.parse(true);
+        } else {
+            try {
+                SimApi.parseNetFile(file);
+            } catch (IOException ex) {
+                throw new Exception("Net file is not a valid NET file.");
+            }
+        }
 
         // file info
         System.out.println("FileName = " + fileItem.getName());
@@ -541,81 +534,6 @@ public class HandleRequests {
             response.getWriter().flush();
         } catch (IOException ex) {
             System.err.println("Error return response.");
-        }
-    }
-
-    /*
-     Init simulator
-     */
-    public void initSim() {
-        try {
-            SimApi.initBaseSim();
-            _ifInitSim = true;
-        } catch (Exception ex) {
-            System.err.println("Error Init the simulator.");
-        }
-    }
-
-    /*
-     Run full simulator
-     */
-    protected void runFull(HttpServletRequest request, HttpServletResponse response) {
-        // init sim first
-        initSim();
-
-        // run
-        try {
-            while (SimApi.ifNextScenario()) {
-                long start = System.currentTimeMillis();
-
-                while (SimApi.ifNextTick()) {
-                    _nextTickIndex++;
-                }
-
-                _nextScenarioIndex++;
-                returnResponse(response, "Scenario Number " + _nextScenarioIndex);
-                String timeForRunningFull = Long.toString(System.currentTimeMillis() - start);
-                returnResponse(response, timeForRunningFull);
-            }
-
-        } catch (IOException | ClassNotFoundException | InterruptedException | QueryExecutionException e) {
-            // Simlation failed.
-            returnResponse(response, "Error running the simulator.");
-            System.err.println("Error running the simulator. " + e.getMessage());
-        }
-        System.out.println("Done.");
-    }
-
-    /*
-     Run only one scenario in the simulator
-     */
-    private void runScenario(HttpServletRequest request, HttpServletResponse response) {
-        // if sim is not init
-        if (!_ifInitSim) {
-            initSim();
-        }
-
-        try {
-            if (SimApi.ifNextScenario()) {
-                long start = System.currentTimeMillis();
-
-                while (SimApi.ifNextTick()) {
-                    _nextTickIndex++;
-                }
-
-                _nextScenarioIndex++;
-                returnResponse(response, "Scenario Number " + _nextScenarioIndex);
-                String timeForRunningFull = Long.toString(System.currentTimeMillis() - start);
-                returnResponse(response, timeForRunningFull);
-
-            } else {
-                returnResponse(response, "No More Scenarios.");
-            }
-
-        } catch (IOException | ClassNotFoundException | InterruptedException | QueryExecutionException e) {
-            // Simlation failed.
-            returnResponse(response, "Error running the simulator.");
-            System.err.println("Error running the simulator on one scenario. " + e.getMessage());
         }
     }
 }

@@ -226,6 +226,16 @@ div.growlUI h2 {
 }
 
 #graphControlTable1 {
+    width: 80%; 
+    position: absolute;
+}
+
+#graphControlTable2 {
+    margin-top: 50px;
     width: 100%; 
-    position: relative
+    position: absolute;
+}
+
+.inrow {
+    display:inline-block;
 }

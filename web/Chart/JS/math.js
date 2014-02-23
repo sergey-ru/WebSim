@@ -1,31 +1,3 @@
-/*
- 
- Author: Chris Ongsuco a.k.a. "owenge"
- Blog: http://owenge.blogspot.com (a link to my blog would be nice)
- Version: Beta
- License: New BSD License
- Summary: A simple equation parser that computes string-based equation like in MS Excel.
- 
- Sample Usage:
- var eq = owenge.equation.parse('1+2');
- document.writeln(eq.answer);
- 
- Answer: 3
- 
- eq = owenge.equation.parse('(((-1+2)*5+-10)/3*2)+100/2/3/4/-5+(90*5)');
- document.writeln(eq.answer);
- 
- Answer: 445.8333333333333
- 
- Support:
- Math functions are yet supported.
- 
- FAQ:
- I wrote this for the sake of learning more about JavaScript and 
- to have fun, of course!
- 
- */
-
 var owenge = function() {
 
     var symbol = {

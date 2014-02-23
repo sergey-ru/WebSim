@@ -8,7 +8,6 @@
 var chart;
 
 function log(b, n) {
-
     return (Math.log(n) / Math.log(b)).toFixed(2);
 }
 
@@ -154,15 +153,20 @@ function sendMessageList(result) {
     var ifStop = false;
     var oneHasMore;
     var time = 0;
+    
     while (!ifStop) {
         oneHasMore = false;
-        for (var i = 0; i < messagesList.length; i++) {
+        
+        for (var i = 0; i < messagesList.length; i++) {    
             var allSourceAndTarget = messagesList[i].split(",");
+            
             // go over nodes list
             if (messagesList[i] === "e")
                 continue;
+            
             var source = allSourceAndTarget[0];
             var target = allSourceAndTarget[1];
+            
             if (allSourceAndTarget.length > 2) {
                 oneHasMore = true;
                 // remove first node from list
@@ -181,6 +185,7 @@ function sendMessageList(result) {
             })(source, target);
         }
         time = time + 1000;
+        
         // if nobody has more nodes, stop.
         if (oneHasMore === false) {
             ifStop = true;

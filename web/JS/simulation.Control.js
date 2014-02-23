@@ -95,7 +95,7 @@ $(document).ready(function() {
         });
     });
 
-    // prepare next scenarop
+    // prepare next scenaro
     $('#nextScenario').click(function(event) {
         disableAllButtons();
 
@@ -107,7 +107,7 @@ $(document).ready(function() {
         });
 
         $.get('SimServlet', {request: "ifExistNextScenario"}, function(responseText) {
-            if (responseText.indexOf("false") !== -1) {
+            if (responseText === "false") {
                 $("#scenarioNumberInfo").text("No More Scenarios");
                 $("#runInitRules").attr("disabled", "disabled");
             }
@@ -139,7 +139,7 @@ $(document).ready(function() {
             type: 'GET',
             success: function(data) {
                 // check if there is a scenario
-                if (data.indexOf("true") !== -1) {
+                if (data === "true") {
 
                     // update scenario name
                     $.ajaxQueue({
@@ -192,9 +192,8 @@ $(document).ready(function() {
             success: function(data) {
                 //$("#output6").text(data);
                 if (data !== "") {
-                    var result = data;
                     var $f = $("#iframeID");
-                    $f[0].contentWindow.sendMessageList(result);  //works
+                    $f[0].contentWindow.sendMessageList(data);  //works
                 }
             }
         });

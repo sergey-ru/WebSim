@@ -15,7 +15,7 @@ public class SimServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        _requests = new HandleRequests();
+        _requests = HandleRequests.getInstance();
         _requests.initLoadingFileEnviroment();
     }
 

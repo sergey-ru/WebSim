@@ -37,11 +37,30 @@ $('#viewgui', parent.document).click(function(event) {
         request.send(null);
         if (request.status === 200) {
             jsonFilePath = request.responseText;
-            jsonFilePath = jsonFilePath.replace("&#10;", "");
         }
 
+
+        function getSize() {
+            var myWidth = 0, myHeight = 0;
+            if (typeof (window.innerWidth) == 'number') {
+                //Non-IE
+                myWidth = window.innerWidth;
+                myHeight = window.innerHeight;
+            } else if (document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)) {
+                //IE 6+ in 'standards compliant mode'
+                myWidth = document.documentElement.clientWidth;
+                myHeight = document.documentElement.clientHeight;
+            } else if (document.body && (document.body.clientWidth || document.body.clientHeight)) {
+                //IE 4 compatible
+                myWidth = document.body.clientWidth;
+                myHeight = document.body.clientHeight;
+            }
+             return myHeight;
+        }
+
+
         chartOptions = {
-            height: 700,
+            height: getSize(),
             container: $("#chart")[0],
             navigation: {
                 mode: "focusnodes",
@@ -146,27 +165,24 @@ function makeFirstLetterUpper(word) {
 }
 
 function sendMessageList(result) {
-    $('#runOneStepInScenario', parent.document).attr("disabled", "disabled");
-    $('#runFullScenario', parent.document).attr("disabled", "disabled");
-
     var messagesList = result.split(",,");
     var ifStop = false;
     var oneHasMore;
     var time = 0;
-    
+
     while (!ifStop) {
         oneHasMore = false;
-        
-        for (var i = 0; i < messagesList.length; i++) {    
+
+        for (var i = 0; i < messagesList.length; i++) {
             var allSourceAndTarget = messagesList[i].split(",");
-            
+
             // go over nodes list
             if (messagesList[i] === "e")
                 continue;
-            
+
             var source = allSourceAndTarget[0];
             var target = allSourceAndTarget[1];
-            
+
             if (allSourceAndTarget.length > 2) {
                 oneHasMore = true;
                 // remove first node from list
@@ -185,13 +201,10 @@ function sendMessageList(result) {
             })(source, target);
         }
         time = time + 1000;
-        
+
         // if nobody has more nodes, stop.
         if (oneHasMore === false) {
             ifStop = true;
         }
     }
-
-    $('#runOneStepInScenario', parent.document).removeAttr("disabled");
-    $('#runFullScenario', parent.document).removeAttr("disabled");
 }

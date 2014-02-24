@@ -37,10 +37,10 @@
         <!-- tree methods -->
         <script type="text/javascript" src="JS/tree.Control.js"></script>
 
-        <!-- jansy bootstrap for more style (file upload) -->
-        <link rel="stylesheet" href="JS/jqueryAndBootstrap/bootstrapJ.min.css">
         <!-- original bootstrap for styling -->
         <link rel="stylesheet" href="JS/jqueryAndBootstrap/bootstrap.min.css">
+        <!-- jansy bootstrap for more style (file upload) -->
+        <link rel="stylesheet" href="JS/jqueryAndBootstrap/bootstrapJ.min.css">
 
     </head>
     <body>
@@ -65,47 +65,71 @@
                     <p>
                     <div id="RunSimDiv">
 
-                        <h3> Step 1.a: </h3>
-                        Select XML Simulator Scenario File To Simulate or create a new:
+                        <h3> Step 1: </h3>
+                        Select XML simulator experiment file to simulate, or create a new experiment:
                         <br/><br/>
 
-                        <table border="0">
+                        <table border="0" style="width: 100%;">
                             <tr>
-                                <td style="width: 200px; margin-top: 10px;">
+                                <td colspan="3" style="width: 100%;">
+                                    <button type="button" id="newTree" class="btn btn-primary" style="width: 60%;">Create New Experiment</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: 50%; margin-top: 8px;">
                                     <div class="fileinput fileinput-new" data-provides="fileinput">
-                                        <span class="btn btn-primary btn-file"><span class="fileinput-new">Select file</span><span class="fileinput-exists">Change</span>
-                                            <input type="file" name="sampleFile" id="sampleFile">
-                                        </span>
-                                        <span class="fileinput-filename"></span>
-                                        <a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
+                                        <div class="input-group">
+                                            <div class="form-control" data-trigger="fileinput"><i class="glyphicon glyphicon-file fileinput-exists"></i> <span class="fileinput-filename"></span></div>
+                                            <span class="input-group-addon btn btn-default btn-file"><span class="fileinput-new">Select file</span><span class="fileinput-exists">Change</span><input type="file" name="xmlFile" id="xmlFile"></span>
+                                            <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Remove</a>
+                                        </div>
                                     </div>
                                 </td>
-                                <td><button type="button" id="UploadFileButton" onclick="uploadNewXmlTree();" class ="btn btn-primary" accept=".xml">Upload</button></td>
+                                <td style="width: 20%"><button type="button" id="UploadFileButton" onclick="uploadXmlTreeFile();" class ="btn btn-primary" accept=".xml">Upload</button></td>
+                                <td style="width: 5%;"></td>
+                                <!--                                <td style="width: 25%"><button type="button" id="newTree" class="btn btn-primary">Create New Experiment</button></td>-->
                             </tr>
                         </table>
 
                         <br/>
-                        <h3> Step 1.b: </h3>
-                        Or, Create a new experiment.
-                        <br/>
-                        <button type="button" id="newTree" class="btn btn-primary btn-sm">New Experiment</button>
-                        <br/>
-                        <br/>
                         <h3> Step 2: </h3>
-                        Edit the tree.
+                        Please load a .net file (that represent a network):
+                        <br/>
+
+                        <table border="0" style="width: 100%;">
+                            <tr>
+                                <td style="width: 50%; margin-top: 8px;">
+                                    <div class="fileinput fileinput-new" data-provides="fileinput">
+                                        <div class="input-group">
+                                            <div class="form-control" data-trigger="fileinput"><i class="glyphicon glyphicon-file fileinput-exists"></i> <span class="fileinput-filename"></span></div>
+                                            <span class="input-group-addon btn btn-default btn-file"><span class="fileinput-new">Select file</span><span class="fileinput-exists">Change</span><input type="file" name="netFile" id="netFile"></span>
+                                            <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Remove</a>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="width: 15%"><button type="button" id="UploadFileButton2" onclick="uploadNetFile();" class ="btn btn-primary" accept=".xml">Upload</button></td>
+                                <td style="width: 2%;"></td>
+                                <td style="width: 23%"><div id="netFileDiv"></div></td>
+                            </tr>
+                        </table>
+
                         <br/>
                         <br/>
                         <h3> Step 3: </h3>
-                        Load the tree into the simulator.
+                        Edit the tree.
                         <br/>
-                        <button type="button" id="loadTreeToSim" class="btn btn-primary doAction">Load</button>
-                        <div id="waitToLoad"></div>
                         <br/>
                         <br/>
                         <h3> Step 4: </h3>
+                        <br/>
+                        <button type="button" id="loadTreeToSim" class="btn btn-primary doAction" style="width: 60%;">Load the tree into the simulator</button>
+                        <div id="waitToLoad"></div>
+                        <br/>
+                        <br/>
+                        <h3> Step 5: </h3>
                         Run simulator.  
                         <br/>
-                        <button type="button" id="viewgui" class="btn btn-primary btn-lg doAction">View Simulator</button>
+                        <button type="button" id="viewgui" class="btn btn-primary doAction"  style="width: 60%;">View Simulator</button>
 
                     </div>
                     </p>
@@ -142,10 +166,10 @@
                         <!-- Graph Control -->
                         <table id="graphControlTable1" border="0" cellpadding="6" cellspacing="6">
                             <tr>
-                                <td id="scenarioNameTd" width="40%"><span id="scenarioNumberInfo"></span></td>
+                                <td id="scenarioNameTd" width="35%"><span id="scenarioNumberInfo"></span></td>
                                 <td id="ticksTd" width="20%"><div id="sliderVal">Tick = 0 Milli</div><div id="slider"></div></td>
-                                <td id="nodesTd" width="20%"><div id="sliderNodesVal"></div><div id="sliderNodes"></div></td>
-                                <td id="simConsolTd" width="20%"><div class="inrow">Tick: </div><div id="output" class="inrow"></div></td>
+                                <td id="nodesTd" width="30%"><div id="sliderNodesVal"></div><div id="sliderNodes"></div></td>
+                                <td id="simConsolTd" width="15%"><div class="inrow">Tick: </div><div id="output" class="inrow"></div></td>
                             </tr>
                         </table>
                         <table id="graphControlTable2" border="0">      
@@ -161,7 +185,7 @@
                         </table>
 
                         <!-- Graph -->
-                        <iframe id="iframeID" src="Graph/SimViewGraph.html" height="780" width="99%" frameborder="0"></iframe>
+                        <iframe id="iframeID" src="Graph/SimViewGraph.html" height="850" width="99%" frameborder="0"></iframe>
                         <div id="output6"></div>
                     </div>
                 </div>
@@ -170,7 +194,7 @@
                     <div id="StatisticsDiv">
                         <div class="center">
                             <center>
-                                <iframe id="iframeStat" src="Statistics/statistics.html" height="740" width="99%" frameborder="0"></iframe>
+                                <iframe id="iframeStat" src="Statistics/statistics.html" height="850" width="99%" frameborder="0"></iframe>
                             </center>
                         </div>
                     </div>  
@@ -179,13 +203,13 @@
         </div>
     </div>
 
-    <div class="ui-layout-north">
-
-        <!-- HEADER -->
-        <h2>Simulator</h2>
-        <div id="sessionId"></div>
-
-    </div>
+    <!--    <div class="ui-layout-north">
+    
+             HEADER 
+            <h2>Simulator</h2>
+            <div id="sessionId"></div>
+    
+        </div>-->
 
     <div class="ui-layout-east">
 
@@ -195,7 +219,7 @@
             </form>
         </div>
         <div class="ui-layout-south">
-            <iframe id="iframeStat" src="Chart/Chart.html" height="740" width="99%" frameborder="0"></iframe>
+            <iframe id="iframeStat" src="Chart/Chart.html" style="position: absolute; height: 100%" width="99%" frameborder="0"></iframe>
             <div id="output6"></div>
         </div>
 
@@ -205,8 +229,9 @@
 
         <!--MENU-->
         <div id="treeMenu">
+            <div id="downloadXMLDiv">
+            </div>
 
-            <a href="DownloadFileServlet" class="btn btn-default btn-sm">Download Experiment</a>
             <div id="errroDownload"></div>
             <p></p>
 

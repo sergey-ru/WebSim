@@ -24,6 +24,10 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import static sim.web.utils.Constans.*;
 import static bgu.sim.Properties.StringsProperties.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import javax.xml.parsers.ParserConfigurationException;
+import org.josql.QueryExecutionException;
 
 /**
  *
@@ -33,232 +37,275 @@ public class HandleRequests {
 
     private String _sessionId;
     private ServletFileUpload _uploader;
+    private static HandleRequests _instance = null;
 
-    public HandleRequests() {
+    private HandleRequests() {
         _uploader = null;
     }
 
+    public static HandleRequests getInstance() {
+        if (_instance == null) {
+            _instance = new HandleRequests();
+
+        }
+        return _instance;
+    }
+
+    /*
+     Handle the client requests
+     */
     public void checkRequest(String theRequest, HttpServletRequest request, HttpServletResponse response) {
         try {
-            XMLTree tree;
-            switch (theRequest) {
-                case "initSession":
 
-                    // create  new seassion for user
-                    HttpSession session = request.getSession();
-                    if (session != null) {
-                        _sessionId = session.getId();
-                    }
-
-                    returnResponse(response, _sessionId);
-
-                    break;
-                case "getJSONgraphData":
-
-                    returnResponse(response, FROM_JS_DATA_PATH + _sessionId + ".json");
-
-                    break;
-                case "runBaseInit":
-
-                    SimApi.initBaseSim();
-
-                    break;
-                case "runInitRules":
-
-                    SimApi.nextScenario();
-                    returnResponse(response, Boolean.toString(SimApi.ifNextScenario()));
-
-                    break;
-                case "runOneStepInScenario":
-
-                    if (SimApi.ifNextTick()) {
-                        SimApi.nextTick();
-                        response.getWriter().write("true");
-                    } else {
-                        response.getWriter().write("false");
-                    }
-
-                    break;
-                case "runFullScenario":
-
-                    SimApi.runFullScenario();
-
-                    break;
-                case "getTicksNumber":
-
-                    tree = XMLTree.getInstance();
-                    response.getWriter().write(tree.getTicksNumber());
-
-                    break;
-                case "getNextScenarioName":
-
-                    response.getWriter().write(SimApi.getNextScenarioName());
-
-                    break;
-                case "getFirstScenarioName":
-
-                    response.getWriter().write(SimApi.getFirstScenarioName());
-
-                    break;
-                case "ifExistNextScenario":
-
-                    response.getWriter().write(Boolean.toString(SimApi.ifNextScenario()));
-
-                    break;
-                case "restart":
-
-                    SimApi.resetSim();
-
-                    break;
-                case "loadXmlTree":
-
-                    loadXmlTree(request, response);
-
-                    break;
-                case "SimulationProperty":
-
-                    tree = XMLTree.getInstance();
-                    response.getWriter().write(tree.getSimulationProperties());
-
-                    break;
-                case "ScenarioProperty":
-
-                    tree = XMLTree.getInstance();
-                    int scenarioIndex = Integer.parseInt(request.getParameter("index"));
-                    response.getWriter().write(tree.getScenarioProperties(scenarioIndex));
-
-                    break;
-                case "InitProperty":
-
-                    tree = XMLTree.getInstance();
-                    int initIndex = Integer.parseInt(request.getParameter("index"));
-                    response.getWriter().write(tree.getInitProperties(initIndex));
-
-                    break;
-                case "DeviceExLinkProperty":
-
-                    tree = XMLTree.getInstance();
-                    int Index = Integer.parseInt(request.getParameter("index"));
-                    String type = request.getParameter("type");
-                    response.getWriter().write(tree.getDeviceExLinkProperties(type, Index));
-
-                    break;
-                case "StatisticProperties":
-
-                    String statisticNodeToCheck = request.getParameter("element");
-                    statisticNodeToCheck = statisticNodeToCheck.replace(XML_STATISTICLISTENER + " ", "");
-                    tree = XMLTree.getInstance();
-                    response.getWriter().write(tree.getStatisticProperties(statisticNodeToCheck));
-
-                    break;
-                case "RoutingAlgProperties":
-
-                    String routalgNodeToCheck = request.getParameter("element");
-                    routalgNodeToCheck = routalgNodeToCheck.replace(XML_ROUTINGALGORITHM + " ", "");
-                    tree = XMLTree.getInstance();
-                    response.getWriter().write(tree.getRoutingAlgProperties(routalgNodeToCheck));
-
-                    break;
-                case "GetPByActionValue":
-
-                    getPByActionValue(request, response);
-
-                    break;
-                case "AddScenarioNewRule":
-
-                    int ScenarioIndex = Integer.parseInt(request.getParameter("index"));
-                    String Rule = request.getParameter("rule");
-
-                    tree = XMLTree.getInstance();
-                    tree.AddNewRuleToScenario(ScenarioIndex, Rule);
-
-                    break;
-                case "DeleteScenario":
-
-                    int ScenarioIndexToDelete = Integer.parseInt(request.getParameter("index"));
-
-                    tree = XMLTree.getInstance();
-                    tree.DeleteScenario(ScenarioIndexToDelete);
-
-                    break;
-                case "AddNewScenario":
-
-                    tree = XMLTree.getInstance();
-                    tree.AddNewScenario();
-
-                    break;
-                case "SaveProperties":
-
-                    saveProperties(request, response);
-
-                    break;
-                case "IfTreeIsValid":
-
-                    tree = XMLTree.getInstance();
-                    response.getWriter().write(tree.validate());
-
-                    break;
-                case "getParserTreeErrorMessage":
-
-                    response.getWriter().write(XMLTree.getParserErrorMessage());
-
-                    break;
-                case "NewTree":
-
-                    tree = XMLTree.getInstance();
-                    response.getWriter().write(tree.newTree());
-
-                    break;
-                case "validateAndInitTree":
-
-                    validateInitTree(response);
-
-                    break;
-                case "getNodeInfo":
-
-                    int nodeId = Integer.parseInt(request.getParameter("node"));
-                    String nodeProp = request.getParameter("prop");
-
-                    if (nodeProp == null) {
-                        response.getWriter().write(SimApi.getNodeInfo(nodeId));
-                    } else {
-                        response.getWriter().write(SimApi.getNodeInfo(nodeId, nodeProp));
-                    }
-
-                    break;
-                case "getNodesCount":
-
-                    int countNodes = SimApi.getNodesCount();
-                    response.getWriter().write(Integer.toString(countNodes));
-
-                    break;
-                case "getStatistics":
-
-                    getStatistics(response);
-
-                    break;
-                case "getChartStatistics":
-
-                    int statIndex = Integer.parseInt(request.getParameter("index"));
-                    int scenarioNum = Integer.parseInt(request.getParameter("scenario"));
-                    getChartStatistics(response, scenarioNum, statIndex);
-
-                    break;
-                case "getMessages":
-
-                    getMessages(response);
-
-                    break;
-            }
-        } catch (Exception ex) {
-            System.err.println("Error: " + ex.getMessage());
+            Method requestMethod = this.getClass().getDeclaredMethod(theRequest, HttpServletRequest.class, HttpServletResponse.class);
+            requestMethod.invoke(this, request, response);
+
+        } catch (IllegalAccessException ex) {
+            System.err.println("IllegalAccessException Error: " + ex.getCause());
+        } catch (IllegalArgumentException ex) {
+            System.err.println("IllegalArgumentException Error: " + ex.getCause());
+        } catch (NoSuchMethodException ex) {
+            System.err.println("NoSuchMethodException Error: " + ex.getCause());
+        } catch (SecurityException ex) {
+            System.err.println("SecurityException Error: " + ex.getCause());
+        } catch (InvocationTargetException ex) {
+            System.err.println("InvocationTargetException Error: " + ex.getCause());
         }
+    }
+
+    /*
+     Returns the number of the toal nodes (from Net file)
+     */
+    private void getNodesCount(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        int countNodes = SimApi.getNodesCount();
+        response.getWriter().write(Integer.toString(countNodes));
+    }
+
+    /*
+     Given the node id, returns its information
+     */
+    private void getNodeInfo(HttpServletRequest request, HttpServletResponse response) throws NumberFormatException, ClassNotFoundException, QueryExecutionException, IOException {
+        int nodeId = Integer.parseInt(request.getParameter("node"));
+        String nodeProp = request.getParameter("prop");
+
+        if (nodeProp == null) {
+            response.getWriter().write(SimApi.getNodeInfo(nodeId));
+        } else {
+            response.getWriter().write(SimApi.getNodeInfo(nodeId, nodeProp));
+        }
+    }
+
+    /*
+     Returns the error message from the tree parser (null/"" if the tree is valid)
+     */
+    private void getParserTreeErrorMessage(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.getWriter().write(XMLTree.getParserErrorMessage());
+    }
+
+    /*
+     Returns boolean as string if the tree is valid
+     */
+    private void IfTreeIsValid(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        XMLTree tree;
+        tree = XMLTree.getInstance();
+        response.getWriter().write(tree.validate());
+    }
+
+    /*
+     Add new empty scenario to the xml tree
+     */
+    private void AddNewScenario(HttpServletRequest request, HttpServletResponse response) {
+        XMLTree.getInstance().AddNewScenario();
+    }
+
+    /*
+     Delete a scenario by its given index
+     */
+    private void DeleteScenario(HttpServletRequest request, HttpServletResponse response) throws NumberFormatException {
+        int ScenarioIndexToDelete = Integer.parseInt(request.getParameter("index"));
+        XMLTree.getInstance().DeleteScenario(ScenarioIndexToDelete);
+    }
+
+    /*
+     Add new rule to the scenario by given the rule type and the scenario index
+     */
+    private void AddScenarioNewRule(HttpServletRequest request, HttpServletResponse response) throws NumberFormatException {
+        String Rule = request.getParameter("rule");
+        int ScenarioIndex = Integer.parseInt(request.getParameter("index"));
+        XMLTree.getInstance().AddNewRuleToScenario(ScenarioIndex, Rule);
+    }
+
+    /*
+     Returns the properties of the selected routing algorithm element
+     */
+    private void RoutingAlgProperties(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        XMLTree tree;
+        tree = XMLTree.getInstance();
+        String routalgNodeToCheck = request.getParameter("element");
+        routalgNodeToCheck = routalgNodeToCheck.replace(XML_ROUTINGALGORITHM + " ", "");
+
+        response.getWriter().write(tree.getRoutingAlgProperties(routalgNodeToCheck));
+    }
+
+    /*
+     Returns the properties of the selected statistics element
+     */
+    private void StatisticProperties(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        XMLTree tree;
+        String statisticNodeToCheck = request.getParameter("element");
+        statisticNodeToCheck = statisticNodeToCheck.replace(XML_STATISTICLISTENER + " ", "");
+        tree = XMLTree.getInstance();
+        response.getWriter().write(tree.getStatisticProperties(statisticNodeToCheck));
+    }
+
+    /*
+     Returns the properties of the selected Device/Ex/Link
+     */
+    private void DeviceExLinkProperty(HttpServletRequest request, HttpServletResponse response) throws IOException, NumberFormatException {
+        XMLTree tree;
+        tree = XMLTree.getInstance();
+        int Index = Integer.parseInt(request.getParameter("index"));
+        String type = request.getParameter("type");
+        response.getWriter().write(tree.getDeviceExLinkProperties(type, Index));
+    }
+
+    /*
+     Returns the properties of the selected Initialization rule
+     */
+    private void InitProperty(HttpServletRequest request, HttpServletResponse response) throws NumberFormatException, IOException {
+        XMLTree tree;
+        tree = XMLTree.getInstance();
+        int initIndex = Integer.parseInt(request.getParameter("index"));
+        response.getWriter().write(tree.getInitProperties(initIndex));
+    }
+
+    /*
+     Returns the properties of the selected scenario
+     */
+    private void ScenarioProperty(HttpServletRequest request, HttpServletResponse response) throws IOException, NumberFormatException {
+        XMLTree tree;
+        tree = XMLTree.getInstance();
+        int scenarioIndex = Integer.parseInt(request.getParameter("index"));
+        response.getWriter().write(tree.getScenarioProperties(scenarioIndex));
+    }
+
+    /*
+     Returns the properties of the simulation element
+     */
+    private void SimulationProperty(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        XMLTree tree;
+        tree = XMLTree.getInstance();
+        response.getWriter().write(tree.getSimulationProperties());
+    }
+
+    /*
+     Restart the simulator
+     */
+    private void restart(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        SimApi.resetSim();
+    }
+
+    /*
+     Return true if there is one more scenario (for GUI validation)
+     */
+    private void ifExistNextScenario(HttpServletRequest request, HttpServletResponse response) throws QueryExecutionException, ClassNotFoundException, IOException {
+        response.getWriter().write(Boolean.toString(SimApi.ifNextScenario()));
+    }
+
+    /*
+     Returns the name of the first scenario (for the GUI)
+     */
+    private void getFirstScenarioName(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.getWriter().write(SimApi.getFirstScenarioName());
+    }
+
+    /*
+     Returns the name of the next scenario (for the GUI)
+     */
+    private void getNextScenarioName(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.getWriter().write(SimApi.getNextScenarioName());
+    }
+
+    /*
+     Return the number of the total ticks in the simulator
+     */
+    private void getTicksNumber(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        XMLTree tree;
+        tree = XMLTree.getInstance();
+        response.getWriter().write(tree.getTicksNumber());
+    }
+
+    /*
+     Run the scenario to its end (all the ticks)
+     */
+    private void runFullScenario(HttpServletRequest request, HttpServletResponse response) throws IOException, ClassNotFoundException, InterruptedException, QueryExecutionException {
+        SimApi.runFullScenario();
+    }
+
+    /*
+     Run one tick in the current scenario
+     */
+    private void runOneStepInScenario(HttpServletRequest request, HttpServletResponse response) throws InterruptedException, QueryExecutionException, IOException {
+        if (SimApi.ifNextTick()) {
+            SimApi.nextTick();
+            response.getWriter().write("true");
+        } else {
+            response.getWriter().write("false");
+        }
+    }
+
+    /*
+     Run the initializations rules of the current scenario
+     */
+    private void runInitRules(HttpServletRequest request, HttpServletResponse response) throws IOException, QueryExecutionException, ClassNotFoundException {
+        SimApi.nextScenario();
+        String answer = Boolean.toString(SimApi.ifNextScenario());
+        // _response.getWriter().write(answer);
+        returnResponse(response, answer);
+    }
+
+    /*
+     Run the basic initialization for the simulator
+     */
+    private void runBaseInit(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        SimApi.initBaseSim();
+    }
+
+    /*
+     Returns the file path of the json data (graph data).
+     */
+    private void getJSONgraphData(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.getWriter().write(FROM_JS_DATA_PATH + _sessionId + ".json");
+    }
+
+    /*
+     Creates a new, empty xml tree
+     */
+    private void NewTree(HttpServletRequest request, HttpServletResponse response) throws ParserConfigurationException, IOException {
+        XMLTree tree;
+        tree = XMLTree.getInstance();
+        //_response.getWriter().write(tree.newTree());
+        String answer = tree.newTree();
+        returnResponse(response, answer);
+    }
+
+    /*
+     Set the user's session and put it in its global variable
+     */
+    private void initSession(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // create  new seassion for user
+        HttpSession session = request.getSession();
+        if (session != null) {
+            _sessionId = session.getId();
+        }
+
+        response.getWriter().write(_sessionId);
     }
 
     /*
      Get the messages created by the simulator
      */
-    private void getMessages(HttpServletResponse response) throws IOException {
+    private void getMessages(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String allPaths = "";
 
         for (Message me : SimApi.getMessages()) {
@@ -275,7 +322,7 @@ public class HandleRequests {
     /*
      Create an HTML table with the statistic data.
      */
-    private void getStatistics(HttpServletResponse response) throws IOException {
+    private void getStatistics(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Map<Integer, StatisticsDataStruct> stats = SimApi.getStatistics();
         String newTableOfStat = "<table id=\"statTable\">";
 
@@ -307,6 +354,15 @@ public class HandleRequests {
         }
 
         return allRows;
+    }
+
+    /*
+     Returns 
+     */
+    private void getChartStatistics(HttpServletRequest request, HttpServletResponse response) throws NumberFormatException, IOException {
+        int statIndex = Integer.parseInt(request.getParameter("index"));
+        int scenarioNum = Integer.parseInt(request.getParameter("scenario"));
+        getChartStatistics(response, scenarioNum, statIndex);
     }
 
     /*
@@ -347,7 +403,7 @@ public class HandleRequests {
     /*
      A final validator for the tree, just before running the simulator.
      */
-    private void validateInitTree(HttpServletResponse response) throws IOException {
+    private void validateAndInitTree(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // save xml file at server
         try {
             XMLTree.getInstance().saveTree(_sessionId);
@@ -389,7 +445,7 @@ public class HandleRequests {
     /*
      Saving the properties of an element that were updated in the GUI.
      */
-    private void saveProperties(HttpServletRequest request, HttpServletResponse response) throws IOException, NumberFormatException {
+    private void SaveProperties(HttpServletRequest request, HttpServletResponse response) throws IOException, NumberFormatException {
         String elementTopic = request.getParameter("elementToSave");
         String indexString = request.getParameter("elementIndex");
         String Info = request.getParameter("info");
@@ -402,7 +458,7 @@ public class HandleRequests {
     /*
      Get the p values of an requested class
      */
-    private void getPByActionValue(HttpServletRequest request, HttpServletResponse response) throws IOException, NumberFormatException {
+    private void GetPByActionValue(HttpServletRequest request, HttpServletResponse response) throws IOException, NumberFormatException {
         String fullClassPath = request.getParameter("fullClassPath");
         String indexStr = request.getParameter("index");
         int ElementIndex = Integer.parseInt(indexStr);
@@ -415,8 +471,8 @@ public class HandleRequests {
      Loading the xml tree by its saved path, or by the root itself.
      */
     private void loadXmlTree(HttpServletRequest request, HttpServletResponse response) throws Exception, IOException {
-        boolean ifByPath = Boolean.parseBoolean(request.getParameter("ifByPath"));
         XMLTree m;
+        boolean ifByPath = Boolean.parseBoolean(request.getParameter("ifByPath"));
 
         m = XMLTree.getInstance();
         m.parse(ifByPath);

@@ -24,12 +24,14 @@ public class DownloadFileServlet extends HttpServlet {
         String fileName = session.getId() + ".xml";
 
         if (fileName == null || fileName.equals("")) {
-            throw new ServletException("File Name can't be null or empty");
+            //throw new ServletException("File Name can't be null or empty");
+            return;
         }
 
         File file = new File(DATA_PATH + fileName);
         if (!file.exists()) {
-            throw new ServletException("File doesn't exists on server.");
+            //throw new ServletException("File doesn't exists on server.");
+            return;
         }
 
         // get file and set the header

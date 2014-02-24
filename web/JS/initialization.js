@@ -17,7 +17,7 @@ $(document).ready(function() {
 
     // init session id
     $.get('SimServlet', {request: "initSession"}, function(responseText) {
-        $("#sessionId").text(responseText);
+        //$("#sessionId").text(responseText); // fot testing
     });
 
     // get iframe child

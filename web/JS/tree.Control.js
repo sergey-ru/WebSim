@@ -160,18 +160,19 @@ function ifTreeIsValid() {
 }
 
 // upload new xml file
-function uploadNewXmlTree() {
+function uploadXmlTreeFile() {
     $(document).ready(function() {
         $("#viewgui").attr("disabled", "disabled");
-        var sampleFile = document.getElementById("sampleFile").files[0];
+        var xmlFile = document.getElementById("xmlFile").files[0];
         var formdata = new FormData();
-        formdata.append("sampleFile", sampleFile);
+        formdata.append("xmlFile", xmlFile);
         var xhr = new XMLHttpRequest();
         xhr.open("POST", "SimServlet?request=newxmlTree", true);
         xhr.send(formdata);
         xhr.onload = function(e) {
             if (this.status === 200) {
                 LoadXmlMenuTree("true");
+                $("#downloadXMLDiv").html('<a href="DownloadFileServlet" class="btn btn-default btn-sm">Download Experiment</a>');
             }
         };
     });
@@ -181,9 +182,9 @@ function uploadNewXmlTree() {
 function uploadNetFile() {
     $(document).ready(function() {
         $("#viewgui").attr("disabled", "disabled");
-        var sampleFile = document.getElementById("NetFilePath").files[0];
+        var netFile = document.getElementById("netFile").files[0];
         var formdata = new FormData();
-        formdata.append("sampleFile", sampleFile);
+        formdata.append("netFile", netFile);
         var xhr = new XMLHttpRequest();
         xhr.open("POST", "SimServlet?request=netFile", true);
         xhr.send(formdata);
@@ -310,11 +311,14 @@ function editSimulationProperty(node) {
 
             // build html code
             htmlBuilder.addRow();
-            htmlBuilder.addLabel(v0[0]);
-            if (v0[0] === "NetFilePath") {
-                htmlBuilder.addInputFile(v0[0], v0[1]);
-            }
-            else {
+
+            if (v0[0] !== "NetFilePath") {
+                htmlBuilder.addLabel(v0[0]);
+                //}
+                //if (v0[0] === "NetFilePath") {
+                //htmlBuilder.addInputFile(v0[0], v0[1]); // we moved the upload to the front
+                //}
+                //else {
                 htmlBuilder.addInput(v0[0], v0[1]);
             }
             htmlBuilder.addEndRow();

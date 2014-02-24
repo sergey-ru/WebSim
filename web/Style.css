@@ -27,7 +27,7 @@ td, th {
 }
 
 #netFileDiv {
-    position: fixed;  
+/*    position: fixed;  */
 }
 
 .danger {
@@ -46,16 +46,12 @@ td, th {
 }
 
 #RunSimDiv {
-    width:80%;
+    width:90%;
 }
 
 #waitToLoad {
     height: 5px;
     margin-top: 3px;
-}
-
-#netFileDiv {
-    height: 5px;
 }
 
 p {

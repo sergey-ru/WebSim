@@ -39,6 +39,7 @@ $(document).ready(function() {
 
     $('#restart').click(function(event) {
         disableAllButtons();
+        
         $.get('SimServlet', {request: "restart"}, function(responseText) {
             // enable run
             $("#runInitRules").removeAttr("disabled");
@@ -52,9 +53,11 @@ $(document).ready(function() {
 
     $('#pause').click(function(event) {
         ifPause = !ifPause;
-
+        $("#restart").removeAttr("disabled");
+        
         if (!ifPause) {
             $('#pause').html("<span class=\"glyphicon glyphicon-pause\"></span> Pause");
+           $("#restart").attr("disabled", "disabled");
             var currTick = $("#output").text();
             currTick = parseInt(currTick);
             poller.setTicks(ticks - currTick);
@@ -92,6 +95,7 @@ $(document).ready(function() {
 
         $.get('SimServlet', {request: "runFullScenario"}, function(responseText) {
             $("#nextScenario").removeAttr("disabled");
+            $("#output").text(0);
         });
     });
 
@@ -120,6 +124,7 @@ $(document).ready(function() {
     $('#runFullTime').click(function(event) {
 
         disableAllButtons();
+        $("#restart").attr("disabled", "disabled");
         $("#pause").removeAttr("disabled");
 
         // get number of ticks
@@ -168,6 +173,7 @@ $(document).ready(function() {
                     $("#runFullTime").attr("disabled", "disabled");
                     $("#pause").attr("disabled", "disabled");
                     $('#scenarioNumberInfo').text("No More Scenarios");
+                    $("#restart").removeAttr("disabled");
                 }
             }
         });
@@ -223,25 +229,23 @@ $(document).ready(function() {
                 url: 'SimServlet',
                 data: {request: 'runOneStepInScenario'},
                 type: 'GET',
-                success: function(response) {
+                success: function() {
 
-                    if (self.ticks > 0 && !ifPause) {
-                        var count = $("#output").text();
-                        count = parseInt(count);
-                        count++;
+                    if (self.ticks >= 0 && !ifPause) {
+                        var count = ticks - self.ticks;
                         $("#output").text(count);
 
                         // animation
                         runMessagesAnimation();
 
                         self.interval = parseInt($("#slider").slider("value"));
-                        self.ticks -= 1;
+                        self.ticks--;
                         self.init();
                     }
                     else if (ifPause) {
                         $("#pause").html("<span class=\"glyphicon glyphicon-repeat\"></span> Resume");
                     }
-                    else if (self.ticks === 0) {
+                    else {
                         $("#runFullTime").removeAttr("disabled");
                     }
                 },

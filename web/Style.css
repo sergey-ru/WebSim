@@ -7,6 +7,14 @@
 body, html {
     padding:0px 0px 0px 0px;
     margin:0px 0px 0px 0px;
+    height: 100%;
+    width: 100%;
+}
+
+#splitter1 , #splitter2, #splitter3
+{
+    width: 99%;
+    height: 99%;
 }
 
 td, th {
@@ -27,7 +35,7 @@ td, th {
 }
 
 #netFileDiv {
-/*    position: fixed;  */
+    /*    position: fixed;  */
 }
 
 .danger {

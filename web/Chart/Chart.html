@@ -4,447 +4,445 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <title>Real-time updates</title>
 
-        <link href="examples.css" rel="stylesheet" type="text/css">
-
         <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="JS/excanvas.min.js"></script><![endif]-->
-        <script type="text/javascript" src="Jquery.JS/jquery.js"></script>
-        <script type="text/javascript" src="Jquery.JS/jquery.flot.js"></script>
-        <!--        <script type="text/javascript" src="Jquery.JS/jquery.flot.navigate.js"></script>-->
-        <script type="text/javascript" src="Jquery.JS/jquery.flot.resize.js"></script>
+        <script language="javascript" type="text/javascript" src="Jquery.JS/jquery.js"></script>
+        <script language="javascript" type="text/javascript" src="Jquery.JS/jquery.flot.js"></script>
+        <script language="javascript" type="text/javascript" src="Jquery.JS/jquery.flot.resize.js"></script>
+        <script type="text/javascript" src="Jquery.JS/jquery.flot.navigate.js"></script>
 
         <!-- math operators order calculate -->
         <script type="text/javascript" src="JS/math.js"></script>
 
         <!-- auto complete-->
-        <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
-        <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+        <link rel="stylesheet" href="JS/AutoComplete/jquery-ui.css">
+        <script src="JS/AutoComplete/jquery-ui.js"></script>
 
-        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="../JS/jqueryAndBootstrap/bootstrapJ.min.css">
 
-        <script type="text/javascript">
+        <style type="text/css">
+            html, body {
+                height: 100%; /* make the percentage height on placeholder work */
+            }
+        </style>
+    </head>
+    <body>
 
-            $(document).ready(function() {
-                // global params
-                var placeholder = $("#placeholder");
-                var plot = $.plot(placeholder, []);
-                // the plugin includes a jQuery plugin for adding resize events to
-                // any element, let's just add a callback so we can display the
-                // placeholder size
-                placeholder.resize(function() {
-                    $(".message").text("Placeholder is now "
-                            + $(this).width() + "x" + $(this).height()
-                            + " pixels");
-                });
+        <div id="placeholder" class="demo-placeholder" style="width:100%;height:75%;"></div>
 
-                var ifInitWrireFunction = false;
-                var initOneTickInScenario = false;
-                var intervalUpdate;
-                var scenario = 0;
-                var ticks = 0;
-                var separators = ['\\\+', '-', '\\*', '/', '\\\(', '\\\)'];
-                var separatorsForAutoComplete = ['+', '-', '*', '/', '(', ')'];
-                var data;
-                var headlines;
-                var countRow;
-                var needInit;
-                var updateInterval = 1;
-                /*
-                 * if the param is a number
-                 * @returns {boolean}
-                 */
-                function IsNumeric(num) {
-                    return (num >= 0 || num < 0);
-                }
 
-                parent.top.$('#restart').click(function(event) {
-                    scenario = 0;
-                    $("#placeholder").text();
-                    clearTimeout(intervalUpdate);
-                });
+        <div id="formOfFunction" class="form-group"  style="width:100%;height:20%;">
+             <label class="control-label" for="inputSuccess4">Write Function </label>
+        <input type="text" class="form-control" id="functionToParse" style="width: 90%;">
+        <button type="button" id="calcButton" class="btn btn-default">Calculate</button>
+        <div id="debug"></div>
+        <span class="help-block" id="parseResult"></span>
+        <span class="help-block" style="color: #BBB;">Write a function using the operators +, -, /, * using the names of the chart's lines. You can use the help of the auto-complete.</span>
+    </div>
 
-                parent.top.$('#runOneStepInScenario').click(function(event) {
-                    if (!initOneTickInScenario) {
-                        updateChart();
-                        initOneTickInScenario = true;
-                    }
 
-                    // draw new data
-                    getData();
-                    if (plot) {
-                        plot.setData(createJSONwithAllDatas());
-                        plot.setupGrid();
-                        plot.draw();
-                    }
-                });
+    <script type="text/javascript">
 
-                parent.top.$('#runFullScenario').click(function(event) {
-                    if (!initOneTickInScenario) {
-                        updateChart();
-                        initOneTickInScenario = true;
-                    }
+        // global parameters
+        var ifInitWrireFunction = false;
+        var initOneTickInScenario = false;
+        var intervalUpdate;
+        var scenario = 0;
+        var ticks = 0;
+        var separators = ['\\\+', '-', '\\*', '/', '\\\(', '\\\)'];
+        var separatorsForAutoComplete = ['+', '-', '*', '/', '(', ')'];
+        var data;
+        var headlines;
+        var countRow;
+        var needInit;
+        var updateInterval = 1;
+        var plot;
+        var placeholder;
 
-                    update();
-                });
+        $(function() {
+            placeholder = $("#placeholder");
 
-                parent.top.$('#nextScenario').click(function(event) {
-                    initOneTickInScenario = false;
-                });
+            //plot = $.plot(placeholder, []);
 
-                parent.top.$('#runFullTime').click(function(event) {
+            //placeholder.resize(function() {
+        });
+
+        $(document).ready(function() {
+
+            /*
+             * if the param is a number
+             * @returns {boolean}
+             */
+            function IsNumeric(num) {
+                return (num >= 0 || num < 0);
+            }
+
+            parent.top.$('#restart').click(function(event) {
+                scenario = 0;
+                $("#placeholder").text();
+                clearTimeout(intervalUpdate);
+            });
+
+            parent.top.$('#runOneStepInScenario').click(function(event) {
+                if (!initOneTickInScenario) {
                     updateChart();
-                });
-
-                function updateChart() {
-
-                    // initialization
-                    placeholder = $("#placeholder");
-                    placeholder.text();
-                    data = new Array([]);
-                    countRow = 1;
-                    needInit = true;
-                    ifInitWrireFunction = false;
-                    headlines = new Array();
-                    parent.top.$('input:checkbox').removeAttr('checked');
-                    scenario++;
-
-                    if (plot) {
-                        plot.setData([]);
-                        plot.setupGrid();
-                        plot.draw();
-                    }
-
-                    // get total ticks
-                    ticks = requestFromServer("request=getTicksNumber");
-                    plot = $.plot(placeholder, [], {
-                        series: {
-                            lines: {
-                                show: true
-                            },
-                            shadowSize: 0
-                        },
-                        xaxis: {
-                            min: 0,
-                            max: ticks
-                                    //zoomRange: [1, 200],
-                                    //panRange: [-10, 2000]
-                        },
-                        yaxis: {
-                            min: 0,
-                            max: ticks
-                                    //zoomRange: [1, 200],
-                                    //panRange: [-10, 2000]
-                        },
-                        zoom: {
-                            interactive: true
-                        },
-                        pan: {
-                            interactive: true
-                        }
-                    });
-
-                    // Resizible
-                    placeholder.resize(function() {
-                        alert("?");
-                        $(".message").text("Placeholder is now "
-                                + $(this).width() + "x" + $(this).height()
-                                + " pixels");
-                    });
-
-                    // show pan/zoom messages to illustrate events
-                    placeholder.bind("plotpan", function(event, plot) {
-                        var axes = plot.getAxes();
-                        $(".message").html("Panning to x: " + axes.xaxis.min.toFixed(2)
-                                + " &ndash; " + axes.xaxis.max.toFixed(2)
-                                + " and y: " + axes.yaxis.min.toFixed(2)
-                                + " &ndash; " + axes.yaxis.max.toFixed(2));
-                    });
-                    placeholder.bind("plotzoom", function(event, plot) {
-                        var axes = plot.getAxes();
-                        $(".message").html("Zooming to x: " + axes.xaxis.min.toFixed(2)
-                                + " &ndash; " + axes.xaxis.max.toFixed(2)
-                                + " and y: " + axes.yaxis.min.toFixed(2)
-                                + " &ndash; " + axes.yaxis.max.toFixed(2));
-                    });
-
-                    update();
+                    initOneTickInScenario = true;
                 }
 
-                /*
-                 * The function that updates every tick tht chart with the new data
-                 * @param {type} event
-                 * @returns {undefined}
-                 */
-                function update() {
-
-                    // draw new data
-                    getData();
-                    if (plot) {
-                        plot.setData(createJSONwithAllDatas());
-                        plot.setupGrid();
-                        plot.draw();
-                    }
-
-                    intervalUpdate = setTimeout(update, updateInterval);
-                    if (countRow > ticks) {
-                        clearTimeout(intervalUpdate);
-                    }
-                }
-
-
-                /*
-                 * Chart Operators. User can insert function and display it on the plot.
-                 * also Auto-Complete for helping writing the function.
-                 */
-                function initWriteFunction() {
-
-                    var availableTags = headlines.concat(separatorsForAutoComplete);
-                    function split(val) {
-                        return val.split(/\s*/);
-                    }
-                    function extractLast(term) {
-                        return split(term).pop();
-                    }
-
-                    $("#functionToParse")
-                            // don't navigate away from the field on tab when selecting an item
-                            .bind("keydown", function(event) {
-                                if (event.keyCode === $.ui.keyCode.TAB &&
-                                        $(this).data("ui-autocomplete").menu.active) {
-                                    event.preventDefault();
-                                }
-                            })
-                            .autocomplete({
-                                minLength: 0,
-                                source: function(request, response) {
-                                    // delegate back to autocomplete, but extract the last term
-                                    response($.ui.autocomplete.filter(
-                                            availableTags, extractLast(request.term)));
-                                },
-                                focus: function() {
-                                    // prevent value inserted on focus
-                                    return false;
-                                },
-                                select: function(event, ui) {
-                                    var terms = split(this.value);
-                                    // remove the current input
-                                    var lastChar = terms.pop();
-                                    while (separatorsForAutoComplete.indexOf(lastChar) === -1 && terms.length > 0) {
-                                        lastChar = terms.pop();
-                                    }
-
-                                    // add the selected item
-                                    if (separatorsForAutoComplete.indexOf(lastChar) !== -1 && ui.item.value !== lastChar) {
-                                        terms.push(lastChar);
-                                    }
-                                    terms.push(ui.item.value);
-                                    this.value = terms.join("");
-                                    return false;
-                                }
-                            });
-                }
-
-                /*
-                 * Validate & build the user's function
-                 * @param {type} e
-                 * @returns {undefined}
-                 */
-                $('#calcButton').click(function() {
-
-                    // Validate function
-                    var ifValid = validateFunction();
-                    if (!ifValid) {
-                        return;
-                    }
-
-                    // set data
-                    var copyOfData = new Array();
-                    for (i = 0; i < data.length; i++) {
-                        copyOfData.push(data[i]);
-                    }
-                    owenge.equation.setDataArrays(copyOfData);
-                    // set headlines
-                    var copyOfHeadlines = new Array();
-                    for (i = 0; i < headlines.length; i++) {
-                        copyOfHeadlines.push(headlines[i]);
-                    }
-                    owenge.equation.setHeadLines(copyOfHeadlines);
-                    // Parsing the function
-                    var funcToParse = $('#functionToParse').val();
-                    var newDataResult = owenge.equation.parse(funcToParse);
-                    data.push(newDataResult.answer);
-                    headlines.push(funcToParse);
-                    // updating plot data - old and new
-                    var oldData = [];
-                    for (var i = 0; i < headlines.length; i++) {
-                        if (data[i])
-                            oldData.push({data: data[i], label: headlines[i]});
-                    }
-
-                    plot.setData(oldData);
+                // draw new data
+                getData();
+                if (plot) {
+                    plot.setData(createJSONwithAllDatas());
                     plot.setupGrid();
                     plot.draw();
-                    $('#formOfFunction').removeClass("has-error");
-                    $('#formOfFunction').addClass("has-success");
+                }
+            });
+
+            parent.top.$('#runFullScenario').click(function(event) {
+                if (!initOneTickInScenario) {
+                    updateChart();
+                    initOneTickInScenario = true;
+                }
+
+                update();
+            });
+
+            parent.top.$('#nextScenario').click(function(event) {
+                initOneTickInScenario = false;
+            });
+
+            parent.top.$('#runFullTime').click(function(event) {
+                updateChart();
+            });
+
+            function updateChart() {
+
+                // initialization
+                placeholder = $("#placeholder");
+                placeholder.text();
+                data = new Array([]);
+                countRow = 1;
+                needInit = true;
+                ifInitWrireFunction = false;
+                headlines = new Array();
+                parent.top.$('input:checkbox').removeAttr('checked');
+                scenario++;
+
+                if (plot) {
+                    plot.setData([]);
+                    plot.setupGrid();
+                    plot.draw();
+                }
+
+                // get total ticks
+                ticks = requestFromServer("request=getTicksNumber");
+
+                plot = $.plot(placeholder, [], {
+                    series: {
+                        lines: {
+                            show: true
+                        },
+                        shadowSize: 0
+                    },
+                    xaxis: {
+                        min: 0,
+                        max: ticks
+                                //zoomRange: [1, 200],
+                                //panRange: [-10, 2000]
+                    },
+                    yaxis: {
+                        min: 0,
+                        max: ticks
+                                //zoomRange: [1, 200],
+                                //panRange: [-10, 2000]
+                    },
+                    zoom: {
+                        interactive: true
+                    },
+                    pan: {
+                        interactive: true
+                    }
                 });
-                /*
-                 * Validating that the function has valid headers and
-                 * that not all params are numbers
-                 */
-                function validateFunction() {
-                    var ifSuccseed;
-                    var ifNotAllNumbers = false;
-                    var funcToParse = $('#functionToParse').val();
-                    var tokens = funcToParse.split(new RegExp(separators.join('|'), 'g'));
-                    $('#parseResult').text("");
-                    // Validate the written function
-                    for (var i = 0; i < tokens.length; i++) {
 
-                        ifSuccseed = false;
-                        // empty places because the split
-                        if (tokens[i] === "")
-                            continue;
+                // Resizible
+                placeholder.resize(function() {
+                });
 
-                        for (var j = 0; j < headlines.length; j++) {
+                // show pan/zoom messages to illustrate events
+                placeholder.bind("plotpan", function(event, plot) {
+                    var axes = plot.getAxes();
+                    $(".message").html("Panning to x: " + axes.xaxis.min.toFixed(2)
+                            + " &ndash; " + axes.xaxis.max.toFixed(2)
+                            + " and y: " + axes.yaxis.min.toFixed(2)
+                            + " &ndash; " + axes.yaxis.max.toFixed(2));
+                });
+                placeholder.bind("plotzoom", function(event, plot) {
+                    var axes = plot.getAxes();
+                    $(".message").html("Zooming to x: " + axes.xaxis.min.toFixed(2)
+                            + " &ndash; " + axes.xaxis.max.toFixed(2)
+                            + " and y: " + axes.yaxis.min.toFixed(2)
+                            + " &ndash; " + axes.yaxis.max.toFixed(2));
+                });
 
-                            // if one of the headers
-                            if (tokens[i] === headlines[j]) {
-                                ifSuccseed = true;
-                                ifNotAllNumbers = true;
+                update();
+            }
+
+            /*
+             * The function that updates every tick tht chart with the new data
+             * @param {type} event
+             * @returns {undefined}
+             */
+            function update() {
+                // draw new data
+                getData();
+                if (plot) {
+                    plot.setData(createJSONwithAllDatas());
+                    plot.setupGrid();
+                    plot.draw();
+                }
+
+                intervalUpdate = setTimeout(update, updateInterval);
+                if (countRow > ticks) {
+                    clearTimeout(intervalUpdate);
+                }
+            }
+
+
+            /*
+             * Chart Operators. User can insert function and display it on the plot.
+             * also Auto-Complete for helping writing the function.
+             */
+            function initWriteFunction() {
+
+                var availableTags = headlines.concat(separatorsForAutoComplete);
+                function split(val) {
+                    return val.split(/\s*/);
+                }
+                function extractLast(term) {
+                    return split(term).pop();
+                }
+
+                $("#functionToParse")
+                        // don't navigate away from the field on tab when selecting an item
+                        .bind("keydown", function(event) {
+                            if (event.keyCode === $.ui.keyCode.TAB &&
+                                    $(this).data("ui-autocomplete").menu.active) {
+                                event.preventDefault();
                             }
+                        })
+                        .autocomplete({
+                            minLength: 0,
+                            source: function(request, response) {
+                                // delegate back to autocomplete, but extract the last term
+                                response($.ui.autocomplete.filter(
+                                        availableTags, extractLast(request.term)));
+                            },
+                            focus: function() {
+                                // prevent value inserted on focus
+                                return false;
+                            },
+                            select: function(event, ui) {
+                                var terms = split(this.value);
+                                // remove the current input
+                                var lastChar = terms.pop();
+                                while (separatorsForAutoComplete.indexOf(lastChar) === -1 && terms.length > 0) {
+                                    lastChar = terms.pop();
+                                }
 
-                            // if is a number
-                            else if (IsNumeric(tokens[i])) {
-                                ifSuccseed = true;
+                                // add the selected item
+                                if (separatorsForAutoComplete.indexOf(lastChar) !== -1 && ui.item.value !== lastChar) {
+                                    terms.push(lastChar);
+                                }
+                                terms.push(ui.item.value);
+                                this.value = terms.join("");
+                                return false;
                             }
+                        });
+            }
+
+            /*
+             * Validate & build the user's function
+             * @param {type} e
+             * @returns {undefined}
+             */
+            $('#calcButton').click(function() {
+
+                // Validate function
+                var ifValid = validateFunction();
+                if (!ifValid) {
+                    return;
+                }
+
+                // set data
+                var copyOfData = new Array();
+                for (i = 0; i < data.length; i++) {
+                    copyOfData.push(data[i]);
+                }
+                owenge.equation.setDataArrays(copyOfData);
+                // set headlines
+                var copyOfHeadlines = new Array();
+                for (i = 0; i < headlines.length; i++) {
+                    copyOfHeadlines.push(headlines[i]);
+                }
+                owenge.equation.setHeadLines(copyOfHeadlines);
+                // Parsing the function
+                var funcToParse = $('#functionToParse').val();
+                var newDataResult = owenge.equation.parse(funcToParse);
+                data.push(newDataResult.answer);
+                headlines.push(funcToParse);
+                // updating plot data - old and new
+                var oldData = [];
+                for (var i = 0; i < headlines.length; i++) {
+                    if (data[i])
+                        oldData.push({data: data[i], label: headlines[i]});
+                }
+
+                plot.setData(oldData);
+                plot.setupGrid();
+                plot.draw();
+                $('#formOfFunction').removeClass("has-error");
+                $('#formOfFunction').addClass("has-success");
+            });
+            /*
+             * Validating that the function has valid headers and
+             * that not all params are numbers
+             */
+            function validateFunction() {
+                var ifSuccseed;
+                var ifNotAllNumbers = false;
+                var funcToParse = $('#functionToParse').val();
+                var tokens = funcToParse.split(new RegExp(separators.join('|'), 'g'));
+                $('#parseResult').text("");
+                // Validate the written function
+                for (var i = 0; i < tokens.length; i++) {
+
+                    ifSuccseed = false;
+                    // empty places because the split
+                    if (tokens[i] === "")
+                        continue;
+
+                    for (var j = 0; j < headlines.length; j++) {
+
+                        // if one of the headers
+                        if (tokens[i] === headlines[j]) {
+                            ifSuccseed = true;
+                            ifNotAllNumbers = true;
                         }
 
-                        if (!ifSuccseed) {
-                            $('#formOfFunction').addClass("has-error");
-                            $('#parseResult').text("Function is not valid. Pls use the help of the auto-complete.");
-                            return false;
+                        // if is a number
+                        else if (IsNumeric(tokens[i])) {
+                            ifSuccseed = true;
                         }
                     }
 
-                    // validate that not all of the parameters in function are numbers
-                    if (!ifNotAllNumbers) {
+                    if (!ifSuccseed) {
                         $('#formOfFunction').addClass("has-error");
                         $('#parseResult').text("Function is not valid. Pls use the help of the auto-complete.");
                         return false;
                     }
-
-                    // Success
-                    return true;
                 }
 
-                /*
-                 * Makes a Json text for the chart (data and labels)
-                 * @type @exp;headlines@call;concat
-                 */
-                function createJSONwithAllDatas() {
-                    var outer = [];
-                    for (var i = 0; i < headlines.length; i++) {
-                        if (data[i])
-                            outer.push({data: data[i], label: headlines[i]});
+                // validate that not all of the parameters in function are numbers
+                if (!ifNotAllNumbers) {
+                    $('#formOfFunction').addClass("has-error");
+                    $('#parseResult').text("Function is not valid. Pls use the help of the auto-complete.");
+                    return false;
+                }
+
+                // Success
+                return true;
+            }
+
+            /*
+             * Makes a Json text for the chart (data and labels)
+             * @type @exp;headlines@call;concat
+             */
+            function createJSONwithAllDatas() {
+                var outer = [];
+                for (var i = 0; i < headlines.length; i++) {
+                    if (data[i])
+                        outer.push({data: data[i], label: headlines[i]});
+                }
+
+                return outer;
+            }
+
+            /*
+             * get from the server the new statistics and updates the chart
+             */
+            function getData() {
+                var ifUpdated = false;
+                var countColumn = 0;
+
+                var jsonFromServer = requestFromServer('request=getChartStatistics&index=' + countRow + '&scenario=' + scenario);
+                var tags = $.parseJSON(jsonFromServer);
+
+                for (var headline in tags) {
+                    // save headers
+                    if (needInit) {
+                        headlines.push(headline);
                     }
 
-                    return outer;
+                    // init
+                    if (!data[countColumn]) {
+                        data[countColumn] = [];
+                    }
+
+                    for (var i = 0; i < tags[headline].length; i++) { // need it. usually 0 or 1.
+                        // inserting new data
+                        data[countColumn].push([countRow, tags[headline][i]]);
+                        // for rows count. update it only when there was a real update with data
+                        ifUpdated = true;
+                    }
+
+                    countColumn++;
                 }
 
                 /*
-                 * get from the server the new statistics and updates the chart
+                 * if the user wants to see one of the nodes property on the chart
                  */
-                function getData() {
-                    var ifUpdated = false;
-                    var countColumn = 0;
-
-                    var jsonFromServer = requestFromServer('request=getChartStatistics&index=' + countRow + '&scenario=' + scenario);
-                    var tags = $.parseJSON(jsonFromServer);
-
-                    for (var headline in tags) {
-                        // save headers
-                        if (needInit) {
-                            headlines.push(headline);
-                        }
-
-                        // init
-                        if (!data[countColumn]) {
+                if (ifUpdated) {
+                    parent.top.$("#nodePropertyCheckboxesForm input:checkbox:checked").each(function() {
+                        var nodeId = parent.top.$("#nodeInfoId").text();
+                        var nodeProp = $(this).attr('id');
+                        var numberReturned = requestFromServer("request=getNodeInfo&node=" + nodeId + "&prop=" + nodeProp);
+                        // validate data as a number
+                        var newPoint = parseFloat(numberReturned);
+                        if (isNaN(newPoint))
+                            newPoint = 0;
+                        if (headlines.indexOf(nodeProp + " " + "Node" + nodeId) === -1)
+                            headlines.push(nodeProp + " " + "Node" + nodeId);
+                        if (!data[countColumn])
                             data[countColumn] = [];
-                        }
-
-                        for (var i = 0; i < tags[headline].length; i++) { // need it. usually 0 or 1.
-                            // inserting new data
-                            data[countColumn].push([countRow, tags[headline][i]]);
-                            // for rows count. update it only when there was a real update with data
-                            ifUpdated = true;
-                        }
-
+                        data[countColumn].push([countRow, newPoint]);
                         countColumn++;
-                    }
-
-                    /*
-                     * if the user wants to see one of the nodes property on the chart
-                     */
-                    if (ifUpdated) {
-                        parent.top.$("#nodePropertyCheckboxesForm input:checkbox:checked").each(function() {
-                            var nodeId = parent.top.$("#nodeInfoId").text();
-                            var nodeProp = $(this).attr('id');
-                            var numberReturned = requestFromServer("request=getNodeInfo&node=" + nodeId + "&prop=" + nodeProp);
-                            // validate data as a number
-                            var newPoint = parseFloat(numberReturned);
-                            if (isNaN(newPoint))
-                                newPoint = 0;
-                            if (headlines.indexOf(nodeProp + " " + "Node" + nodeId) === -1)
-                                headlines.push(nodeProp + " " + "Node" + nodeId);
-                            if (!data[countColumn])
-                                data[countColumn] = [];
-                            data[countColumn].push([countRow, newPoint]);
-                            countColumn++;
-                        });
-                    }
-
-                    if (ifUpdated) {
-                        countRow++;
-                        ifUpdated = false;
-                        needInit = false;
-                        if (!ifInitWrireFunction) {
-                            initWriteFunction();
-                            ifInitWrireFunction = true;
-                        }
-                    }
-
+                    });
                 }
 
-                function requestFromServer(fullRequest) {
-                    var request = new XMLHttpRequest();
-                    request.open('GET', '/Simulator/SimServlet?' + fullRequest, false); // `false` makes the request synchronous
-                    request.send(null);
-                    if (request.status === 200) {
-                        return request.responseText;
+                if (ifUpdated) {
+                    countRow++;
+                    ifUpdated = false;
+                    needInit = false;
+                    if (!ifInitWrireFunction) {
+                        initWriteFunction();
+                        ifInitWrireFunction = true;
                     }
                 }
-            });</script>
-    </head>
-    <body>
 
-        <div id="content">
-            <div class="demo-container">
-                <div id="placeholder" class="demo-placeholder"></div>
+            }
 
-                <div id="formOfFunction" class="form-group">
-                    <label class="control-label" for="inputSuccess4">Write Function </label>
-                    <input type="text" class="form-control" id="functionToParse">
-                    <button type="button" id="calcButton" class="btn btn-default">Calculate</button>
-                    <div id="debug"></div>
-                    <span class="help-block" id="parseResult"></span>
-                    <span class="help-block" style="color: #BBB;">Write a function using the operators +, -, /, * using the names of the chart's lines. You can use the help of the auto-complete.</span>
-                </div>
-
-                <p class="message"></p>
-
-            </div>
-        </div>
-    </body>
+            function requestFromServer(fullRequest) {
+                var request = new XMLHttpRequest();
+                request.open('GET', '/Simulator/SimServlet?' + fullRequest, false); // `false` makes the request synchronous
+                request.send(null);
+                if (request.status === 200) {
+                    return request.responseText;
+                }
+            }
+        });
+    </script>
 
     <!-- style-->
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
+    <script src="../JS/jqueryAndBootstrap/bootstrapj.min.js"></script> 
+
+</body>
 </html>

@@ -11,10 +11,22 @@ body, html {
     width: 100%;
 }
 
-#splitter1 , #splitter2, #splitter3
+iframe
 {
-    width: 99%;
-    height: 99%;
+    height:95%;
+    width:98%;
+    overflow:hidden;
+    position: absolute;
+}
+
+#iframeID {
+    margin-top: 10px;
+    height:90%;
+}
+
+.tdOfInputFile {
+    margin-top: 12px;
+    width: 50%;
 }
 
 td, th {
@@ -232,12 +244,14 @@ div.growlUI h2 {
 #graphControlTable1 {
     width: 80%; 
     position: absolute;
+    z-index: 999;
 }
 
 #graphControlTable2 {
     margin-top: 50px;
     width: 100%; 
     position: absolute;
+    z-index: 999;
 }
 
 .inrow {

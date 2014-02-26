@@ -42,7 +42,7 @@ $('#viewgui', parent.document).click(function(event) {
 
         function getSize() {
             var myWidth = 0, myHeight = 0;
-            if (typeof (window.innerWidth) == 'number') {
+            if (typeof (window.innerWidth) === 'number') {
                 //Non-IE
                 myWidth = window.innerWidth;
                 myHeight = window.innerHeight;
@@ -55,7 +55,7 @@ $('#viewgui', parent.document).click(function(event) {
                 myWidth = document.body.clientWidth;
                 myHeight = document.body.clientHeight;
             }
-             return myHeight;
+            return myHeight;
         }
 
 
@@ -110,7 +110,8 @@ $('#viewgui', parent.document).click(function(event) {
 
                         chart.addFocusNode(event.clickNode.id);
 
-                        var newTable = "<table id=\"nodeInfoTable\">";
+                        var newTable = "<table id=\"nodeInfoTable\" class=\"table table-hover\">";
+                        newTable += "<thead><tr><th>See value on chart</th><th>Attribute</th><th>Value</th></tr></thead><tbody>";
                         newTable += "<tr><td style=\"width:10%\"></td><td style=\"width:30%\">Id</td><td style=\"width:60%\"><div id=\"nodeInfoId\">" + event.clickNode.id + "<div></td></tr>";
                         newTable += "<tr><td style=\"width:10%\"></td><td style=\"width:30%\">Type</td><td style=\"width:60%\">" + makeFirstLetterUpper(event.clickNode.data.type) + "</td></tr>";
 
@@ -130,9 +131,9 @@ $('#viewgui', parent.document).click(function(event) {
 
                                 newTable += "<tr><td style=\"width:10%\"><input type=\"checkbox\" id=\"" + makeFirstLetterUpper(line[0]) + "\" value\"" + makeFirstLetterUpper(line[1]) + "\"></td><td style=\"width:30%\">" + makeFirstLetterUpper(line[0]) + "</td><td style=\"width:60%\">" + makeFirstLetterUpper(line[1]) + "</td></tr>";
                             }
-                            newTable += "</table>";
+                            newTable += "</tbody></table>";
 
-                            parent.top.$("#state").html(newTable);
+                            parent.top.$("#nodeInfoDiv").html(newTable);
                             //parent.top.$("#nodeInfoTable").addClass("table");
                             //parent.top.$("#nodeInfoTable").addClass("table-striped");
                         }

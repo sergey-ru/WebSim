@@ -41,31 +41,36 @@ $(document).ready(function() {
     });
 
     // Layout
-//    $('body').layout({
-//        applyDemoStyles: true
-//        , minSize: 100	// ALL panes
-//        , east__size: 200
-//        , stateManagement__enabled: true
-//        , east__childOptions: {
-//            applyDemoStyles: true
-//            , minSize: 50	// ALL panes
-//            , south__size: 100
-//        }, north_childOptions: {
-//            applyDemoStyles: true
-//            , minSize: 50	// ALL panes
-//            , south__size: 100
-//        }
-//    });
+    $('body').layout({
+        applyDemoStyles: true
+        , minSize: 100	// ALL panes
+        , east__size: 200
+        , stateManagement__enabled: true
+        , maskContents: true
+        , east__childOptions: {
+            applyDemoStyles: true
+            , minSize: 50	// ALL panes
+            , south__size: 100
+            , maskContents: true
+        }, north_childOptions: {
+            applyDemoStyles: true
+            , minSize: 50	// ALL panes
+            , south__size: 100
+            , maskContents: true
+        }
+    });
 
-    $("#splitter1").wijsplitter({orientation: "vertical", fullSplit: true, splitterDistance: 300});
-    $("#splitter2").wijsplitter({orientation: "vertical", fullSplit: true, splitterDistance: 800, collapsingPanel: "panel2"});
-    $("#splitter3").wijsplitter({orientation: "horizontal", fullSplit: true, splitterDistance: 400});
+//    $("#splitter1").wijsplitter({orientation: "vertical", fullSplit: true, splitterDistance: 300});
+//    $("#splitter2").wijsplitter({orientation: "vertical", fullSplit: true, splitterDistance: 800, collapsingPanel: "panel2"});
+//    $("#splitter3").wijsplitter({orientation: "horizontal", fullSplit: true, splitterDistance: 400});
 
 
     $(function() {
         $('.doAction').tooltip();
     });
 });
+
+
 
 /*
  * End Initialization

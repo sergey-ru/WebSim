@@ -171,8 +171,14 @@ function uploadXmlTreeFile() {
         xhr.send(formdata);
         xhr.onload = function(e) {
             if (this.status === 200) {
-                LoadXmlMenuTree("true");
-                $("#downloadXMLDiv").html('<a href="DownloadFileServlet" class="btn btn-default btn-sm">Download Experiment</a>');
+                if (xhr.responseText === "true&#10;") {
+                    $("#xmlFileDiv").html("<div class=\"success\">Xml file loaded successfully.</div>");
+                    LoadXmlMenuTree("true");
+                    $("#downloadXMLDiv").html('<a href="DownloadFileServlet" class="btn btn-default btn-sm">Download Experiment</a>');
+                }
+                else
+                    $("#xmlFileDiv").html("<div class=\"danger\">Xml file were not loaded. Please try another xml file.</div>");
+
             }
         };
     });

@@ -26,8 +26,6 @@ $(document).ready(function() {
         $('#ViewSimulatorDiv').hide();
         $('#EditNodeDivShow').hide();
         $('#StatisticsDiv').show();
-
-        //$('#iframeStat').attr("src", "Statistics/statistics.html");
     });
 
     $('#viewgui').click(function(event) {

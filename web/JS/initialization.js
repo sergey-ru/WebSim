@@ -44,33 +44,27 @@ $(document).ready(function() {
     $('body').layout({
         applyDemoStyles: true
         , minSize: 100	// ALL panes
-        , east__size: 200
+        , east__size: 700
         , stateManagement__enabled: true
         , maskContents: true
         , east__childOptions: {
             applyDemoStyles: true
             , minSize: 50	// ALL panes
-            , south__size: 100
+            , south__size: 550
             , maskContents: true
         }, north_childOptions: {
             applyDemoStyles: true
             , minSize: 50	// ALL panes
-            , south__size: 100
+            , south__size: 400
             , maskContents: true
         }
     });
 
-//    $("#splitter1").wijsplitter({orientation: "vertical", fullSplit: true, splitterDistance: 300});
-//    $("#splitter2").wijsplitter({orientation: "vertical", fullSplit: true, splitterDistance: 800, collapsingPanel: "panel2"});
-//    $("#splitter3").wijsplitter({orientation: "horizontal", fullSplit: true, splitterDistance: 400});
-
-
+    // Allows the alt tool to work
     $(function() {
         $('.doAction').tooltip();
     });
 });
-
-
 
 /*
  * End Initialization

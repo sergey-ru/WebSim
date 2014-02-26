@@ -4,63 +4,73 @@
     Created on : Dec 2, 2013, 11:29:36 AM
     Author     : Keren Fruchter
 */
+
 body, html {
-    padding:0px 0px 0px 0px;
-    margin:0px 0px 0px 0px;
-    height: 100%;
     width: 100%;
+    height: 100%;
+    margin:0px 0px 0px 0px;
+    padding:0px 0px 0px 0px;
 }
 
 iframe
 {
-    height:95%;
     width:98%;
+    height:95%;
     overflow:hidden;
     position: absolute;
 }
 
+.inrow {
+    display:run-in;
+}
+
+.wide {
+    width: 100%;
+}
+
 #iframeID {
-    margin-top: 10px;
     height:90%;
+    margin-top: 10px;
 }
 
 .tdOfInputFile {
-    margin-top: 12px;
     width: 50%;
+    margin-top: 14px;
 }
 
 td, th {
     padding: 0.1rem;
+    display: run-in;
     overflow: hidden;
-    display: inline-block;
     white-space: nowrap;
 }
 
+p {
+    margin: 20px 20px 20px 20px;
+}
+
 .success {
+    color: green;
     margin-top: 5px;
     font-size: small;
-    color: green;
 }
 
 #saveResult {
     position: absolute;
 }
 
-#netFileDiv {
-    /*    position: fixed;  */
-}
-
 .danger {
+    color: red;
     margin-top: 5px;
     font-size: small;
-    color: red;
 }
 
 #menu {
-    height:800px;
     width:20%;
     float:left;
+    height:800px;
 }
+
 #content {
     height:800px;
 }
@@ -72,51 +82,6 @@ td, th {
 #waitToLoad {
     height: 5px;
     margin-top: 3px;
-}
-
-p {
-    margin: 20px 20px 20px 20px;
-}
-
-
-.hasmenu {
-    border: 0px solid #008;
-    margin: 3px;
-    padding: 5px;
-    width: 30px;
-}
-
-.ui-widget{
-    font-size: .8em;
-}
-.ui-menu {
-    width: 150px;
-}
-
-/* Define a custom icon */
-
-.ui-icon.custom-icon-firefox {
-    background-image: url(application_firefox.gif);
-    background-position: 0 0;
-}
-
-div.growlUI { background: url(http://malsup.com/jquery/block/check48.png) no-repeat 10px 10px }
-div.growlUI h1, div.growlUI h2 {
-    color: white; 
-    padding: 5px 5px 5px 75px;
-    text-align: left;
-}
-
-div.growlUI h1 {
-    font-size: 17px;
-}
-
-div.growlUI h2 {
-    font-size: 15px;
-}
-
-#treeMenu {
-
 }
 
 #loadingmessage {
@@ -132,18 +97,18 @@ div.growlUI h2 {
 }
 
 #TreeValidation {
-    position:absolute; 
     bottom:0;
+    position:absolute;
 }
 
 #spaceMenuContent {
-    float: right; 
     width: 2%;
+    float: right;
 }
 
 #content {
-    float: right; 
     width: 83%;
+    float: right; 
 }
 
 .rowOfStep1 {
@@ -160,12 +125,13 @@ div.growlUI h2 {
 }
 
 #scenarioNameTd {
-    text-align: center;
+    color: #222;
     font-size: large;
     font-weight: bold;
-    color: #222;
-    text-shadow: 0px 2px 3px #555;
+    text-align: center;
     text-transform:capitalize;
+    text-shadow: 0px 2px 3px #555;
+
 }
 
 #ticksTd {
@@ -174,8 +140,8 @@ div.growlUI h2 {
 
 #slider {
     float: top;
-    clear: inherit;
     width: 90%;
+    clear: inherit;
     margin:5px 5px 5px 5px;
 }
 
@@ -185,41 +151,13 @@ div.growlUI h2 {
 
 #sliderNodes {
     float: top;
-    clear: inherit;
     width: 90%;
+    clear: inherit;
     margin:5px 5px 5px 5px;
 }
 
 #simConsolTd {
     text-align: center;
-}
-
-#1td {
-
-}
-
-#2td {
-
-}
-
-#3td {
-
-}
-
-#4td {
-
-}
-
-#5td {
-
-}
-
-#6td {
-
-}
-
-#7td {
-
 }
 
 .table{
@@ -231,29 +169,37 @@ div.growlUI h2 {
 }
 
 #nodeInfoTable {
-    width: 70%;
-    font-size: medium;
-}
-
-#nodeInfoTable td {
-    height: 30px;
-    border-bottom:1px solid #fff;
-    border-top:1px solid #fff;
+    width: 90%;
+    font-size: smaller;
 }
 
 #graphControlTable1 {
     width: 80%; 
-    position: absolute;
     z-index: 999;
+    position: absolute;
 }
 
 #graphControlTable2 {
-    margin-top: 50px;
-    width: 100%; 
-    position: absolute;
+    width: 100%;
     z-index: 999;
+    margin-top: 50px;
+    position: absolute;
 }
 
-.inrow {
-    display:inline-block;
+#graphControlTable2 button {
+    width: 100%; 
+}
+
+#fileinputtable1 td, #fileinputtable1 th {
+    padding: 0.1rem;
+    overflow: hidden;
+    white-space: nowrap; 
+    display: inline-block;
+}
+
+#fileinputtable2 td, #fileinputtable2 th {
+    padding: 0.1rem;
+    overflow: hidden;
+    white-space: nowrap; 
+    display: inline-block;
 }

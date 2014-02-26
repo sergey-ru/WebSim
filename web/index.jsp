@@ -9,7 +9,7 @@
         <link rel="shortcut icon" href="Images/favicon.ico" /> 
 
         <!-- Main jQuery -->
-        <script type="text/javascript" src="JS/jquery-2.0.3.min.js"></script>
+        <script type="text/javascript" src="JS/jqueryAndBootstrap/jquery-2.0.3.min.js"></script>
         <link rel="stylesheet" href="JS/jqueryAndBootstrap/jquery-ui.css">
         <script src="JS/jqueryAndBootstrap/jquery-1.9.1.js"></script>
         <script src="JS/jqueryAndBootstrap/jquery-ui.js"></script>
@@ -67,20 +67,20 @@
 
                         <h3> Step 1: </h3>
                         Select XML simulator experiment file to simulate, or create a new experiment:
-                        <br/><br/>
+                        <br/>
 
-                        <table border="0" style="width: 100%;">
+                        <table id="fileinputtable1" border="0" class="wide">
                             <tr>
-                                <td colspan="2" style="width: 100%;">
+                                <td colspan="3" class="wide">
                                     <button type="button" id="newTree" class="btn btn-primary" style="width: 70%;">Create New Experiment</button>
                                 </td>
                             </tr>
                             <tr>
                                 <td class="tdOfInputFile">
-                                    <div class="fileinput fileinput-new" data-provides="fileinput">
-                                        <div class="input-group">
+                                    <div class="fileinput fileinput-new wide" data-provides="fileinput">
+                                        <div class="input-group" class="wide">
                                             <div class="form-control" data-trigger="fileinput"><i class="glyphicon glyphicon-file fileinput-exists"></i> <span class="fileinput-filename"></span></div>
-                                            <span class="input-group-addon btn btn-default btn-file"><span class="fileinput-new">Select file</span><span class="fileinput-exists">Change</span><input type="file" name="xmlFile" id="xmlFile"></span>
+                                            <span class="input-group-addon btn btn-default btn-file" ><span class="fileinput-new" >Select file</span><span class="fileinput-exists">Change</span><input type="file" name="xmlFile" id="xmlFile"></span>
                                             <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Remove</a>
                                         </div>
                                     </div>
@@ -91,16 +91,16 @@
                             </tr>
                         </table>
 
-                        <br/>
+
                         <h3> Step 2: </h3>
                         Please load a .net file (that represent a network):
                         <br/>
 
-                        <table border="0" style="width: 100%;">
+                        <table id="fileinputtable2" border="0" class="wide">
                             <tr>
                                 <td class="tdOfInputFile">
-                                    <div class="fileinput fileinput-new" data-provides="fileinput">
-                                        <div class="input-group">
+                                    <div class="fileinput fileinput-new wide" data-provides="fileinput">
+                                        <div class="input-group" class="wide">
                                             <div class="form-control" data-trigger="fileinput"><i class="glyphicon glyphicon-file fileinput-exists"></i> <span class="fileinput-filename"></span></div>
                                             <span class="input-group-addon btn btn-default btn-file"><span class="fileinput-new">Select file</span><span class="fileinput-exists">Change</span><input type="file" name="netFile" id="netFile"></span>
                                             <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Remove</a>
@@ -113,11 +113,11 @@
                             </tr>
                         </table>
 
-                        <br/>
+
                         <br/>
                         <h3> Step 3: </h3>
                         Edit the tree.
-                        <br/>
+
                         <br/>
                         <br/>
                         <h3> Step 4: </h3>
@@ -165,12 +165,12 @@
 
 
                         <!-- Graph Control -->
-                        <table id="graphControlTable1" border="0" cellpadding="6" cellspacing="6">
+                        <table id="graphControlTable1" border="0">
                             <tr>
                                 <td id="scenarioNameTd" width="35%"><span id="scenarioNumberInfo"></span></td>
                                 <td id="ticksTd" width="20%"><div id="sliderVal">Tick = 0 Milli</div><div id="slider"></div></td>
                                 <td id="nodesTd" width="30%"><div id="sliderNodesVal"></div><div id="sliderNodes"></div></td>
-                                <td id="simConsolTd" width="15%"><div class="inrow">Tick: </div><div id="output" class="inrow"></div></td>
+                                <td id="simConsolTd" width="15%"><div style="display: inline-block;">Tick: </div><div id="output" style="display: inline-block;"></div></td>
                             </tr>
                         </table>
                         <table id="graphControlTable2" border="0">      
@@ -194,11 +194,7 @@
 
                 <div class="tab-pane fade" id="stat">
                     <div id="StatisticsDiv">
-                        <div class="center">
-                            <center>
-                                <iframe id="iframeStat" src="Statistics/statistics.html" frameborder="0"></iframe>
-                            </center>
-                        </div>
+                        <iframe id="iframeStat" src="Statistics/statistics.html"  height="100%" width="100%" style="position: absolute;" frameborder="0"></iframe>
                     </div>  
                 </div>
             </div>
@@ -220,7 +216,7 @@
                 </form>
             </div>
             <div class="ui-layout-south">
-                <iframe id="iframeStat" src="Chart/Chart.html" style="position: absolute; height: 98%" width="98%" frameborder="0"></iframe>
+                <iframe id="iframeStat" src="Chart/Chart.html" frameborder="0"></iframe>
                 <div id="output6"></div>
             </div>
 
@@ -282,8 +278,6 @@
         </div><!-- /.modal --> 
 
     </body>
-    <!-- original bootstrap js -->
-    <!--<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>-->
     <!-- jansy bootstrap js -->
     <script src="JS/jqueryAndBootstrap/bootstrapj.min.js"></script>
 </html>

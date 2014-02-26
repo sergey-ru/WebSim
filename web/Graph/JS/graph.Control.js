@@ -110,8 +110,8 @@ $('#viewgui', parent.document).click(function(event) {
 
                         chart.addFocusNode(event.clickNode.id);
 
-                        var newTable = "<table id=\"nodeInfoTable\" class=\"table table-hover\">";
-                        newTable += "<thead><tr><th>See value on chart</th><th>Attribute</th><th>Value</th></tr></thead><tbody>";
+                        var newTable = "<table id=\"nodeInfoTable\" class=\"table table-responsive\">";
+                        newTable += "<thead><tr><th style=\"width:10%\">#</th><th style=\"width:30%\">Attribute</th><th style=\"width:60%\">Value</th></tr></thead><tbody>";
                         newTable += "<tr><td style=\"width:10%\"></td><td style=\"width:30%\">Id</td><td style=\"width:60%\"><div id=\"nodeInfoId\">" + event.clickNode.id + "<div></td></tr>";
                         newTable += "<tr><td style=\"width:10%\"></td><td style=\"width:30%\">Type</td><td style=\"width:60%\">" + makeFirstLetterUpper(event.clickNode.data.type) + "</td></tr>";
 
@@ -134,8 +134,6 @@ $('#viewgui', parent.document).click(function(event) {
                             newTable += "</tbody></table>";
 
                             parent.top.$("#nodeInfoDiv").html(newTable);
-                            //parent.top.$("#nodeInfoTable").addClass("table");
-                            //parent.top.$("#nodeInfoTable").addClass("table-striped");
                         }
 
                     }

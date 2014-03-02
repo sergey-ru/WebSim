@@ -18,6 +18,9 @@ $(document).ready(function() {
             else {
                 $('#waitToLoad').html("<div class=\"danger\">" + responseText + "</div>");
             }
+            
+            // call restart to able the currect buttons to be active.
+            $('#restart').click();
         });
     });
 

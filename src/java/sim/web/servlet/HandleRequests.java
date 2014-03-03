@@ -424,7 +424,7 @@ public class HandleRequests {
 
         // init base (Simulator class, read & parse netFile)
         try {
-            SimApi.initBaseSim();
+            SimApi.resetSim();
         } catch (Exception ex) {
             response.getWriter().write("Error initialize the simulator. " + ex.getMessage());
             return;

@@ -88,7 +88,7 @@ public final class XMLTree {
     public void updateElementAttribute(String Element, int Index, String Property, String Value) {
         try {
             Node ElementNode = _root.getElementsByTagName(Element.toLowerCase()).item(Index - 1);
-            ElementNode.getAttributes().getNamedItem(lowerCaseFirstLetter(Property)).setNodeValue(Value);
+            ElementNode.getAttributes().getNamedItem(lowerFirstLetter(Property)).setNodeValue(Value);
         } catch (DOMException ex) {
             System.err.println("Cant find " + Element + ". " + ex.getMessage());
         }
@@ -381,7 +381,7 @@ public final class XMLTree {
 
         // save init name (second)
         String[] Property = parsedInfo[1].split(KEY_VAL_SPLITTER);
-        InitNode.getAttributes().getNamedItem(lowerCaseFirstLetter(Property[0])).setNodeValue(Property[1]);
+        InitNode.getAttributes().getNamedItem(lowerFirstLetter(Property[0])).setNodeValue(Property[1]);
 
         // --- save all p (third and so on...)---
         // delete all children first
@@ -397,7 +397,7 @@ public final class XMLTree {
 
             // create p
             Element p = _doc.createElement(XML_PROPERTY);
-            p.setAttribute(ATTRIBUTE_KEY, key);
+            p.setAttribute(ATTRIBUTE_KEY, lowerFirstLetter(key));
             p.setAttribute(ATTRIBUTE_VALUE, val);
 
             // add the new p to the action
@@ -425,7 +425,7 @@ public final class XMLTree {
         String[] Property;
         // save init name (second)
         Property = parsedInfo[1].split(KEY_VAL_SPLITTER);
-        InitNode.getAttributes().getNamedItem(lowerCaseFirstLetter(Property[0])).setNodeValue(Property[1]);
+        InitNode.getAttributes().getNamedItem(lowerFirstLetter(Property[0])).setNodeValue(Property[1]);
 
         // order 3
         Property = parsedInfo[2].split(KEY_VAL_SPLITTER);
@@ -449,7 +449,7 @@ public final class XMLTree {
 
             // create p
             Element p = _doc.createElement(XML_PROPERTY);
-            p.setAttribute(ATTRIBUTE_KEY, key);
+            p.setAttribute(ATTRIBUTE_KEY, lowerFirstLetter(key));
             p.setAttribute(ATTRIBUTE_VALUE, val);
 
             action.appendChild(p);
@@ -686,8 +686,7 @@ public final class XMLTree {
                     action = initNode.getChildNodes().item(2);
                     break;
             }
-        }
-        else {  // routhing aldo or statistics
+        } else {  // routhing aldo or statistics
             for (int i = 0; i < li.getLength(); i++) {
                 if (li.item(i).getAttributes().item(0).getNodeValue().equalsIgnoreCase(ClassName)) {
                     action = li.item(i);
@@ -1122,10 +1121,6 @@ public final class XMLTree {
         return StatIdarr[StatIdarr.length - 1];
     }
 
-    private String lowerCaseFirstLetter(String userIdea) {
-        return Character.toLowerCase(userIdea.charAt(0)) + userIdea.substring(1);
-    }
-
     public String validate() {
         if (ifRootIsValid()) {
             return "true";
@@ -1339,6 +1334,10 @@ public final class XMLTree {
 
     public String upperFirstLetter(String userIdea) {
         return Character.toUpperCase(userIdea.charAt(0)) + userIdea.substring(1);
+    }
+
+    public String lowerFirstLetter(String userIdea) {
+        return Character.toLowerCase(userIdea.charAt(0)) + userIdea.substring(1);
     }
 
     public String getNetFilePath() {

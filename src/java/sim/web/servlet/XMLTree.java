@@ -10,6 +10,11 @@ package sim.web.servlet;
  * @author Keren Fruchter
  */
 import bgu.sim.api.*;
+import java.io.File;
+import java.util.Set;
+import java.util.List;
+import java.util.HashSet;
+import java.io.IOException;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 import org.w3c.dom.Element;
@@ -17,11 +22,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.NamedNodeMap;
-import java.io.File;
-import java.io.IOException;
-import java.util.Set;
-import java.util.List;
-import java.util.HashSet;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -39,16 +39,16 @@ public final class XMLTree {
     private Document _doc;
     private Element _root;
     private StringBuilder _result;
-    private static boolean _ifSuccsessParsing;
     private static String parserErrorMessage;
+    private static boolean _ifSuccsessParsing;
 
     private final Set<String> _RoutingAlgoChosen = new HashSet<>();
     private final Set<String> _StatisticListenerChosen = new HashSet<>();
 
     int _initIndex;
+    int _linkIndex;
     int _deviceIndex;
     int _externalIndex;
-    int _linkIndex;
 
     private XMLTree() {
         parserErrorMessage = "";

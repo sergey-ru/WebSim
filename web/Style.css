@@ -134,10 +134,6 @@ p {
 
 }
 
-#ticksTd {
-    text-align: center;
-}
-
 #slider {
     float: top;
     width: 90%;
@@ -145,8 +141,24 @@ p {
     margin:5px 5px 5px 5px;
 }
 
+#ticksTd {
+    text-align: center;
+    margin-left: 10px;
+    margin-right: 10px;
+    left: 10px;
+    right: 10px;
+    padding: 0px 10px 0px 10px;
+    float: top;
+}
+
 #nodesTd { 
     text-align: center;
+    margin-left: 10px;
+    margin-right: 10px;
+    left: 10px;
+    right: 10px;
+    padding: 10px 10px 10px 10px;
+    float: top;
 }
 
 #sliderNodes {

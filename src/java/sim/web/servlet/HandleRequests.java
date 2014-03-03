@@ -461,9 +461,10 @@ public class HandleRequests {
     private void GetPByActionValue(HttpServletRequest request, HttpServletResponse response) throws IOException, NumberFormatException {
         String fullClassPath = request.getParameter("fullClassPath");
         String indexStr = request.getParameter("index");
+        String type = request.getParameter("type");
         int ElementIndex = Integer.parseInt(indexStr);
 
-        String result = XMLTree.getInstance().getPValuesByActionValue(fullClassPath, ElementIndex);
+        String result = XMLTree.getInstance().getPValuesByActionValue(fullClassPath, ElementIndex, type);
         response.getWriter().write(result);
     }
 

@@ -55,8 +55,8 @@ public final class XMLTree {
     }
 
     /*
-    Instance of the class.
-    */
+     Instance of the class.
+     */
     private static class XMLTreeHolder {
 
         private static final XMLTree INSTANCE = new XMLTree();
@@ -524,7 +524,7 @@ public final class XMLTree {
             pList = SimApi.getPropertyList(name);
             for (String property : pList) {
                 String pKey = upperFirstLetter(property);
-                String pVal = getPValueByItsKey(XML_STATISTICLISTENER, name, pKey, -1);
+                String pVal = getPValueByItsKey("", XML_STATISTICLISTENER, name, pKey, -1);
 
                 res += pKey; // upper first letter
                 res += KEY_VAL_SPLITTER;
@@ -561,7 +561,7 @@ public final class XMLTree {
             pList = SimApi.getPropertyList(name);
             for (String property : pList) {
                 String pKey = upperFirstLetter(property);
-                String pVal = getPValueByItsKey(XML_ROUTINGALGORITHM, name, pKey, -1);
+                String pVal = getPValueByItsKey("", XML_ROUTINGALGORITHM, name, pKey, -1);
 
                 res += pKey; // upper first letter
                 res += KEY_VAL_SPLITTER;
@@ -642,7 +642,10 @@ public final class XMLTree {
         return res;
     }
 
-    String getPValuesByActionValue(String fullClassPath, int index) {
+    /*
+     Creates p by its given class name
+     */
+    String getPValuesByActionValue(String fullClassPath, int index, String type) {
         String res = "";
         String pKey;
         String pVal;
@@ -650,7 +653,7 @@ public final class XMLTree {
             List<String> pList = SimApi.getPropertyList(fullClassPath);
             for (int i = 0; i < pList.size(); i++) {
                 pKey = upperFirstLetter(pList.get(i));
-                pVal = getPValueByItsKey(XML_ACTION, fullClassPath, pKey, index);
+                pVal = getPValueByItsKey(type, XML_ACTION, fullClassPath, pKey, index);
 
                 res += pKey; // upper first letter
                 res += KEY_VAL_SPLITTER;
@@ -663,17 +666,29 @@ public final class XMLTree {
         return res;
     }
 
-    public String getPValueByItsKey(String underElement, String ClassName, String Key, int index) {
+    public String getPValueByItsKey(String type, String underElement, String ClassName, String Key, int index) {
         Node action = null;
         NodeList li = _root.getElementsByTagName(underElement);
 
         if (index != -1) {
-            Node initNode = _root.getElementsByTagName(XML_INIT).item(index - 1); //?
-            action = initNode.getFirstChild();
-        } else {
-            // find element by its class
+            Node initNode = _root.getElementsByTagName(type).item(index - 1);
+            switch (type) {
+                case XML_INIT:
+                    action = initNode.getFirstChild();
+                    break;
+                case XML_DEVICE:
+                    action = initNode.getChildNodes().item(2);
+                    break;
+                case XML_EXTERNAL:
+                    action = initNode.getChildNodes().item(2);
+                    break;
+                case XML_LINK:
+                    action = initNode.getChildNodes().item(2);
+                    break;
+            }
+        }
+        else {  // routhing aldo or statistics
             for (int i = 0; i < li.getLength(); i++) {
-                System.out.println(li.item(i).getAttributes().item(0).getNodeValue());
                 if (li.item(i).getAttributes().item(0).getNodeValue().equalsIgnoreCase(ClassName)) {
                     action = li.item(i);
                     break;
@@ -683,11 +698,9 @@ public final class XMLTree {
 
         if (action != null) {
             NodeList pList = action.getChildNodes();
-            System.out.println(pList.getLength());
             for (int i = 0; i < pList.getLength(); i++) {
                 NamedNodeMap attMap = pList.item(i).getAttributes();
                 for (int j = 0; j < attMap.getLength(); j++) {
-                    System.out.println(attMap.item(j).getNodeValue());
                     if (attMap.item(j).getNodeValue().equalsIgnoreCase(Key)) {
                         return attMap.item(j + 1).getNodeValue();
                     }

@@ -267,10 +267,10 @@ function LoadXmlMenuTree(ifByPath) {
     });
 }
 
-function createPvaluesByActionPath(fullClassPath, index) {
+function createPvaluesByActionPath(fullClassPath, index, type) {
     htmlcode = "";
 
-    $.get('SimServlet', {request: "GetPByActionValue", fullClassPath: fullClassPath, index: index}, function(responseText) {
+    $.get('SimServlet', {request: "GetPByActionValue", fullClassPath: fullClassPath, index: index, type: type}, function(responseText) {
         var pListRes = responseText.split(",,");
 
         for (var i = 0; i < pListRes.length - 1; i++) {
@@ -482,11 +482,12 @@ function editInitProperty(node) {
         htmlBuilder.Flush();
 
         // p in the xml (0..1)
-        createPvaluesByActionPath(selectedFullPathClass, index);
-        // add method if select chenge, replace the p values
+        createPvaluesByActionPath(selectedFullPathClass, index, "init");
+        
+        // add method if select changed, replace the p values
         $('#ActionSelect').change(function() {
             var selectedFullPathClass = $('#ActionSelect option:selected').attr('id');
-            createPvaluesByActionPath(selectedFullPathClass, index);
+            createPvaluesByActionPath(selectedFullPathClass, index, "init");
         });
         $('#EditNodeDivLoading').hide();
         $('#EditNodeDivShow').show();
@@ -567,11 +568,11 @@ function editExDevLinkProperty(node) {
         htmlBuilder.Flush();
 
         // p in the xml (0..1)
-        createPvaluesByActionPath(selectedFullPathClass, index);
+        createPvaluesByActionPath(selectedFullPathClass, index, type1);
         // add method if select chenge, replace the p values
         $('#ActionSelect').change(function() {
             var selectedFullPathClass = $('#ActionSelect option:selected').attr('id');
-            createPvaluesByActionPath(selectedFullPathClass, index);
+            createPvaluesByActionPath(selectedFullPathClass, index, type1);
         });
         $('#EditNodeDivLoading').hide();
         $('#EditNodeDivShow').show();

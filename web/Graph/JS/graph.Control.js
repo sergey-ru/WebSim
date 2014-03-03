@@ -13,7 +13,8 @@ function log(b, n) {
 
 function createNodesSlider(numOfNodes) {
     parent.top.$("#sliderNodes").slider({min: 1});
-    parent.top.$("#sliderNodes").slider({max: numOfNodes});
+    parent.top.$("#sliderNodes").slider("option", "max", numOfNodes);
+    parent.top.$("#sliderNodes").slider("option", "value", log(2, 1));
     parent.top.$("#sliderNodesVal").text("Radius expand = " + log(2, 1));
 }
 

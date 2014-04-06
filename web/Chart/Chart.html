@@ -36,7 +36,7 @@
             <button type="button" id="calcButton" class="btn btn-default">Calculate</button>
             <div id="debug"></div>
             <span class="help-block" id="parseResult"></span>
-            <span class="help-block" style="color: #BBB;">Write a function using the operators +, -, /, * using the names of the chart's lines. You can use the help of the auto-complete.</span>
+            <span class="help-block" style="color: #BBB;">Write a function by using the operators +, -, /, * and remove() between the names of the chart's lines. You can use the help of the auto-complete.</span>
             <div id="mess"></div>
         </div>
 
@@ -49,8 +49,8 @@
             var intervalUpdate;
             var scenario = 0;
             var ticks = 0;
-            var separators = ['\\\+', '-', '\\*', '/', '\\\(', '\\\)'];
-            var separatorsForAutoComplete = ['+', '-', '*', '/', '(', ')'];
+            var separators = ['\\\+', '-', '\\*', '/', '\\\(', '\\\)', 'remove'];
+            var separatorsForAutoComplete = ['+', '-', '*', '/', '(', ')', 'remove('];
             var countRow;
             var needInit;
             var updateInterval = 1;
@@ -84,7 +84,7 @@
                 parent.top.$('#restart').click(function(event) {
                     scenario = 0;
                     //$("#placeholder").text();
-                     plot = $.plot(placeholder, [], {});
+                    plot = $.plot(placeholder, [], {});
                     clearTimeout(intervalUpdate);
                 });
 
@@ -158,7 +158,7 @@
                         },
                         yaxis: {
                             min: 0,
-                            max: ticks
+                            max: null
                                     //zoomRange: [1, 200],
                                     //panRange: [-10, 2000]
                         },
@@ -166,7 +166,7 @@
                             interactive: true
                         },
                         pan: {
-                            interactive: true
+                            interactive: false
                         }
                     });
 
@@ -224,7 +224,7 @@
                 function updateFunctionsLines() {
                     for (var i = 0; i < headlines.length; i++) {
                         if (functionOrNotArrOfBinary[i] === 1) {
-                            
+
                             // set data
                             var copyOfData = new Array();
                             for (var k = 0; k < data.length; k++) {
@@ -242,7 +242,7 @@
                             // Parsing the function
                             var funcToParse = headlines[i];
                             var newDataResult = owenge.equation.parse(funcToParse);
-                            
+
                             data[i] = newDataResult.answer;
 
                             // updating plot data - old and new
@@ -324,45 +324,62 @@
 
                     // Validate function
                     var ifValid = validateFunction();
+
                     if (!ifValid) {
                         return;
                     }
 
-                    // set data
-                    var copyOfData = new Array();
-                    for (var i = 0; i < data.length; i++) {
-                        copyOfData.push(data[i]);
-                    }
-                    owenge.equation.setDataArrays(copyOfData);
+                    // remove() function. user can remove a line chart.
+                    if ($('#functionToParse').val().indexOf("remove") !== -1) {
+                        var headline = $('#functionToParse').val();
+                        headline = headline.replace("remove(", "");
+                        headline = headline.replace(")", "");
 
-                    // set headlines
-                    var copyOfHeadlines = new Array();
+                        for (var i = 0; i < data.length; i++) {
+                            if (headlines[i] === headline) {
+                                headlines[i] = null;
+                                data[i] = null;
+                            }
+                        }
+                    }
+                    else {
+                        // set data
+                        var copyOfData = new Array();
+                        for (var i = 0; i < data.length; i++) {
+                            copyOfData.push(data[i]);
+                        }
+                        owenge.equation.setDataArrays(copyOfData);
+
+                        // set headlines
+                        var copyOfHeadlines = new Array();
+                        for (var i = 0; i < headlines.length; i++) {
+                            copyOfHeadlines.push(headlines[i]);
+                        }
+                        owenge.equation.setHeadLines(copyOfHeadlines);
+
+                        // Parsing the function
+                        var funcToParse = $('#functionToParse').val();
+                        var newDataResult = owenge.equation.parse(funcToParse);
+
+                        data.push(newDataResult.answer);
+                        headlines.push(funcToParse);
+                        functionOrNotArrOfBinary.push(1);
+                    }
+
+                    // updating plot data - old and new
+                    var oldData = [];
                     for (var i = 0; i < headlines.length; i++) {
-                        copyOfHeadlines.push(headlines[i]);
+                        if (data[i])
+                            oldData.push({data: data[i], label: headlines[i]});
                     }
-                    owenge.equation.setHeadLines(copyOfHeadlines);
 
-                    // Parsing the function
-                    var funcToParse = $('#functionToParse').val();
-                    var newDataResult = owenge.equation.parse(funcToParse);
-
-                    data.push(newDataResult.answer);
-                    headlines.push(funcToParse);
-                    functionOrNotArrOfBinary.push(1);
-
-//                    // updating plot data - old and new
-//                    var oldData = [];
-//                    for (var i = 0; i < headlines.length; i++) {
-//                        if (data[i])
-//                            oldData.push({data: data[i], label: headlines[i]});
-//                    }
-//
-//                    plot.setData(oldData);
-//                    plot.setupGrid();
-//                    plot.draw();
+                    plot.setData(oldData);
+                    plot.setupGrid();
+                    plot.draw();
 
                     $('#formOfFunction').removeClass("has-error");
                     $('#formOfFunction').addClass("has-success");
+
                 }
 
                 /*

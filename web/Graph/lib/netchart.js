@@ -1283,16 +1283,16 @@
                 return this.addAction(aa, {expanded: true})
             }
         };
-        Z.prototype.runMovingMessage = function(nodeId1, nodeId2) {
+        Z.prototype.runMovingMessage = function(nodeId1, nodeId2, messageType) {
             if ((this.nodes[nodeId1] && this.nodes[nodeId1].initial)) {
-                this.updateAction(nodeId1, {runMovingMessage: true, id1: nodeId1, id2: nodeId2, runMovingMessageStepX: 0});
+                this.updateAction(nodeId1, {runMovingMessage: true, id1: nodeId1, id2: nodeId2, runMovingMessageStepX: 0, runMovingMessageType: messageType});
             } else {
-                this.addAction(nodeId1, {runMovingMessage: true, id1: nodeId1, id2: nodeId2, runMovingMessageStepX: 0});
+                this.addAction(nodeId1, {runMovingMessage: true, id1: nodeId1, id2: nodeId2, runMovingMessageStepX: 0, runMovingMessageType: messageType});
             }
             if ((this.nodes[nodeId2] && this.nodes[nodeId2].initial)) {
-                this.updateAction(nodeId2, {runMovingMessage: true, id1: nodeId1, id2: nodeId2, runMovingMessageStepX: 0});
+                this.updateAction(nodeId2, {runMovingMessage: true, id1: nodeId1, id2: nodeId2, runMovingMessageStepX: 0, runMovingMessageType: messageType});
             } else {
-                this.addAction(nodeId2, {runMovingMessage: true, id1: nodeId1, id2: nodeId2, runMovingMessageStepX: 0});
+                this.addAction(nodeId2, {runMovingMessage: true, id1: nodeId1, id2: nodeId2, runMovingMessageStepX: 0, runMovingMessageType: messageType});
             }
             return;
         };
@@ -5009,12 +5009,13 @@
         Z.prototype.userLock = false;
         Z.prototype.expanded = false;
         Z.prototype.runMovingMessage = false;
+        Z.prototype.runMovingMessageType = null;
         Z.prototype.id1 = false;
         Z.prototype.id2 = false;
         Z.prototype.focused = false;
         Z.prototype.image = null;
         Z.prototype.imageSlicing = null;
-        Z.prototype.radius = 10;
+        Z.prototype.radius = 4;
         Z.prototype.label = null;
         Z.prototype.labelStyle = null;
         Z.prototype.labelBackground = null;
@@ -5041,6 +5042,7 @@
         Z.prototype.runMovingMessage = null;        // keren
         Z.prototype.runMovingMessageStepX = null;   // keren
         Z.prototype.runMovingMessageStepY = null;   // keren
+        Z.prototype.runMovingMessageType = null;   // keren
         Z.prototype.radius = 1;
         Z.prototype.length = 1;
         Z.prototype.strength = 1;
@@ -5931,7 +5933,7 @@
             af = ac.radius;
             Q.extend(ac, this.scene.settings.style.node);
             if (!ac.radius) {
-                ac.radius = 10
+                ac.radius = 4
             }
             ac.label = ac.id;
             ac.labelStyle = this.scene.settings.style.nodeLabel;
@@ -5955,7 +5957,7 @@
                 }
                 this.applyStyleRules(ac, this.nodeRules);
                 if (!Q.isNumber(ac.radius)) {
-                    ac.radius = 10
+                    ac.radius = 4
                 }
             }
             if (ac.removed) {
@@ -6772,7 +6774,7 @@
     F = (function(Z) {
         m(aa, Z);
         aa.FlatTheme = {advanced: {themeCSSClass: "DVSL-flat", assets: ["netchart.css"]}};
-        aa.defaults = {theme: aa.FlatTheme, data: {format: "JSON", preloaded: null, dataFunction: null, url: null, requestTimeout: 40000, cacheSize: 10000, random: null, randomGridLinkProbability: 0.6, randomNodes: 0, randomLinks: 0, requestMaxUnits: 2, numberOfParralelRequests: 3, preloadNodeLinks: false}, filters: {nodeFilter: null, linkFilter: null, nodeLinksProcessor: null, multilinkProcessor: null}, style: {nodeLabelMinSize: 40, nodeDetailMinZoom: 0.2, linkLabelMinZoom: 3, iconsMinZoom: 0.7, iconSize: 16, iconNodeDistance: 0, iconNodeAngle: -Math.PI / 4, nodeRadiusExtent: [10, 50], linkRadiusExtent: [0.2, 10], nodeAutoScaling: null, linkAutoScaling: null, nodeRules: {}, linkRules: {}, selection: {fillColor: "lightblue", sizeConstant: 5, sizeProportional: 0.2}, node: {fillColor: "#4f4", lineColor: null, lineWidth: null, radius: 10, shadowColor: null, labelLocation: "outside"}, nodeLocked: {}, nodeLabel: {fillColor: "black"}, nodeExpanded: {}, nodeFocused: {fillColor: "orange"}, link: {fillColor: "#6D6", shadowColor: null, fromDecoration: null, toDecoration: null, fromIcons: null, toIcons: null, label: null, radius: 1, strength: 1, dashed: false, toPieValue: 0, toPieColor: null}, linkLabel: {fillColor: "black"}, linkLabelBalloon: {fillColor: "#FFF", lineColor: "gray"}, nodeLabelBalloon: {fillColor: "rgba(255,255,255,0.7)"}, hiddenLinks: {fillColor: "#BBB", lineColor: "#BBB", lineWidth: 1, size: 3}, hoverStyle: {shadowOffsetX: 0, shadowOffsetY: 0, shadowBlur: 12, shadowColor: "blue"}, removedColor: "#EEE"}, layout: {nodeSpacing: 10, multilinkSpacing: 10, layoutMode: "dynamic", layoutFreezeTimeout: 1500, fadeTime: 600, globalLayoutOnChanges: true}, events: {onClick: null, onRightClick: null, onDoubleClick: null, onSelectionChange: null, onHoverChange: null}, interaction: {zooming: {doubleClickZoom: 1.5, zoomExtent: [0.1, 8], autoZoom: true, sensitivity: 1, wheel: true, fingers: true, autoZoomDuration: 500}, selection: {enabled: true, nodesSelectable: true, linksSelectable: true, lockNodesOnMove: true, tolerance: 10}}, navigation: {mode: "showall", initialNodes: null, focusNodeExpansionRadius: 2, numberOfFocusNodes: 3, focusHistoryRelevanceCooldown: 0.6, expandDelay: 400, expandOnClick: true, autoZoomOnFocus: false, nodeAutoExpandFilter: null}, nodeMenu: {enabled: true, buttons: ["hide", "expand", "focus", "lock"], showData: false, contentsFunction: null}, linkMenu: {enabled: true, showData: false, contentsFunction: null}, advanced: {perNodeLoadingIndicator: true, style: {loadingArcStyle: {r: 35, lineColor: "red", lineWidth: 5, location: "corner"}}}, localization: {loadingLabel: "Loading...", closeButton: "Close"}};
+        aa.defaults = {theme: aa.FlatTheme, data: {format: "JSON", preloaded: null, dataFunction: null, url: null, requestTimeout: 40000, cacheSize: 10000, random: null, randomGridLinkProbability: 0.6, randomNodes: 0, randomLinks: 0, requestMaxUnits: 2, numberOfParralelRequests: 3, preloadNodeLinks: false}, filters: {nodeFilter: null, linkFilter: null, nodeLinksProcessor: null, multilinkProcessor: null}, style: {nodeLabelMinSize: 40, nodeDetailMinZoom: 0.2, linkLabelMinZoom: 3, iconsMinZoom: 0.7, iconSize: 16, iconNodeDistance: 0, iconNodeAngle: -Math.PI / 4, nodeRadiusExtent: [10, 50], linkRadiusExtent: [0.2, 10], nodeAutoScaling: null, linkAutoScaling: null, nodeRules: {}, linkRules: {}, selection: {fillColor: "lightblue", sizeConstant: 5, sizeProportional: 0.2}, node: {fillColor: "#a3ffa3", lineColor: null, lineWidth: null, radius: 4, shadowColor: null, labelLocation: "outside"}, nodeLocked: {}, nodeLabel: {fillColor: "black"}, nodeExpanded: {}, nodeFocused: {fillColor: "orange"}, link: {fillColor: "#6D6", shadowColor: null, fromDecoration: null, toDecoration: null, fromIcons: null, toIcons: null, label: null, radius: 1, strength: 1, dashed: false, toPieValue: 0, toPieColor: null}, linkLabel: {fillColor: "black"}, linkLabelBalloon: {fillColor: "#FFF", lineColor: "gray"}, nodeLabelBalloon: {fillColor: "rgba(255,255,255,0.7)"}, hiddenLinks: {fillColor: "#BBB", lineColor: "#BBB", lineWidth: 1, size: 3}, hoverStyle: {shadowOffsetX: 0, shadowOffsetY: 0, shadowBlur: 12, shadowColor: "blue"}, removedColor: "#EEE"}, layout: {nodeSpacing: 10, multilinkSpacing: 10, layoutMode: "dynamic", layoutFreezeTimeout: 1500, fadeTime: 600, globalLayoutOnChanges: true}, events: {onClick: null, onRightClick: null, onDoubleClick: null, onSelectionChange: null, onHoverChange: null}, interaction: {zooming: {doubleClickZoom: 1.5, zoomExtent: [0.1, 8], autoZoom: true, sensitivity: 1, wheel: true, fingers: true, autoZoomDuration: 500}, selection: {enabled: true, nodesSelectable: true, linksSelectable: true, lockNodesOnMove: true, tolerance: 10}}, navigation: {mode: "showall", initialNodes: null, focusNodeExpansionRadius: 2, numberOfFocusNodes: 3, focusHistoryRelevanceCooldown: 0.6, expandDelay: 400, expandOnClick: true, autoZoomOnFocus: false, nodeAutoExpandFilter: null}, nodeMenu: {enabled: true, buttons: ["hide", "expand", "focus", "lock"], showData: false, contentsFunction: null}, linkMenu: {enabled: true, showData: false, contentsFunction: null}, advanced: {perNodeLoadingIndicator: true, style: {loadingArcStyle: {r: 35, lineColor: "red", lineWidth: 5, location: "corner"}}}, localization: {loadingLabel: "Loading...", closeButton: "Close"}};
         function aa(ab) {
             aa.__super__.constructor.call(this, "netchart");
             this.apply(aa.defaults);
@@ -7559,23 +7561,23 @@
                 var nodeWithNewAtt1 = this.chart.navigator.nodes[at.from.id];
                 var nodeWithNewAtt2 = this.chart.navigator.nodes[at.to.id];
                 // keren!!!!!!!!!!!!!
+                
                 var messagefromx;
                 var messagefromy;
                 var messagetox;
                 var messagetoy;
 
-                aW.fillStyle = "#FF1C0A";
-                aW.beginPath();
-
-
-//                if ((at.from.id == "3" && at.to.id == "7") || (at.from.id == "7" && at.to.id == "3")) {
-//                    var k = 0;
-//                    k=6;
-//                }
-
-
                 if (nodeWithNewAtt1) {
                     if (nodeWithNewAtt1.runMovingMessage == true) {
+
+                        aW.beginPath();
+                        if (nodeWithNewAtt1.runMovingMessageType == "Worm") {
+                            aW.fillStyle = "#FF1C0A"; // red
+                        }
+                        else {
+                            aW.fillStyle = "#2946e6";
+                        }
+
                         // the node wants to send a message to one of its neighbours.
                         if (nodeWithNewAtt1.id1 == at.to.id || nodeWithNewAtt1.id2 == at.to.id) {
 
@@ -7592,20 +7594,13 @@
                                 messagetoy = ar - bG * aU;
                             }
 
-                            at.runMovingMessageStepX = at.runMovingMessageStepX + 0.01;
+                            at.runMovingMessageStepX += 0.01;
 
-                            if (at.runMovingMessageStepX < 1) {
+                            if (at.runMovingMessageStepX <= 1) {
                                 var deltaX = messagetox - messagefromx;
                                 var deltaY = messagetoy - messagefromy;
 
                                 var distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
-
-//                                if (at.runMovingMessageStepX > 0.99) {
-//                                    nodeWithNewAtt1.runMovingMessage = false;
-//                                    nodeWithNewAtt2.runMovingMessage = false;
-//                                    at.runMovingMessageStepX=0.1;
-//                                }
-
 
                                 var directionX = deltaX / distance;
                                 var directionY = deltaY / distance;
@@ -7613,63 +7608,86 @@
                                 var newX = messagefromx + directionX * (distance * at.runMovingMessageStepX);
                                 var newY = messagefromy + directionY * (distance * at.runMovingMessageStepX);
 
+                                //aW.beginPath();
                                 aW.arc(newX, newY, aU * 4, 0, 2 * Math.PI); // keren
+
+                                var imageObj = new Image();
+                                imageObj.src = "Images/" + nodeWithNewAtt1.runMovingMessageType + ".png";
+                                aW.drawImage(imageObj, newX, newY, aU * 20, aU * 20);
+                                aW.closePath();
+                                aW.fill();
                             }
                             else
                             {
                                 nodeWithNewAtt1.runMovingMessage = false;
-                                nodeWithNewAtt2.runMovingMessage = false;
-                                at.runMovingMessageStepX = 0.1;
+                                // nodeWithNewAtt2.runMovingMessage = false;
+                                at.runMovingMessageStepX = 0.01;
                             }
                         }
                     }
                 }
 
-                if (nodeWithNewAtt2) {
-                    if (nodeWithNewAtt2.runMovingMessage == true) {
-                        if (nodeWithNewAtt2.id1 == at.from.id || nodeWithNewAtt2.id2 == at.from.id) {
+//                if (nodeWithNewAtt2) {
+//                    if (nodeWithNewAtt2.runMovingMessage == true) {
+//
+//                        aW.beginPath();
+//                        if (nodeWithNewAtt2.runMovingMessageType == "Worm") {
+//                            aW.fillStyle = "#FF1C0A"; // red
+//                        }
+//                        else {
+//                            aW.fillStyle = "#2946e6";
+//                        }
+//
+//                        if (nodeWithNewAtt2.id1 == at.from.id || nodeWithNewAtt2.id2 == at.from.id) {
+//
+//                            if (nodeWithNewAtt2.id1 == at.from.id) {
+//                                messagefromx = aK + bE * aU;
+//                                messagefromy = ar - bG * aU;
+//                                messagetox = aJ + bE * aU;
+//                                messagetoy = ap - bG * aU;
+//                            }
+//                            else {
+//                                messagefromx = aJ + bE * aU;
+//                                messagefromy = ap - bG * aU;
+//                                messagetox = aK + bE * aU;
+//                                messagetoy = ar - bG * aU;
+//                            }
+//
+//                            at.runMovingMessageStepX = at.runMovingMessageStepX + 0.01;
+//
+//                            if (at.runMovingMessageStepX <= 1) {
+//                                var deltaX = messagetox - messagefromx;
+//                                var deltaY = messagetoy - messagefromy;
+//
+//                                var distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
+//
+//                                var directionX = deltaX / distance;
+//                                var directionY = deltaY / distance;
+//
+//                                var newX = messagefromx + directionX * (distance * at.runMovingMessageStepX);
+//                                var newY = messagefromy + directionY * (distance * at.runMovingMessageStepX);
+//
+//                                aW.beginPath();
+//                                aW.arc(newX, newY, aU * 4, 0, 2 * Math.PI); // keren
+//
+//                                var imageObj = new Image();
+//                                imageObj.src = "Images/" + nodeWithNewAtt1.runMovingMessageType + ".png";
+//                                aW.drawImage(imageObj, newX, newY, 15, 15);
+//                                aW.closePath();
+//                                aW.fill();
+//                            }
+//                            else {
+//                                //nodeWithNewAtt1.runMovingMessage = false;
+//                                nodeWithNewAtt2.runMovingMessage = false;
+//                                at.runMovingMessageStepX = 0.1;
+//                            }
+//                        }
+//                    }
+//                }
 
-                            if (nodeWithNewAtt2.id1 == at.from.id) {
-                                messagefromx = aK + bE * aU;
-                                messagefromy = ar - bG * aU;
-                                messagetox = aJ + bE * aU;
-                                messagetoy = ap - bG * aU;
-                            }
-                            else {
-                                messagefromx = aJ + bE * aU;
-                                messagefromy = ap - bG * aU;
-                                messagetox = aK + bE * aU;
-                                messagetoy = ar - bG * aU;
-                            }
 
-                            at.runMovingMessageStepX = at.runMovingMessageStepX + 0.01;
-
-                            if (at.runMovingMessageStepX < 1) {
-                                var deltaX = messagetox - messagefromx;
-                                var deltaY = messagetoy - messagefromy;
-
-                                var distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
-
-                                var directionX = deltaX / distance;
-                                var directionY = deltaY / distance;
-
-                                var newX = messagefromx + directionX * (distance * at.runMovingMessageStepX);
-                                var newY = messagefromy + directionY * (distance * at.runMovingMessageStepX);
-
-                                aW.arc(newX, newY, aU * 4, 0, 2 * Math.PI); // keren
-                            }
-                            else {
-                                nodeWithNewAtt1.runMovingMessage = false;
-                                nodeWithNewAtt2.runMovingMessage = false;
-                                at.runMovingMessageStepX = 0.1;
-                            }
-                        }
-                    }
-                }
-
-
-                aW.closePath();
-                aW.fill();
+                //aW.closePath();
+                //aW.fill();
 
 
             }
@@ -7707,9 +7725,10 @@
                     if (aS != null) {
                         if (a6.imageSlicing) {
                             aT = a6.imageSlicing;
-                            aW.drawImage(aS, aT[0], aT[1], aT[2], aT[3], aO - aU, aM - aU, aU * 2, aU * 2)
+                            //aW.drawImage(aS, aT[0], aT[1], aT[2], aT[3], aO - aU - 3, aM - aU - 3, aU * 2.7, aU * 2.7)
+                            aW.drawImage(aS, aT[0], aT[1], aS.width, aS.height, aO - aU, aM - aU + 30, aU, aU)
                         } else {
-                            aW.drawImage(aS, 0, 0, aS.width, aS.height, aO - aU, aM - aU, aU * 2, aU * 2)
+                            aW.drawImage(aS, 0, 0, aS.width, aS.height, (aO - aU), (aM - aU), aU * 2, aU * 2)
                         }
                     }
                     if (!a6.removed) {
@@ -7926,10 +7945,11 @@
                 ae = ac.imageSlicing;
                 if (ae) {
                     ad.drawImage(af, ae[0], ae[1], ae[2], ae[3], ab - aa, ag - aa, ae[2], ae[3])
+                    //ad.drawImage(af, 50, 50, 460, 360)
                 } else {
                     ad.drawImage(af, ab - aa, ag - aa)
                 }
-                ac.x = ab;
+                ac.x = ab
                 ac.y = ag
             }
         };
@@ -8490,14 +8510,14 @@
             }
             return this.navigator.hideNode(ab)
         };
-        aa.prototype.runMovingMessage = function(nodeId1, nodeId2) { // keren - this one is really been called
+        aa.prototype.runMovingMessage = function(nodeId1, nodeId2, t) { // keren - this one is really been called
             if (Q.isObject(nodeId1)) {
                 nodeId1 = nodeId1.id;
             }
             if (Q.isObject(nodeId2)) {
                 nodeId2 = nodeId2.id;
             }
-            return this.navigator.runMovingMessage(nodeId1, nodeId2);
+            return this.navigator.runMovingMessage(nodeId1, nodeId2, t);
             //this.graph.runMovingMessage(nodeId1, nodeId2);
         };
         aa.prototype.setSelection = function(ae, ag) {
@@ -8599,8 +8619,8 @@
         aa.prototype.showNode = function(ab) {
             return this._impl.expandNode(ab, 1)
         };
-        aa.prototype.runMovingMessage = function(nodeId1, nodeId2) {
-            return this._impl.runMovingMessage(nodeId1, nodeId2);
+        aa.prototype.runMovingMessage = function(nodeId1, nodeId2, t) {
+            return this._impl.runMovingMessage(nodeId1, nodeId2, t);
         };
         aa.prototype.hideNode = function(ab) {
             return this._impl.hideNode(ab);

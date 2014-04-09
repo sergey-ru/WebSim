@@ -309,7 +309,7 @@ public class HandleRequests {
         String allPaths = "";
 
         for (Message me : SimApi.getMessages()) {
-            allPaths += me.getRoute() + ",,";
+            allPaths += me.getRoute() + "," + me.getType().toString() + ",,";
         }
 
         if (!allPaths.equals("")) {

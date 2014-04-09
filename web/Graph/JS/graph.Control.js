@@ -8,7 +8,7 @@
 var chart;
 
 function log(b, n) {
-    return (Math.log(n) / Math.log(b)).toFixed(2);
+    return n;//((Math.log(n) / Math.log(b)).toFixed(2)) + 20;
 }
 
 function createNodesSlider(numOfNodes) {
@@ -71,44 +71,12 @@ $('#viewgui', parent.document).click(function(event) {
                 numberOfFocusNodes: 1
             },
             data: {url: jsonFilePath},
-            style: {nodeRules: {
-                    "radius": function(node) {
-                        node.radius = Math.max(0.2, node.relevance);
-                    },
-                    "image": function(node) {
-
-                        var image = null;
-                        var sliceNo = 0;
-                        var sliceSize = 239;
-                        if (node.data.type === "pc")
-                        {
-                            image = "./Images/pc.png";
-                        }
-                        else if (node.data.type === "switch")
-                        {
-                            image = "./Images/switch.png";
-                        }
-                        else if (node.data.type === "router")
-                        {
-                            image = "./Images/router.png";
-                        }
-
-                        if (node.data.foreign) {
-                            sliceNo = 1;
-                        } else {
-                            sliceNo = 0;
-                        }
-
-                        node.image = image;
-                        node.imageSlicing = [0, sliceNo * sliceSize, sliceSize, sliceSize];
-                    }
-                }},
+            style: {nodeRules: {"rule1": nodeStyle}},
             /*
              * make a table with the selected node info
              */
             events: {onClick: function(event) {
                     if (event.clickNode) {
-
                         chart.addFocusNode(event.clickNode.id);
 
                         var newTable = "<table id=\"nodeInfoTable\" class=\"table table-responsive\">";
@@ -141,6 +109,19 @@ $('#viewgui', parent.document).click(function(event) {
                     event.preventDefault();
                 }}
         };
+
+        function nodeStyle(node) {
+            node.image = "./Images/" + node.data.type + ".png";
+            node.radius = 5;
+            //alert(node.data.type);
+            var type = node.data.type.split("_");
+            //alert(type[1]);
+            if (type[1] === "world")
+                node.fillColor = "rgba(10,25,170,0.5)";
+            else
+                node.fillColor = "rgba(110,255,70,0.5)";
+        }
+
         chart = new NetChart(chartOptions);
 
         // slider
@@ -173,15 +154,18 @@ function sendMessageList(result) {
     while (!ifStop) {
         oneHasMore = false;
 
-        for (var i = 0; i < messagesList.length; i++) {
+        // last one is the message type
+        for (var i = 0; i < messagesList.length - 1; i++) {
             var allSourceAndTarget = messagesList[i].split(",");
 
             // go over nodes list
             if (messagesList[i] === "e")
                 continue;
 
-            var source = allSourceAndTarget[0];
-            var target = allSourceAndTarget[1];
+            var source = allSourceAndTarget[0]; // source
+            var target = allSourceAndTarget[1]; // next step
+            var messageType = allSourceAndTarget[allSourceAndTarget.length - 1];
+
 
             if (allSourceAndTarget.length > 2) {
                 oneHasMore = true;
@@ -192,15 +176,15 @@ function sendMessageList(result) {
                 messagesList[i] = "e";
             }
 
-            (function(source1, target1)
+            (function(source1, target1, messageType1)
             {
                 setTimeout(function()
                 {
-                    chart.runMovingMessage(source1, target1);
+                    chart.runMovingMessage(source1, target1, messageType1);
                 }, time);
-            })(source, target);
+            })(source, target, messageType);
         }
-        time = time + 1000;
+        time = time + 1900;
 
         // if nobody has more nodes, stop.
         if (oneHasMore === false) {

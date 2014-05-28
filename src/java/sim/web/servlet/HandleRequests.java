@@ -530,11 +530,11 @@ public class HandleRequests {
             XMLTree m = XMLTree.getInstance();
             m.parse(true);
         } else {
-            try {
-                SimApi.parseNetFile(file);
-            } catch (IOException ex) {
-                throw new Exception("Net file is not a valid NET file.");
-            }
+//            try {
+//                SimApi.parseNetFile(file);
+//            } catch (IOException ex) {
+//                throw new Exception("Net file is not a valid NET file.");
+//            }
         }
 
         // file info

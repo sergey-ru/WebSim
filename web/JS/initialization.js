@@ -31,7 +31,7 @@ $(document).ready(function() {
 
     // slider
     $(function() {
-        $("#slider").slider({max: 10000});
+        $("#slider").slider({min: 1, max: 10000, value: 1820});
     });
 
     $("#slider").slider({

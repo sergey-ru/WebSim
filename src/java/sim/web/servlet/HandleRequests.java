@@ -246,9 +246,10 @@ public class HandleRequests {
      Run one tick in the current scenario
      */
     private void runOneStepInScenario(HttpServletRequest request, HttpServletResponse response) throws InterruptedException, QueryExecutionException, IOException {
-        if (SimApi.ifNextTick()) {
+        String ifNextTick = SimApi.ifNextTick();
+        if (!"false".equals(ifNextTick)) {
             SimApi.nextTick();
-            response.getWriter().write("true");
+            response.getWriter().write(ifNextTick);
         } else {
             response.getWriter().write("false");
         }
@@ -306,17 +307,23 @@ public class HandleRequests {
      Get the messages created by the simulator
      */
     private void getMessages(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String allPaths = "";
+        int tick = Integer.parseInt(request.getParameter("tick"));
 
-        for (Message me : SimApi.getMessages()) {
-            allPaths += me.getRoute() + "," + me.getType().toString() + ",,";
+        if (tick != SimApi.getCurrTick()) {
+            String allPaths = "";
+
+            for (Message me : SimApi.getMessages()) {
+                allPaths += me.getRoute() + "," + (me.getRouteList().size() - 1) + "," + me.getType().toString() + ",,";
+            }
+
+            if (!allPaths.equals("")) {
+                allPaths = allPaths.substring(0, allPaths.length() - 2);
+            }
+
+            response.getWriter().write(SimApi.getCurrTick() + "!" + allPaths);
+        } else {
+            response.sendError(0);
         }
-
-        if (!allPaths.equals("")) {
-            allPaths = allPaths.substring(1, allPaths.length() - 2);
-        }
-
-        response.getWriter().write(allPaths);
     }
 
     /*
@@ -368,18 +375,18 @@ public class HandleRequests {
     /*
      Create a JSON format of the statistics data for showing on a chart.
      */
-    private void getChartStatistics(HttpServletResponse response, int scenario, int index) throws IOException {
+    private void getChartStatistics(HttpServletResponse response, int scenario, int tickIndex) throws IOException {
         JSONObject obj = new JSONObject();
         Map<Integer, JSONArray> jsonArays = new HashMap<>();
 
-        List<String> listOfStatistics = SimApi.getChartStatistics(scenario, index);
+        List<String> listOfStatistics = SimApi.getChartStatistics(scenario, tickIndex);
 
         if (listOfStatistics == null) {
             response.getWriter().write(obj.toJSONString());
             return;
         }
 
-        if (index > 0) {
+        if (tickIndex > 0) {
             for (int i = 0; i < listOfStatistics.size(); i++) {
                 JSONArray listJ = new JSONArray();
                 listJ.add(listOfStatistics.get(i));
@@ -573,7 +580,8 @@ public class HandleRequests {
                 if (keyval[0].toString().equals("Radio")) {
                     BackRequest += m.updateStatisticListenerOnOff(elementTopic, elementIndex, keyval[0], keyval[1]);
                 } else {
-                    m.updateStatisticListenerProperties(elementTopic, parsedInfo);
+                    String[] elementTopic1 = elementTopic.split(" ");
+                    m.updateStatisticListenerProperties(elementTopic1[1], parsedInfo);
                 }
 
             }
@@ -585,7 +593,8 @@ public class HandleRequests {
                 if (keyval[0].toString().equals("Radio")) {
                     BackRequest += m.updateRoutingAlgorithmOnOff(elementTopic, elementIndex, keyval[0], keyval[1]);
                 } else {
-                    m.updateRoutingAlgorithmProperties(elementTopic, parsedInfo);
+                    String[] elementTopic1 = elementTopic.split(" ");
+                    m.updateRoutingAlgorithmProperties(elementTopic1[1], parsedInfo);
                 }
             }
 

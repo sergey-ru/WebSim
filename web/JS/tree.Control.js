@@ -18,9 +18,12 @@ $(document).ready(function() {
             else {
                 $('#waitToLoad').html("<div class=\"danger\">" + responseText + "</div>");
             }
-            
+
             // call restart to able the currect buttons to be active.
             $('#restart').click();
+            // show Download XML button
+            $("#downloadXMLDiv").html('<a href="DownloadFileServlet" class="btn btn-default btn-sm">Download Experiment</a>');
+            ifTreeIsValid();
         });
     });
 
@@ -483,7 +486,7 @@ function editInitProperty(node) {
 
         // p in the xml (0..1)
         createPvaluesByActionPath(selectedFullPathClass, index, "init");
-        
+
         // add method if select changed, replace the p values
         $('#ActionSelect').change(function() {
             var selectedFullPathClass = $('#ActionSelect option:selected').attr('id');
@@ -547,19 +550,49 @@ function editExDevLinkProperty(node) {
         htmlBuilder.addLabel("Actions");
         htmlBuilder.addStartSelect();
 
+        var fullListForSelect = [];
+        var listForSort = [];
+
+        function ListObj(fullclass, name, selected) {
+            this.fullclass = fullclass;
+            this.name = name;
+            this.selected = selected;
+        }
+
         for (var i = 1; i < res.length - 1; i++) {
             var listofclass = res[i].split("::");
             var listAfterDots = listofclass[1].split(".");
 
             if (listofclass[0] === "ActionList") {
                 if (selectedFullPathClass !== listofclass[1]) {
-                    htmlBuilder.addOption(listofclass[1], listAfterDots[listAfterDots.length - 1], false);
+                    fullListForSelect.push(new ListObj(listofclass[1], listAfterDots[listAfterDots.length - 1], false));
+                    //htmlBuilder.addOption(listofclass[1], listAfterDots[listAfterDots.length - 1], false);
                 }
                 else {
-                    htmlBuilder.addOption(listofclass[1], listAfterDots[listAfterDots.length - 1], true);
+                    fullListForSelect.push(new ListObj(listofclass[1], listAfterDots[listAfterDots.length - 1], true));
+                    //htmlBuilder.addOption(listofclass[1], listAfterDots[listAfterDots.length - 1], true);
                 }
+                listForSort.push(listAfterDots[listAfterDots.length - 1]);
             }
         }
+
+        // Sort by name
+        fullListForSelect.sort(function(item1, item2) {
+            var val1 = item1.name;
+            var val2 = item2.name;
+            if (val1 === val2)
+                return 0;
+            if (val1 > val2)
+                return 1;
+            if (val1 < val2)
+                return -1;
+        });
+
+        // build the sorted selected list
+        for (i = 0; i < fullListForSelect.length; i++) {
+            htmlBuilder.addOption(fullListForSelect[i].fullclass, fullListForSelect[i].name, fullListForSelect[i].selected);
+        }
+
 
         htmlBuilder.addEndSelect();
         htmlBuilder.addEndRow();
@@ -637,10 +670,10 @@ var htmlBuilder = {
         this.html += '<div class="row">';
     },
     addLabel: function(id) {
-        this.html += '<div class="col-md-2">' +
+        this.html += '<div class="col-md-3">' +
                 '<label id="Label' + id + '" ' +
                 'for="' + id + '" ' +
-                'class="col-sm-2 control-label">' +
+                'class="col-sm-3 control-label">' +
                 id +
                 '</label>' +
                 '</div>';

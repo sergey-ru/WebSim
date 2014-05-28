@@ -29,7 +29,6 @@
 
         <div id="placeholder" class="demo-placeholder" style="width:100%;height:75%;"></div>
 
-
         <div id="formOfFunction" class="form-group"  style="width:100%;height:20%;">
             <label class="control-label" for="inputSuccess4">Write Function </label>
             <input type="text" class="form-control" id="functionToParse" style="width: 90%;">
@@ -39,7 +38,6 @@
             <span class="help-block" style="color: #BBB;">Write a function by using the operators +, -, /, * and remove() between the names of the chart's lines. You can use the help of the auto-complete.</span>
             <div id="mess"></div>
         </div>
-
 
         <script type="text/javascript">
 
@@ -123,8 +121,6 @@
                 function updateChart() {
 
                     // initialization
-                    //placeholder = $("#placeholder");
-                    //placeholder.text();
                     data = new Array([]);
                     countRow = 1;
                     needInit = true;
@@ -443,6 +439,7 @@
                         if (data[i])
                             outer.push({data: data[i], label: headlines[i]});
                     }
+                   // if (outer!="") alert(outer);
                     return outer;
                 }
 
@@ -470,7 +467,8 @@
 
                         for (var i = 0; i < tags[headline].length; i++) { // need it. usually 0 or 1.
                             // inserting new data
-                            data[countColumn].push([countRow, tags[headline][i]]);
+                            data[countColumn].push([countRow-1, tags[headline][i]]);
+                            //alert("data: " + data[countColumn]);
                             // for rows count. update it only when there was a real update with data
                             ifUpdated = true;
                         }

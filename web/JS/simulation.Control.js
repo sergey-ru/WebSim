@@ -3,8 +3,10 @@
  */
 
 $(document).ready(function() {
+    // Global
     var ifPause = false;
     var ticks = 0;
+    var messageTick = 0;
 
     $("iframe").each(function()
     {
@@ -24,6 +26,42 @@ $(document).ready(function() {
             $.get('SimServlet', {request: "getNextScenarioName"}, function(responseText) {
                 $('#scenarioNumberInfo').text(responseText);
                 $("#output").text(0); // ticks
+
+
+                $("#runFullTime").click();
+                $("#sliderNodes").slider("option", "value", 170);
+
+                $("#runFullTime").bind("runAuto", function() {
+                    $("#runFullTime").click();
+                });
+
+//                setInterval(function() {        // restart
+//                    $("#restart").click();
+//                }, 200000);
+
+
+//                // run loop
+//                $("#runFullTime").click();      // now
+//                $("#sliderNodes").slider("option", "value", 170);
+//
+//
+//
+//                setInterval(function() {        // pause
+//                    $("#pause").click();
+//                }, 170000);
+//                setInterval(function() {        // restart
+//                    $("#restart").click();
+//                }, 173000);
+//                setInterval(function() {        // restart               
+//                    $("#sliderNodes").slider("option", "value", 170);
+//                }, 176000);
+//                setInterval(function() {        // play
+//                    $("#runFullTime").click();
+//                }, 179000);
+//                setInterval(function() {        // resume
+//                    $("#pause").click();
+//                }, 182000);
+
             });
         });
     });
@@ -39,11 +77,16 @@ $(document).ready(function() {
 
     $('#restart').click(function(event) {
         disableAllButtons();
-        
+
+        //var $f = $("#iframeID");
+        $("#iframeID")[0].contentWindow.resetTimeForMessages();
+        $("#iframeID")[0].contentWindow.initGraph();
+
         $.get('SimServlet', {request: "restart"}, function(responseText) {
             // enable run
             $("#runInitRules").removeAttr("disabled");
             $("#runFullTime").removeAttr("disabled");
+            $("#runFullTime").trigger('runAuto');
             $.get('SimServlet', {request: "getNextScenarioName"}, function(responseText) {
                 $('#scenarioNumberInfo').text(responseText);
                 $("#output").text(0); // ticks
@@ -54,10 +97,12 @@ $(document).ready(function() {
     $('#pause').click(function(event) {
         ifPause = !ifPause;
         $("#restart").removeAttr("disabled");
-        
+
+        $("#iframeID")[0].contentWindow.resetTimeForMessages();
+
         if (!ifPause) {
             $('#pause').html("<span class=\"glyphicon glyphicon-pause\"></span> Pause");
-           $("#restart").attr("disabled", "disabled");
+            $("#restart").attr("disabled", "disabled");
             var currTick = $("#output").text();
             currTick = parseInt(currTick);
             poller.setTicks(ticks - currTick);
@@ -70,23 +115,30 @@ $(document).ready(function() {
         disableAllButtons();
         $("#runFullScenario").removeAttr("disabled");
 
-        $.get('SimServlet', {request: "runOneStepInScenario"}, function(responseText) {
-            if (responseText.indexOf("false") !== -1) {
+//        // increase tick display first for sync with the chart that he is faster
+//        var count = $("#output").text();
+//        count = parseInt(count);
+//        count++;
+//        $("#output").text(count);
+
+        $.get('SimServlet', {request: "runOneStepInScenario"}, function(currTick) {
+            if (currTick.indexOf("false") !== -1) {
                 $("#nextScenario").removeAttr("disabled");
+//                // decrease tick display because it didnt succeed
+//                var count = $("#output").text();
+//                count = parseInt(count);
+//                count--;
+
             }
             else
             {
+                $("#output").text(currTick);
                 $("#runOneStepInScenario").removeAttr("disabled");
-                // increase tick display
-                var count = $("#output").text();
-                count = parseInt(count);
-                count++;
-                $("#output").text(count);
+
+                // get messages
+                runMessagesAnimation();
             }
         });
-
-        // get messages
-        runMessagesAnimation();
     });
 
     // run full scenario till its end
@@ -106,14 +158,19 @@ $(document).ready(function() {
         $.get('SimServlet', {request: "getNextScenarioName"}, function(responseText) {
             if (responseText !== "")
                 $('#scenarioNumberInfo').text(responseText);
-            else
+            else {
                 $('#scenarioNumberInfo').text("No More Scenarios");
+                $("#restart").click();
+                $("#sliderNodes").slider("option", "value", 170);
+            }
         });
 
         $.get('SimServlet', {request: "ifExistNextScenario"}, function(responseText) {
             if (responseText === "false") {
                 $("#scenarioNumberInfo").text("No More Scenarios");
                 $("#runInitRules").attr("disabled", "disabled");
+                $("#restart").click();
+                $("#sliderNodes").slider("option", "value", 170);
             }
             else {
                 $("#runInitRules").removeAttr("disabled");
@@ -174,6 +231,8 @@ $(document).ready(function() {
                     $("#pause").attr("disabled", "disabled");
                     $('#scenarioNumberInfo').text("No More Scenarios");
                     $("#restart").removeAttr("disabled");
+                    $("#restart").click();
+                    $("#sliderNodes").slider("option", "value", 170);
                 }
             }
         });
@@ -189,16 +248,18 @@ $(document).ready(function() {
     }
 
     function runMessagesAnimation() {
-
         $.ajaxQueue({
             url: 'SimServlet',
-            data: {request: "getMessages"},
+            data: {request: "getMessages", tick: messageTick},
             type: 'GET',
             success: function(data) {
-                //$("#output6").text(data);
-                if (data !== "") {
+
+                var arrData = data.split("!");
+                messageTick = arrData[0];
+
+                if (arrData[1] != "") {
                     var $f = $("#iframeID");
-                    $f[0].contentWindow.sendMessageList(data);  //works
+                    $f[0].contentWindow.sendMessageList(arrData[1], messageTick);  // works  
                 }
             }
         });
@@ -246,6 +307,7 @@ $(document).ready(function() {
                     }
                     else {
                         $("#runFullTime").removeAttr("disabled");
+                        $("#runFullTime").trigger('runAuto');
                     }
                 },
                 // 'this' inside the handler won't be this poller object

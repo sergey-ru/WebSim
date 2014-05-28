@@ -29,8 +29,8 @@ iframe
 }
 
 #iframeID {
-    height:90%;
-    margin-top: 10px;
+    height:93%;
+    margin-top: 7px;
 }
 
 .tdOfInputFile {
@@ -96,9 +96,9 @@ p {
     display: none;
 }
 
-#TreeValidation {
-    bottom:0;
-    position:absolute;
+#TreeValidation, #ifTreeValidDiv {
+    position: fixed;
+    bottom: 0;
 }
 
 #spaceMenuContent {

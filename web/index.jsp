@@ -168,7 +168,7 @@
                         <table id="graphControlTable1" border="0">
                             <tr>
                                 <td id="scenarioNameTd" width="35%"><span id="scenarioNumberInfo"></span></td>
-                                <td id="ticksTd" width="20%"><div id="sliderVal">Tick = 0 Milli</div><div id="slider"></div></td>
+                                <td id="ticksTd" width="20%"><div id="sliderVal">Tick = 1820 Milli</div><div id="slider"></div></td>
                                 <td id="nodesTd" width="30%"><div id="sliderNodesVal"></div><div id="sliderNodes" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"></div></td>
                                 <td id="simConsolTd" width="15%"><div style="display: inline-block;">Tick: </div><div id="output" style="display: inline-block;"></div></td>
                             </tr>
@@ -187,8 +187,6 @@
 
                         <!-- Graph -->
                         <iframe id="iframeID" src="Graph/SimViewGraph.html" height="100%" width="100%" frameborder="0"></iframe>
-                        <div id="output6"></div>
-
                     </div>
                 </div>
 

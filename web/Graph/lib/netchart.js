@@ -7627,67 +7627,67 @@
                     }
                 }
 
-//                if (nodeWithNewAtt2) {
-//                    if (nodeWithNewAtt2.runMovingMessage == true) {
-//
-//                        aW.beginPath();
-//                        if (nodeWithNewAtt2.runMovingMessageType == "Worm") {
-//                            aW.fillStyle = "#FF1C0A"; // red
-//                        }
-//                        else {
-//                            aW.fillStyle = "#2946e6";
-//                        }
-//
-//                        if (nodeWithNewAtt2.id1 == at.from.id || nodeWithNewAtt2.id2 == at.from.id) {
-//
-//                            if (nodeWithNewAtt2.id1 == at.from.id) {
-//                                messagefromx = aK + bE * aU;
-//                                messagefromy = ar - bG * aU;
-//                                messagetox = aJ + bE * aU;
-//                                messagetoy = ap - bG * aU;
-//                            }
-//                            else {
-//                                messagefromx = aJ + bE * aU;
-//                                messagefromy = ap - bG * aU;
-//                                messagetox = aK + bE * aU;
-//                                messagetoy = ar - bG * aU;
-//                            }
-//
-//                            at.runMovingMessageStepX = at.runMovingMessageStepX + 0.01;
-//
-//                            if (at.runMovingMessageStepX <= 1) {
-//                                var deltaX = messagetox - messagefromx;
-//                                var deltaY = messagetoy - messagefromy;
-//
-//                                var distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
-//
-//                                var directionX = deltaX / distance;
-//                                var directionY = deltaY / distance;
-//
-//                                var newX = messagefromx + directionX * (distance * at.runMovingMessageStepX);
-//                                var newY = messagefromy + directionY * (distance * at.runMovingMessageStepX);
-//
-//                                aW.beginPath();
-//                                aW.arc(newX, newY, aU * 4, 0, 2 * Math.PI); // keren
-//
-//                                var imageObj = new Image();
-//                                imageObj.src = "Images/" + nodeWithNewAtt1.runMovingMessageType + ".png";
-//                                aW.drawImage(imageObj, newX, newY, 15, 15);
-//                                aW.closePath();
-//                                aW.fill();
-//                            }
-//                            else {
-//                                //nodeWithNewAtt1.runMovingMessage = false;
-//                                nodeWithNewAtt2.runMovingMessage = false;
-//                                at.runMovingMessageStepX = 0.1;
-//                            }
-//                        }
-//                    }
-//                }
+                if (nodeWithNewAtt2) {
+                    if (nodeWithNewAtt2.runMovingMessage == true) {
+
+                        aW.beginPath();
+                        if (nodeWithNewAtt2.runMovingMessageType == "Worm") {
+                            aW.fillStyle = "#FF1C0A"; // red
+                        }
+                        else {
+                            aW.fillStyle = "#2946e6";
+                        }
+
+                        if (nodeWithNewAtt2.id1 == at.from.id || nodeWithNewAtt2.id2 == at.from.id) {
+
+                            if (nodeWithNewAtt2.id1 == at.from.id) {
+                                messagefromx = aK + bE * aU;
+                                messagefromy = ar - bG * aU;
+                                messagetox = aJ + bE * aU;
+                                messagetoy = ap - bG * aU;
+                            }
+                            else {
+                                messagefromx = aJ + bE * aU;
+                                messagefromy = ap - bG * aU;
+                                messagetox = aK + bE * aU;
+                                messagetoy = ar - bG * aU;
+                            }
+
+                            at.runMovingMessageStepX = at.runMovingMessageStepX + 0.01;
+
+                            if (at.runMovingMessageStepX <= 1) {
+                                var deltaX = messagetox - messagefromx;
+                                var deltaY = messagetoy - messagefromy;
+
+                                var distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
+
+                                var directionX = deltaX / distance;
+                                var directionY = deltaY / distance;
+
+                                var newX = messagefromx + directionX * (distance * at.runMovingMessageStepX);
+                                var newY = messagefromy + directionY * (distance * at.runMovingMessageStepX);
+
+                                aW.beginPath();
+                                aW.arc(newX, newY, aU * 4, 0, 2 * Math.PI); // keren
+
+                                var imageObj = new Image();
+                                imageObj.src = "Images/" + nodeWithNewAtt1.runMovingMessageType + ".png";
+                                aW.drawImage(imageObj, newX, newY, 15, 15);
+                                aW.closePath();
+                                aW.fill();
+                            }
+                            else {
+                                //nodeWithNewAtt1.runMovingMessage = false;
+                                nodeWithNewAtt2.runMovingMessage = false;
+                                at.runMovingMessageStepX = 0.1;
+                            }
+                        }
+                    }
+                }
 
 
-                //aW.closePath();
-                //aW.fill();
+                aW.closePath();
+                aW.fill();
 
 
             }

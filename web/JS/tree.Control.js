@@ -3,6 +3,7 @@
  */
 
 $(document).ready(function() {
+    $("#UploadFileButton2").attr("disabled", "disabled");
 
     // load the edited tree menu to the simulator
     $('#loadTreeToSim').click(function(event) {
@@ -181,6 +182,7 @@ function uploadXmlTreeFile() {
                     $("#xmlFileDiv").html("<div class=\"success\">Xml file loaded successfully.</div>");
                     LoadXmlMenuTree("true");
                     $("#downloadXMLDiv").html('<a href="DownloadFileServlet" class="btn btn-default btn-sm">Download Experiment</a>');
+                    $("#UploadFileButton2").removeAttr("disabled");
                 }
                 else
                     $("#xmlFileDiv").html("<div class=\"danger\">Xml file were not loaded. Please try another xml file.</div>");

@@ -55,7 +55,8 @@ var owenge = function() {
             for (i = 0; i < len; i++) {
                 // Get the current character of the formula.
                 var ch = s.charAt(i);
-
+                
+                
                 // Get the left character of the current character.
                 var left = i == 0 ? '' : s.charAt(i - 1);
 

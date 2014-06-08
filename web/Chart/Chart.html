@@ -11,19 +11,16 @@
         <script type="text/javascript" src="Jquery.JS/jquery.flot.navigate.js"></script>
 
 
+
+        <!--        <script type="text/javascript" src="http://cdn.kendostatic.com/2014.1.416/js/jquery.min.js"></script>-->
         <link href="http://cdn.kendostatic.com/2014.1.416/styles/kendo.common.min.css" rel="stylesheet" />
         <link href="http://cdn.kendostatic.com/2014.1.416/styles/kendo.default.min.css" rel="stylesheet" />
-        <script src="http://cdn.kendostatic.com/2014.1.416/js/jquery.min.js"></script>
-        <script src="http://cdn.kendostatic.com/2014.1.416/js/kendo.all.min.js"></script>
+        <script type="text/javascript" src="http://cdn.kendostatic.com/2014.1.416/js/kendo.all.min.js"></script>
 
         <!-- math operators order calculate -->
         <script type="text/javascript" src="JS/math.js"></script>
 
-        <!-- auto complete-->
-        <link rel="stylesheet" href="JS/AutoComplete/jquery-ui.css">
-        <script src="JS/AutoComplete/jquery-ui.js"></script>
-
-        <link rel="stylesheet" href="../JS/jqueryAndBootstrap/bootstrapJ.min.css">
+        <link rel="stylesheet" href="../JS/jqueryAndBootstrap/bootstrap.min.css">
 
         <style type="text/css">
             html, body {
@@ -35,9 +32,9 @@
 
         <div id="placeholder" class="demo-placeholder" style="width:100%;height:75%;"></div>
 
-        <div id="formOfFunction" class="form-group"  style="width:100%;height:20%;">
+        <div id="formOfFunction" class="form-group" style="width:100%;height:20%;">
             <label class="control-label" for="inputSuccess4">Write Function </label>
-            <input type="text" class="form-control" id="functionToParse" style="width: 90%;">
+            <input type="text" id="functionToParse" style="width: 90%;">
             <button type="button" id="calcButton" class="btn btn-default">Calculate</button>
             <div id="debug"></div>
             <span class="help-block" id="parseResult"></span>
@@ -60,7 +57,6 @@
             var updateInterval = 1;
             var plot;
             var placeholder = $("#placeholder");
-
             // arrays
             var data;
             var headlines;
@@ -80,18 +76,23 @@
                 parent.top.$('#loadTreeToSim').click(function(event) {
                     ifInitWrireFunction = false;
                     initOneTickInScenario = false;
-                    intervalUpdate;
+                    // intervalUpdate;
                     scenario = 0;
                     ticks = 0;
                 });
-
                 parent.top.$('#restart').click(function(event) {
                     scenario = 0;
-                    //$("#placeholder").text();
                     plot = $.plot(placeholder, [], {});
-                    clearTimeout(intervalUpdate);
-                });
+                    try {
+                        clearTimeout(intervalUpdate);
+                    }
+                    catch (err) {
+                        var text = "There was an error on this page.\n\n";
+                        text += "Error description: " + err.message + "\n\n";
+                        text += "Click OK to continue.\n\n";
+                    }
 
+                });
                 parent.top.$('#runOneStepInScenario').click(function(event) {
                     if (!initOneTickInScenario) {
                         updateChart();
@@ -106,7 +107,6 @@
                         plot.draw();
                     }
                 });
-
                 parent.top.$('#runFullScenario').click(function(event) {
                     if (!initOneTickInScenario) {
                         updateChart();
@@ -115,15 +115,20 @@
 
                     update();
                 });
-
                 parent.top.$('#nextScenario').click(function(event) {
                     initOneTickInScenario = false;
                 });
-
                 parent.top.$('#runFullTime').click(function(event) {
                     updateChart();
                 });
-
+                // init autocomplete
+                // create AutoComplete UI component
+                $("#functionToParse").kendoAutoComplete({
+                    dataSource: [],
+                    filter: "startswith",
+                    placeholder: "Write Function",
+                    separator: " "
+                });
                 function updateChart() {
 
                     // initialization
@@ -135,7 +140,6 @@
                     functionOrNotArrOfBinary = new Array();
                     parent.top.$('input:checkbox').removeAttr('checked');
                     scenario++;
-
                     if (plot) {
                         plot.setData([]);
                         plot.setupGrid();
@@ -144,7 +148,6 @@
 
                     // get total ticks
                     ticks = requestFromServer("request=getTicksNumber");
-
                     plot = $.plot(placeholder, [], {
                         series: {
                             lines: {
@@ -171,11 +174,9 @@
                             interactive: true
                         }
                     });
-
                     // Resizible
                     placeholder.resize(function() {
                     });
-
                     // show pan/zoom messages to illustrate events
                     placeholder.bind("plotpan", function(event, plot) {
                         var axes = plot.getAxes();
@@ -191,7 +192,6 @@
                                 + " and y: " + axes.yaxis.min.toFixed(2)
                                 + " &ndash; " + axes.yaxis.max.toFixed(2));
                     });
-
                     update();
                 }
 
@@ -203,10 +203,8 @@
                 function update() {
                     // insert the new points to the currect arrays.
                     getData();
-
                     // update the rest of the lines with the new data
                     updateFunctionsLines();
-
                     if (plot) {
                         plot.setData(createJSONwithAllDatas());
                         plot.setupGrid();
@@ -233,20 +231,17 @@
                                 copyOfData.push(data[k]);
                             }
                             owenge.equation.setDataArrays(copyOfData);
-
                             // set headlines
                             var copyOfHeadlines = new Array();
                             for (var k = 0; k < headlines.length; k++) {
-                                copyOfHeadlines.push(headlines[k]);
+                                copyOfHeadlines.push($.trim(headlines[k]));
                             }
                             owenge.equation.setHeadLines(copyOfHeadlines);
-
                             // Parsing the function
                             var funcToParse = headlines[i];
+                            funcToParse = funcToParse.split(' ').join('');
                             var newDataResult = owenge.equation.parse(funcToParse);
-
                             data[i] = newDataResult.answer;
-
                             // updating plot data - old and new
                             var oldData = [];
                             for (var j = 0; j < headlines.length; j++) {
@@ -275,113 +270,24 @@
                         return split(term).pop();
                     }
 
-//                    $("#functionToParse")
-//                            // don't navigate away from the field on tab when selecting an item
-//                            .bind("keydown", function(event) {
-//                                if (event.keyCode === $.ui.keyCode.TAB &&
-//                                        $(this).data("ui-autocomplete").menu.active) {
-//                                    event.preventDefault();
-//                                }
-//                            })
-//                            .autocomplete({
-//                                minLength: 0,
-//                                source: function(request, response) {
-//                                    // delegate back to autocomplete, but extract the last term
-//                                    response($.ui.autocomplete.filter(
-//                                            availableTags, extractLast(request.term)));
-//                                },
-//                                focus: function() {
-//                                    // prevent value inserted on focus
-//                                    return false;
-//                                },
-//                                select: function(event, ui) {
-//                                    var terms = split(this.value);
-//                                    // remove the current input
-//                                    var lastChar = terms.pop();
-//                                    while (separatorsForAutoComplete.indexOf(lastChar) === -1 && terms.length > 0) {
-//                                        lastChar = terms.pop();
-//                                    }
-//
-//                                    // add the selected item
-//                                    if (separatorsForAutoComplete.indexOf(lastChar) !== -1 && ui.item.value !== lastChar) {
-//                                        terms.push(lastChar);
-//                                    }
-//                                    terms.push(ui.item.value);
-//                                    this.value = terms.join("");
-//                                    return false;
-//                                }
-//                            });
-
-
-                    var data = [
-                        "Albania",
-                        "Andorra",
-                        "Armenia",
-                        "Austria",
-                        "Azerbaijan",
-                        "Belarus",
-                        "Belgium",
-                        "Bosnia & Herzegovina",
-                        "Bulgaria",
-                        "Croatia",
-                        "Cyprus",
-                        "Czech Republic",
-                        "Denmark",
-                        "Estonia",
-                        "Finland",
-                        "France",
-                        "Georgia",
-                        "Germany",
-                        "Greece",
-                        "Hungary",
-                        "Iceland",
-                        "Ireland",
-                        "Italy",
-                        "Kosovo",
-                        "Latvia",
-                        "Liechtenstein",
-                        "Lithuania",
-                        "Luxembourg",
-                        "Macedonia",
-                        "Malta",
-                        "Moldova",
-                        "Monaco",
-                        "Montenegro",
-                        "Netherlands",
-                        "Norway",
-                        "Poland",
-                        "Portugal",
-                        "Romania",
-                        "Russia",
-                        "San Marino",
-                        "Serbia",
-                        "Slovakia",
-                        "Slovenia",
-                        "Spain",
-                        "Sweden",
-                        "Switzerland",
-                        "Turkey",
-                        "Ukraine",
-                        "United Kingdom",
-                        "Vatican City"
-                    ];
-
-                    //create AutoComplete UI component
-                    $("#functionToParse").kendoAutoComplete({
-                        dataSource: data,
-                        filter: "startswith",
-                        placeholder: "Select country...",
-                        separator: ", "
+                    var dataSource = new kendo.data.DataSource({
+                        data: availableTags
                     });
-                   // });
+                    var autocomplete = $("#functionToParse").data("kendoAutoComplete");
+                    autocomplete.setDataSource(dataSource);
+//                    //create AutoComplete UI component
+//                    $("#functionToParse").kendoAutoComplete({
+//                        dataSource: availableTags,
+//                        filter: "startswith",
+//                        placeholder: "Write Function",
+//                        separator: " "
+//                    });
                 }
 
 
                 $('#calcButton').click(function() {
                     validateNewFunctionAndUpdateChart();
                 });
-
-
                 /*
                  * Validate & build the user's function
                  */
@@ -389,17 +295,17 @@
 
                     // Validate function
                     var ifValid = validateFunction();
-
                     if (!ifValid) {
                         return;
                     }
 
+                    var request = $('#functionToParse').val();
+                    request = request.split(' ').join('');
                     // remove() function. user can remove a line chart.
-                    if ($('#functionToParse').val().indexOf("remove") !== -1) {
-                        var headline = $('#functionToParse').val();
+                    if (request.indexOf("remove") !== -1) {
+                        var headline = request;
                         headline = headline.replace("remove(", "");
                         headline = headline.replace(")", "");
-
                         for (var i = 0; i < data.length; i++) {
                             if (headlines[i] === headline) {
                                 headlines[i] = null;
@@ -414,17 +320,22 @@
                             copyOfData.push(data[i]);
                         }
                         owenge.equation.setDataArrays(copyOfData);
-
                         // set headlines
                         var copyOfHeadlines = new Array();
                         for (var i = 0; i < headlines.length; i++) {
-                            copyOfHeadlines.push(headlines[i]);
+                            copyOfHeadlines.push($.trim(headlines[i]));
                         }
-                        owenge.equation.setHeadLines(copyOfHeadlines);
 
+                        // alert("copyOfHeadlines: " + copyOfHeadlines);
+                        owenge.equation.setHeadLines(copyOfHeadlines);
                         // Parsing the function
                         var funcToParse = $('#functionToParse').val();
+                        funcToParse = funcToParse.split(' ').join('');
+                        funcToParse = $.trim(funcToParse);
+                        //alert("'" + funcToParse + "'");
                         var newDataResult = owenge.equation.parse(funcToParse);
+                        // alert("pushing " + $.trim(funcToParse));
+                        //alert("answer " + newDataResult.answer);
 
                         data.push(newDataResult.answer);
                         headlines.push(funcToParse);
@@ -434,17 +345,18 @@
                     // updating plot data - old and new
                     var oldData = [];
                     for (var i = 0; i < headlines.length; i++) {
-                        if (data[i])
+                        if (data[i] && headlines[i])
                             oldData.push({data: data[i], label: headlines[i]});
                     }
 
                     plot.setData(oldData);
                     plot.setupGrid();
                     plot.draw();
+                    //$('#formOfFunction').removeClass("has-error");
+                    //$('#formOfFunction').addClass("has-success");
 
-                    $('#formOfFunction').removeClass("has-error");
-                    $('#formOfFunction').addClass("has-success");
-
+                    $('#fparseResult').removeClass("has-error").addClass("has-success");
+                    $('#formOfFunction').removeClass("has-error").addClass("has-success");
                 }
 
                 /*
@@ -457,7 +369,6 @@
                     var funcToParse = $('#functionToParse').val();
                     var tokens = funcToParse.split(new RegExp(separators.join('|'), 'g'));
                     $('#parseResult').text("");
-
                     // Validate the written function
                     for (var i = 0; i < tokens.length; i++) {
 
@@ -465,11 +376,11 @@
                         // empty places because the split
                         if (tokens[i] === "")
                             continue;
-
                         for (var j = 0; j < headlines.length; j++) {
 
                             // if one of the headers
-                            if (tokens[i] === headlines[j]) {
+                            if ($.trim(tokens[i]) === $.trim(headlines[j])) {
+                                //alert("we are even");
                                 ifSuccseed = true;
                                 ifNotAllNumbers = true;
                             }
@@ -481,7 +392,12 @@
                         }
 
                         if (!ifSuccseed) {
-                            $('#formOfFunction').addClass("has-error");
+                            // alert((tokens[i] == headlines[j]) + " tokens[i] : " + tokens[i] + " headlines[j]: " + headlines[j]);
+                            //$('#formOfFunction').addClass("has-error");
+                            //$('#parseResult').addClass("has-error");
+
+                            $('#parseResult').removeClass("has-success").addClass("has-error");
+                            $('#formOfFunction').removeClass("has-success").addClass("has-error");
                             $('#parseResult').text("Function is not valid. Pls use the help of the auto-complete.");
                             return false;
                         }
@@ -489,7 +405,8 @@
 
                     // validate that not all of the parameters in function are numbers
                     if (!ifNotAllNumbers) {
-                        $('#formOfFunction').addClass("has-error");
+                        $('#parseResult').removeClass("has-success").addClass("has-error");
+                        $('#formOfFunction').removeClass("has-success").addClass("has-error");
                         $('#parseResult').text("Function is not valid. Pls use the help of the auto-complete.");
                         return false;
                     }
@@ -505,7 +422,7 @@
                 function createJSONwithAllDatas() {
                     var outer = [];
                     for (var i = 0; i < headlines.length; i++) {
-                        if (data[i])
+                        if (data[i] && headlines[i])
                             outer.push({data: data[i], label: headlines[i]});
                     }
                     // if (outer!="") alert(outer);
@@ -518,14 +435,14 @@
                 function getData() {
                     var ifUpdated = false;
                     var countColumn = 0;
-
                     var jsonFromServer = requestFromServer('request=getChartStatistics&index=' + countRow + '&scenario=' + scenario);
                     var tags = $.parseJSON(jsonFromServer);
-
                     for (var headline in tags) {
                         // save headers
                         if (needInit) {
-                            headlines.push(headline);
+                            var newHeadline = $.trim(headline);
+                            newHeadline = newHeadline.split(' ').join('');
+                            headlines.push(newHeadline);
                             functionOrNotArrOfBinary.push(0);
                         }
 
@@ -553,13 +470,10 @@
                             var nodeId = parent.top.$("#nodeInfoId").text();
                             var nodeProp = $(this).attr('id');
                             var numberReturned = requestFromServer("request=getNodeInfo&node=" + nodeId + "&prop=" + nodeProp);
-
                             // validate data as a number
                             var newPoint = parseFloat(numberReturned);
-
                             if (isNaN(newPoint))
                                 newPoint = 0;
-
                             if (headlines.indexOf(nodeProp + " " + "Node" + nodeId) === -1) {
                                 headlines.push(nodeProp + " " + "Node" + nodeId);
                                 functionOrNotArrOfBinary.push(0);
@@ -567,7 +481,6 @@
 
                             if (!data[countColumn])
                                 data[countColumn] = [];
-
                             data[countColumn].push([countRow, newPoint]);
                             countColumn++;
                         });
@@ -577,7 +490,6 @@
                         countRow++;
                         ifUpdated = false;
                         needInit = false;
-
                         if (!ifInitWrireFunction) {
                             initWriteFunction();
                             ifInitWrireFunction = true;
@@ -593,11 +505,10 @@
                         return request.responseText;
                     }
                 }
-            });
-        </script>
+            });</script>
 
         <!-- style-->
-        <script src="../JS/jqueryAndBootstrap/bootstrapj.min.js"></script> 
-
+        <!--        <script src="../JS/jqueryAndBootstrap/bootstrapj.min.js"></script> -->
+        <script src="../JS/jqueryAndBootstrap/bootstrap.min.js"></script>
     </body>
 </html>
